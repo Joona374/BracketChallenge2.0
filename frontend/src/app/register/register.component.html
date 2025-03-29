@@ -1,0 +1,53 @@
+<h2>Register</h2>
+
+<form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+  <label for="username">Username:</label><br />
+  <input
+    type="text"
+    id="username"
+    name="username"
+    required
+    [(ngModel)]="formData.username"
+  /><br /><br />
+
+  <label for="teamName">Team Name:</label><br />
+  <input
+    type="text"
+    id="teamName"
+    name="teamName"
+    required
+    [(ngModel)]="formData.teamName"
+  /><br /><br />
+
+  <label for="password">Password:</label><br />
+  <input
+    type="password"
+    id="password"
+    name="password"
+    required
+    [(ngModel)]="formData.password"
+  /><br /><br />
+
+  <label for="confirmPassword">Confirm Password:</label><br />
+  <input
+    type="password"
+    id="confirmPassword"
+    name="confirmPassword"
+    required
+    [(ngModel)]="formData.confirmPassword"
+  /><br /><br />
+
+  <label for="registrationCode">Registration Code:</label><br />
+  <input
+    type="text"
+    id="registrationCode"
+    name="registrationCode"
+    required
+    [(ngModel)]="formData.registrationCode"
+  /><br /><br />
+
+  <button type="submit" [disabled]="!registerForm.form.valid">Register</button>
+</form>
+
+<div *ngIf="message" style="color: green">{{ message }}</div>
+<div *ngIf="error" style="color: red">{{ error }}</div>
