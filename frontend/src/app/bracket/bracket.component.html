@@ -6,19 +6,35 @@
     <h4>West R1</h4>
     <div class="column">
       <div *ngFor="let m of matchups.west" class="matchup">
-        <div
-          class="team"
-          [class]="getTeamClass(m.id, m.team1)"
-          (click)="pickWinner(m.id, m.team1)"
-        >
-          {{ m.team1 || "\u00A0" }}
-        </div>
-        <div
-          class="team"
-          [class]="getTeamClass(m.id, m.team2)"
-          (click)="pickWinner(m.id, m.team2)"
-        >
-          {{ m.team2 || "\u00A0" }}
+        <div class="teams-and-games west">
+          <div class="game-control" *ngIf="userPicks.round1[m.id]">
+            <button class="plus-button" (click)="increaseGames('round1', m.id)">
+              +
+            </button>
+            <div>{{ getGames("round1", m.id) }}</div>
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round1', m.id)"
+            >
+              –
+            </button>
+          </div>
+          <div class="teams">
+            <div
+              class="team"
+              [class]="getTeamClass(m.id, m.team1)"
+              (click)="pickWinner(m.id, m.team1)"
+            >
+              {{ m.team1 || "\u00A0" }}
+            </div>
+            <div
+              class="team"
+              [class]="getTeamClass(m.id, m.team2)"
+              (click)="pickWinner(m.id, m.team2)"
+            >
+              {{ m.team2 || "\u00A0" }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -28,26 +44,35 @@
   <div class="column-container">
     <h4>West R2</h4>
     <div class="column">
-      <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.round2['w-semi']?.[0] || '', userPicks.round2['w-semi']?.[1] || '']"
-          [class]="getTeamClass('w-semi', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('w-semi', team)"
-        >
-          {{ team || "\u00A0" }}
-        </div>
-      </div>
-      <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.round2['w-semi2']?.[0] || '', userPicks.round2['w-semi2']?.[1] || '']"
-          [class]="getTeamClass('w-semi2', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('w-semi2', team)"
-        >
-          {{ team || "\u00A0" }}
+      <div *ngFor="let key of ['w-semi', 'w-semi2']" class="matchup">
+        <div class="teams-and-games west">
+          <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
+            <button
+              class="plus-button"
+              (click)="increaseGames('round2', key + '-winner')"
+            >
+              +
+            </button>
+            <div>{{ getGames("round2", key + "-winner") }}</div>
+
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round2', key + '-winner')"
+            >
+              –
+            </button>
+          </div>
+          <div class="teams">
+            <div
+              class="team"
+              *ngFor="let team of getTeamArray('round2', key)"
+              [class]="getTeamClass(key, team)"
+              [class.disabled]="!isTeamSelectable(team)"
+              (click)="isTeamSelectable(team) && pickWinner(key, team)"
+            >
+              {{ team || "\u00A0" }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -58,14 +83,37 @@
     <h4>West Final</h4>
     <div class="column">
       <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.round3['west-final']?.[0] || '', userPicks.round3['west-final']?.[1] || '']"
-          [class]="getTeamClass('west-final', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('west-final', team)"
-        >
-          {{ team || "\u00A0" }}
+        <div class="teams-and-games west">
+          <div
+            class="game-control"
+            *ngIf="userPicks.round3['west-final-winner']"
+          >
+            <button
+              class="plus-button"
+              (click)="increaseGames('round3', 'west-final-winner')"
+            >
+              +
+            </button>
+            <div>{{ getGames("round3", "west-final-winner") }}</div>
+
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round3', 'west-final-winner')"
+            >
+              –
+            </button>
+          </div>
+          <div class="teams">
+            <div
+              class="team"
+              *ngFor="let team of getTeamArray('round3', 'west-final')"
+              [class]="getTeamClass('west-final', team)"
+              [class.disabled]="!isTeamSelectable(team)"
+              (click)="isTeamSelectable(team) && pickWinner('west-final', team)"
+            >
+              {{ team || "\u00A0" }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -76,14 +124,54 @@
     <h4>Cup Final</h4>
     <div class="column">
       <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.final['cup']?.[0] || '', userPicks.final['cup']?.[1] || '']"
-          [class]="getTeamClass('cup', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('cup', team)"
-        >
-          {{ team || "\u00A0" }}
+        <div class="teams-and-games cup-final">
+          <!-- Trophy image -->
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Stanley_Cup_no_background.png"
+            alt="Stanley Cup"
+            class="cup-image"
+          />
+
+          <!-- Teams -->
+          <div class="teams">
+            <div
+              class="team"
+              *ngFor="let team of getTeamArray('final', 'cup')"
+              [class]="getTeamClass('cup', team)"
+              [class.disabled]="!isTeamSelectable(team)"
+              (click)="isTeamSelectable(team) && pickWinner('cup', team)"
+            >
+              {{ team || "\u00A0" }}
+            </div>
+          </div>
+
+          <!-- Game controls -->
+          <div
+            class="game-control final-control"
+            *ngIf="userPicks.final['cup-winner']"
+          >
+            <button
+              class="minus-button"
+              (click)="decreaseGames('final', 'cup-winner')"
+            >
+              –
+            </button>
+            <div>{{ getGames("final", "cup-winner") }}</div>
+            <button
+              class="plus-button"
+              (click)="increaseGames('final', 'cup-winner')"
+            >
+              +
+            </button>
+          </div>
+
+          <!-- Champion label -->
+          <div class="champion-label" *ngIf="userPicks.final['cup-winner']">
+            <div>🏆 CHAMPION:</div>
+            <div class="champion-name">
+              {{ userPicks.final["cup-winner"] }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -94,14 +182,37 @@
     <h4>East Final</h4>
     <div class="column">
       <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.round3['east-final']?.[0] || '', userPicks.round3['east-final']?.[1] || '']"
-          [class]="getTeamClass('east-final', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('east-final', team)"
-        >
-          {{ team || "\u00A0" }}
+        <div class="teams-and-games east">
+          <div
+            class="game-control"
+            *ngIf="userPicks.round3['east-final-winner']"
+          >
+            <button
+              class="plus-button"
+              (click)="increaseGames('round3', 'east-final-winner')"
+            >
+              +
+            </button>
+            <div>{{ getGames("round3", "east-final-winner") }}</div>
+
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round3', 'east-final-winner')"
+            >
+              –
+            </button>
+          </div>
+          <div class="teams">
+            <div
+              class="team"
+              *ngFor="let team of getTeamArray('round3', 'east-final')"
+              [class]="getTeamClass('east-final', team)"
+              [class.disabled]="!isTeamSelectable(team)"
+              (click)="isTeamSelectable(team) && pickWinner('east-final', team)"
+            >
+              {{ team || "\u00A0" }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -111,26 +222,35 @@
   <div class="column-container">
     <h4>East R2</h4>
     <div class="column">
-      <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.round2['e-semi']?.[0] || '', userPicks.round2['e-semi']?.[1] || '']"
-          [class]="getTeamClass('e-semi', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('e-semi', team)"
-        >
-          {{ team || "\u00A0" }}
-        </div>
-      </div>
-      <div class="matchup">
-        <div
-          class="team"
-          *ngFor="let team of [userPicks.round2['e-semi2']?.[0] || '', userPicks.round2['e-semi2']?.[1] || '']"
-          [class]="getTeamClass('e-semi2', team)"
-          [class.disabled]="!isTeamSelectable(team)"
-          (click)="isTeamSelectable(team) && pickWinner('e-semi2', team)"
-        >
-          {{ team || "\u00A0" }}
+      <div *ngFor="let key of ['e-semi', 'e-semi2']" class="matchup">
+        <div class="teams-and-games east">
+          <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
+            <button
+              class="plus-button"
+              (click)="increaseGames('round2', key + '-winner')"
+            >
+              +
+            </button>
+            <div>{{ getGames("round2", key + "-winner") }}</div>
+
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round2', key + '-winner')"
+            >
+              –
+            </button>
+          </div>
+          <div class="teams">
+            <div
+              class="team"
+              *ngFor="let team of getTeamArray('round2', key)"
+              [class]="getTeamClass(key, team)"
+              [class.disabled]="!isTeamSelectable(team)"
+              (click)="isTeamSelectable(team) && pickWinner(key, team)"
+            >
+              {{ team || "\u00A0" }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -141,24 +261,43 @@
     <h4>East R1</h4>
     <div class="column">
       <div *ngFor="let m of matchups.east" class="matchup">
-        <div
-          class="team"
-          [class]="getTeamClass(m.id, m.team1)"
-          (click)="pickWinner(m.id, m.team1)"
-        >
-          {{ m.team1 || "\u00A0" }}
-        </div>
-        <div
-          class="team"
-          [class]="getTeamClass(m.id, m.team2)"
-          (click)="pickWinner(m.id, m.team2)"
-        >
-          {{ m.team2 || "\u00A0" }}
+        <div class="teams-and-games east">
+          <div class="game-control" *ngIf="userPicks.round1[m.id]">
+            <button class="plus-button" (click)="increaseGames('round1', m.id)">
+              +
+            </button>
+
+            <div>{{ getGames("round1", m.id) }}</div>
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round1', m.id)"
+            >
+              –
+            </button>
+          </div>
+          <div class="teams">
+            <div
+              class="team"
+              [class]="getTeamClass(m.id, m.team1)"
+              (click)="pickWinner(m.id, m.team1)"
+            >
+              {{ m.team1 || "\u00A0" }}
+            </div>
+            <div
+              class="team"
+              [class]="getTeamClass(m.id, m.team2)"
+              (click)="pickWinner(m.id, m.team2)"
+            >
+              {{ m.team2 || "\u00A0" }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Buttons -->
 <div class="button-row">
   <button class="bracket-button" (click)="savePicks()">💾 Save Picks</button>
   <button class="bracket-button" (click)="resetBracket()">

@@ -269,4 +269,68 @@ export class BracketComponent implements OnInit {
     const teamClass = team.toLowerCase(); // assumes team is the 3-letter abbreviation like "NYR"
     return selected ? `team selected ${teamClass}` : "team";
   }
+
+  increaseGames(round: string, matchupId: number | string) {
+    const gamesKey = `${round}Games` as keyof typeof this.userPicks;
+
+    // ✅ Make sure the object exists
+    if (!this.userPicks[gamesKey]) {
+      this.userPicks[gamesKey] = {};
+    }
+
+    const gamesObj = this.userPicks[gamesKey] as Record<
+      string | number,
+      number
+    >;
+
+    if (!(matchupId in gamesObj)) {
+      gamesObj[matchupId] = 4;
+    }
+
+    if (gamesObj[matchupId] < 7) {
+      gamesObj[matchupId]++;
+    }
+  }
+
+  decreaseGames(round: string, matchupId: number | string) {
+    const gamesKey = `${round}Games` as keyof typeof this.userPicks;
+
+    // ✅ Make sure the object exists
+    if (!this.userPicks[gamesKey]) {
+      this.userPicks[gamesKey] = {};
+    }
+
+    const gamesObj = this.userPicks[gamesKey] as Record<
+      string | number,
+      number
+    >;
+
+    if (!(matchupId in gamesObj)) {
+      gamesObj[matchupId] = 4;
+    }
+
+    if (gamesObj[matchupId] > 4) {
+      gamesObj[matchupId]--;
+    }
+  }
+
+  getGames(round: string, matchupId: number | string): number {
+    const gamesObj = this.userPicks[
+      `${round}Games` as keyof typeof this.userPicks
+    ] as any;
+    return gamesObj?.[matchupId] ?? 4; // fallback to 4
+  }
+
+  getTeamArray(
+    round: "round1" | "round2" | "round3" | "final",
+    key: string | number
+  ): string[] {
+    const roundData = this.userPicks[round] as Record<
+      string | number,
+      string | string[]
+    >;
+    const value = roundData[key];
+
+    return Array.isArray(value) ? value : [];
+  }
 }

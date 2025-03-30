@@ -31,10 +31,10 @@
 
 .matchup {
   border: 1px solid #777;
-  padding: 10px;
+  padding: 8px;
   border-radius: 6px;
   background-color: #444;
-  margin: 5px 0;
+  margin: 4px 0;
 }
 
 .team {
@@ -226,19 +226,132 @@
   background-color: #0077ff;
 }
 
-.game-select {
-  width: 100%;
-  margin: 4px 0 8px;
-  padding: 6px;
-  background-color: #222;
-  color: #ccc;
-  border: 1px solid #444;
-  border-radius: 4px;
-  font-size: 14px;
+.game-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.game-select:focus {
-  outline: none;
-  border-color: #005bbb;
-  background-color: #2a2a2a;
+.game-control div {
+  font-size: 17px;
+  color: #ccc;
+  font-weight: bold;
+}
+
+.teams-and-games {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch; /* ← ensures children like .game-control can grow */
+  justify-content: space-between;
+  gap: 7px;
+}
+
+.teams {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 4px;
+}
+
+.teams-and-games.east {
+  flex-direction: row;
+}
+
+.teams-and-games.west {
+  flex-direction: row-reverse;
+}
+
+.game-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly; /* push buttons apart */
+  min-width: 30px;
+}
+
+.teams-and-games.cup-final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.teams {
+  width: 100%;
+}
+
+.final-control {
+  flex-direction: row;
+  gap: 10px;
+  margin: 0;
+}
+
+.final-control button {
+  padding: 4px 8px;
+  font-size: 16px;
+}
+
+.teams-and-games.cup-final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.cup-image {
+  height: 200px;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+.final-control {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.champion-label {
+  margin-top: 12px;
+  text-align: center;
+  color: gold;
+  font-weight: bold;
+}
+
+.champion-name {
+  font-size: 18px;
+  margin-top: 4px;
+  color: white;
+  text-shadow: 0 0 4px #000;
+}
+
+.plus-button {
+  background-color: #2e8b57; /* light green */
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.plus-button:hover {
+  background-color: #38a169;
+}
+
+.minus-button {
+  background-color: #b22222; /* light red */
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.minus-button:hover {
+  background-color: #cc3b3b;
 }
