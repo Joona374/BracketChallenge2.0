@@ -28,7 +28,7 @@ export class LoginComponent {
 
     this.http.post("http://localhost:5000/api/login", this.formData).subscribe({
       next: (res: any) => {
-        localStorage.setItem("loggedInUser", this.formData.username);
+        localStorage.setItem("loggedInUser", JSON.stringify(res));
         this.message = res.message || "Login successful!";
         window.location.href = "/";
       },

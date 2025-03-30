@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import Config
-from db import db_engine as db
-from models import User, RegistrationCode, Matchup
 from datetime import datetime, UTC
 from flask_cors import CORS
+import json
+
+from config import Config
+from db import db_engine as db
+from models import User, RegistrationCode, Matchup, Pick
 
 app = Flask(__name__)
 CORS(app) 
@@ -68,7 +70,12 @@ def login():
     if not check_password_hash(user.password_hash, data["password"]):
         return jsonify({"error": "Invalid password"}), 401
     
-    return jsonify({"message": "Login successful", "username": user.username, "teamName": user.team_name}), 200
+    return jsonify({
+        "message": "Login successful",
+        "username": user.username,
+        "teamName": user.team_name,
+        "id": user.id
+    }), 200
 
 @app.route("/api/bracket/matchups", methods=["GET"])
 def get_matchups():
@@ -90,6 +97,53 @@ def get_matchups():
         })
 
     return jsonify(result), 200
+
+@app.route("/api/bracket/save-picks", methods=["POST"])
+def save_picks():
+    data = request.json
+
+    user_id = data.get("user_id")
+    picks = data.get("picks")
+
+    if not user_id or not picks:
+        return jsonify({"error": "Missing user_id or picks"}), 400
+
+    existing_pick = Pick.query.filter_by(user_id=user_id).first()
+    if existing_pick:
+        db.session.delete(existing_pick)
+
+    try:
+        new_pick = Pick(
+            user_id=user_id,
+            picks_json=json.dumps(picks),
+            created_at=datetime.now(UTC)
+        )
+        db.session.add(new_pick)
+        db.session.commit()
+        return jsonify({"message": "Picks saved successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to save picks", "details": str(e)}), 500 
+
+@app.route("/api/bracket/get-picks", methods=["GET"])
+def get_picks():
+    user_id = request.args.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
+    pick = Pick.query.filter_by(user_id=user_id).first()
+
+    if not pick:
+        return jsonify({"error": "No picks found for this user"}), 404
+
+    try:
+        picks_data = json.loads(pick.picks_json)
+        return jsonify({"picks": picks_data}), 200
+    except Exception as e:
+        print("Error parsing picks JSON:", e)
+        return jsonify({"error": "Failed to parse picks", "details": str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():

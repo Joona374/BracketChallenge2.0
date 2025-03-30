@@ -8,14 +8,14 @@
       <div *ngFor="let m of matchups.west" class="matchup">
         <div
           class="team"
-          [class.selected]="getPick(m.id, m.team1)"
+          [class]="getTeamClass(m.id, m.team1)"
           (click)="pickWinner(m.id, m.team1)"
         >
           {{ m.team1 || "\u00A0" }}
         </div>
         <div
           class="team"
-          [class.selected]="getPick(m.id, m.team2)"
+          [class]="getTeamClass(m.id, m.team2)"
           (click)="pickWinner(m.id, m.team2)"
         >
           {{ m.team2 || "\u00A0" }}
@@ -32,7 +32,7 @@
         <div
           class="team"
           *ngFor="let team of [userPicks.round2['w-semi']?.[0] || '', userPicks.round2['w-semi']?.[1] || '']"
-          [class.selected]="getPick('w-semi', team)"
+          [class]="getTeamClass('w-semi', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('w-semi', team)"
         >
@@ -43,7 +43,7 @@
         <div
           class="team"
           *ngFor="let team of [userPicks.round2['w-semi2']?.[0] || '', userPicks.round2['w-semi2']?.[1] || '']"
-          [class.selected]="getPick('w-semi2', team)"
+          [class]="getTeamClass('w-semi2', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('w-semi2', team)"
         >
@@ -61,7 +61,7 @@
         <div
           class="team"
           *ngFor="let team of [userPicks.round3['west-final']?.[0] || '', userPicks.round3['west-final']?.[1] || '']"
-          [class.selected]="getPick('west-final', team)"
+          [class]="getTeamClass('west-final', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('west-final', team)"
         >
@@ -73,13 +73,13 @@
 
   <!-- Column 4: Stanley Cup Final -->
   <div class="column-container">
-    <h4>Stanley Cup Final</h4>
+    <h4>Cup Final</h4>
     <div class="column">
       <div class="matchup">
         <div
           class="team"
           *ngFor="let team of [userPicks.final['cup']?.[0] || '', userPicks.final['cup']?.[1] || '']"
-          [class.selected]="getPick('cup', team)"
+          [class]="getTeamClass('cup', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('cup', team)"
         >
@@ -97,7 +97,7 @@
         <div
           class="team"
           *ngFor="let team of [userPicks.round3['east-final']?.[0] || '', userPicks.round3['east-final']?.[1] || '']"
-          [class.selected]="getPick('east-final', team)"
+          [class]="getTeamClass('east-final', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('east-final', team)"
         >
@@ -115,7 +115,7 @@
         <div
           class="team"
           *ngFor="let team of [userPicks.round2['e-semi']?.[0] || '', userPicks.round2['e-semi']?.[1] || '']"
-          [class.selected]="getPick('e-semi', team)"
+          [class]="getTeamClass('e-semi', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('e-semi', team)"
         >
@@ -126,7 +126,7 @@
         <div
           class="team"
           *ngFor="let team of [userPicks.round2['e-semi2']?.[0] || '', userPicks.round2['e-semi2']?.[1] || '']"
-          [class.selected]="getPick('e-semi2', team)"
+          [class]="getTeamClass('e-semi2', team)"
           [class.disabled]="!isTeamSelectable(team)"
           (click)="isTeamSelectable(team) && pickWinner('e-semi2', team)"
         >
@@ -143,14 +143,14 @@
       <div *ngFor="let m of matchups.east" class="matchup">
         <div
           class="team"
-          [class.selected]="getPick(m.id, m.team1)"
+          [class]="getTeamClass(m.id, m.team1)"
           (click)="pickWinner(m.id, m.team1)"
         >
           {{ m.team1 || "\u00A0" }}
         </div>
         <div
           class="team"
-          [class.selected]="getPick(m.id, m.team2)"
+          [class]="getTeamClass(m.id, m.team2)"
           (click)="pickWinner(m.id, m.team2)"
         >
           {{ m.team2 || "\u00A0" }}
@@ -158,4 +158,10 @@
       </div>
     </div>
   </div>
+</div>
+<div class="button-row">
+  <button class="bracket-button" (click)="savePicks()">💾 Save Picks</button>
+  <button class="bracket-button" (click)="resetBracket()">
+    🔄 Reset Bracket
+  </button>
 </div>

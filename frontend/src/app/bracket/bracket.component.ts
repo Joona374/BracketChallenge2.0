@@ -2,6 +2,7 @@
 import { Component, OnInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 
 interface Matchups {
   west: any[];
@@ -15,7 +16,7 @@ interface RoundPicks {
 @Component({
   selector: "app-bracket",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: "./bracket.component.html",
   styleUrls: ["./bracket.component.css"],
 })
@@ -24,24 +25,49 @@ export class BracketComponent implements OnInit {
 
   userPicks: {
     round1: { [key: number]: string };
+    round1Games: { [key: number]: number };
+
     round2: RoundPicks;
+    round2Games: { [key: string]: number };
+
     round3: RoundPicks;
+    round3Games: { [key: string]: number };
+
     final: RoundPicks;
+    finalGames: { [key: string]: number };
   } = {
     round1: {},
+    round1Games: {},
+
     round2: {},
+    round2Games: {},
+
     round3: {},
+    round3Games: {},
+
     final: {},
+    finalGames: {},
   };
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    const user = localStorage.getItem("loggedInUser");
-    if (!user) {
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+
+    if (!user?.id) {
       window.location.href = "/";
       return;
     }
+
+    this.http.get("http://localhost:5000/api/bracket/matchups").subscribe({
+      next: (data: any) => {
+        this.matchups = data;
+        this.loadPreviousPicks(user.id); // ← Load saved picks after matchups
+      },
+      error: (err) => {
+        console.error("Failed to load matchups", err);
+      },
+    });
 
     this.http.get("http://localhost:5000/api/bracket/matchups").subscribe({
       next: (data: any) => {
@@ -178,5 +204,69 @@ export class BracketComponent implements OnInit {
     Object.assign(this.userPicks.round2, round2Winners);
     Object.assign(this.userPicks.round3, round3Winners);
     Object.assign(this.userPicks.final, finalWinners);
+  }
+
+  savePicks() {
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+
+    const payload = {
+      user_id: user.id,
+      picks: this.userPicks,
+    };
+
+    this.http
+      .post("http://localhost:5000/api/bracket/save-picks", payload)
+      .subscribe({
+        next: () => {
+          alert("Picks saved successfully!");
+        },
+        error: (err) => {
+          console.error("Failed to save picks", err);
+          alert("Error saving picks.");
+        },
+      });
+  }
+
+  loadPreviousPicks(userId: number) {
+    this.http
+      .get(`http://localhost:5000/api/bracket/get-picks?user_id=${userId}`)
+      .subscribe({
+        next: (res: any) => {
+          this.userPicks = res.picks;
+          this.computeNextRounds(); // Important to rebuild the bracket UI!
+        },
+        error: (err) => {
+          if (err.status === 404) {
+            console.log("No previous picks found for this user.");
+          } else {
+            console.error("Failed to load picks", err);
+          }
+        },
+      });
+  }
+
+  resetBracket() {
+    this.userPicks = {
+      round1: {},
+      round1Games: {},
+
+      round2: {},
+      round2Games: {},
+
+      round3: {},
+      round3Games: {},
+
+      final: {},
+      finalGames: {},
+    };
+    this.computeNextRounds();
+  }
+
+  getTeamClass(matchupId: number | string, team: string): string {
+    if (!this.isTeamSelectable(team)) return "team disabled";
+
+    const selected = this.getPick(matchupId, team);
+    const teamClass = team.toLowerCase(); // assumes team is the 3-letter abbreviation like "NYR"
+    return selected ? `team selected ${teamClass}` : "team";
   }
 }
