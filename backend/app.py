@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode
+from models import User, RegistrationCode, Matchup
 from datetime import datetime, UTC
 from flask_cors import CORS
 
@@ -52,6 +52,44 @@ def register():
     db.session.commit()
 
     return jsonify({"message": "User registered successfully"}), 201
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.json
+
+    if not data or "username" not in data or "password" not in data:
+        return jsonify({"error": "Missing username or password"}), 400
+    
+    user = User.query.filter_by(username=data["username"]).first()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    if not check_password_hash(user.password_hash, data["password"]):
+        return jsonify({"error": "Invalid password"}), 401
+    
+    return jsonify({"message": "Login successful", "username": user.username, "teamName": user.team_name}), 200
+
+@app.route("/api/bracket/matchups", methods=["GET"])
+def get_matchups():
+    matchups = Matchup.query.filter_by(round=1).all()
+    if not matchups:
+        return jsonify({"error": "No matchups found"}), 404
+    
+    result = {
+        "west": [],
+        "east": []
+    }
+
+    for matchup in matchups:
+        result[matchup.conference].append({
+            "id": matchup.id,
+            "matchupCode": matchup.matchup_code,
+            "team1": matchup.team1,
+            "team2": matchup.team2
+        })
+
+    return jsonify(result), 200
 
 if __name__ == '__main__':
     with app.app_context():

@@ -1,7 +1,7 @@
-<h2>Register</h2>
+<h2>Rekisteröidy</h2>
 
 <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
-  <label for="username">Username:</label><br />
+  <label for="username">Käyttäjätunnus / sähköposti :</label><br />
   <input
     type="text"
     id="username"
@@ -10,7 +10,7 @@
     [(ngModel)]="formData.username"
   /><br /><br />
 
-  <label for="teamName">Team Name:</label><br />
+  <label for="teamName">Joukkueen nimi:</label><br />
   <input
     type="text"
     id="teamName"
@@ -19,7 +19,7 @@
     [(ngModel)]="formData.teamName"
   /><br /><br />
 
-  <label for="password">Password:</label><br />
+  <label for="password">Salasana:</label><br />
   <input
     type="password"
     id="password"
@@ -28,7 +28,7 @@
     [(ngModel)]="formData.password"
   /><br /><br />
 
-  <label for="confirmPassword">Confirm Password:</label><br />
+  <label for="confirmPassword">Vahvista salasana:</label><br />
   <input
     type="password"
     id="confirmPassword"
@@ -37,7 +37,7 @@
     [(ngModel)]="formData.confirmPassword"
   /><br /><br />
 
-  <label for="registrationCode">Registration Code:</label><br />
+  <label for="registrationCode">Rekisteröinti koodi:</label><br />
   <input
     type="text"
     id="registrationCode"
@@ -46,7 +46,9 @@
     [(ngModel)]="formData.registrationCode"
   /><br /><br />
 
-  <button type="submit" [disabled]="!registerForm.form.valid">Register</button>
+  <button type="submit" [disabled]="!registerForm.form.valid">
+    Rekisteröidy
+  </button>
 </form>
 
 <div *ngIf="message" style="color: green">{{ message }}</div>

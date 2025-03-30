@@ -1,0 +1,17 @@
+<h1>Welcome to NHL Bracket Challenge</h1>
+
+<div class="button-container" *ngIf="!loggedInUser">
+  <button routerLink="/register">Register</button>
+  <button routerLink="/login">Login</button>
+</div>
+
+<div *ngIf="loggedInUser" class="user-info">
+  <p>
+    You're logged in as <strong>{{ loggedInUser }}</strong>
+  </p>
+  <div *ngIf="loggedInUser" class="button-container">
+    <button routerLink="/bracket">Go to Bracket</button>
+  </div>
+
+  <button (click)="logout()">Logout</button>
+</div>

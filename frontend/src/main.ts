@@ -6,10 +6,15 @@ import { Routes } from "@angular/router";
 
 import { AppComponent } from "./app/app.component";
 import { RegisterComponent } from "./app/register/register.component";
+import { HomeComponent } from "./app/home/home.component";
+import { LoginComponent } from "./app/login/login.component";
+import { BracketComponent } from "./app/bracket/bracket.component"; // 👈
 
 const routes: Routes = [
-  { path: "", redirectTo: "register", pathMatch: "full" }, // default route
+  { path: "", component: HomeComponent }, // default route
   { path: "register", component: RegisterComponent },
+  { path: "login", component: LoginComponent },
+  { path: "bracket", component: BracketComponent },
 ];
 
 bootstrapApplication(AppComponent, {
