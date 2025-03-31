@@ -1,0 +1,114 @@
+<h2 class="section-header">Select Your Starting Lineup</h2>
+
+<div class="lineup-wrapper">
+  <div class="slot-container">
+    <!-- Forwards -->
+    <div class="lineup-row forwards">
+      <div
+        *ngFor="let slot of forwardSlots"
+        class="slot"
+        [ngClass]="getPlayerClass(slot)"
+        [class.active]="selectedSlot === slot"
+        (click)="selectedSlot = slot"
+      >
+        <span>{{ formatPlayer(slot) }}</span>
+      </div>
+    </div>
+
+    <!-- Defenders -->
+    <div class="lineup-row defenders">
+      <div class="spacer"></div>
+      <div
+        *ngFor="let slot of defenderSlots"
+        class="slot"
+        [ngClass]="getPlayerClass(slot)"
+        [class.active]="selectedSlot === slot"
+        (click)="selectedSlot = slot"
+      >
+        <span>{{ formatPlayer(slot) }}</span>
+      </div>
+    </div>
+
+    <!-- Goalie -->
+    <div class="lineup-row goalie">
+      <div class="spacer"></div>
+      <div class="spacer"></div>
+      <div
+        class="slot"
+        [ngClass]="getPlayerClass(goalieSlot)"
+        [class.active]="selectedSlot === goalieSlot"
+        (click)="selectedSlot = goalieSlot"
+      >
+        <span>{{ formatPlayer(goalieSlot) }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="contorls">
+  <input
+    type="text"
+    placeholder="Search by name or team..."
+    [(ngModel)]="searchTerm"
+    class="search-box"
+  />
+  <button class="lineup-button save" (click)="saveLineup()">
+    💾 Save Lineup
+  </button>
+  <button class="lineup-button clear" (click)="clearLineup()">
+    🧹 Clear Lineup
+  </button>
+</div>
+
+<!-- Scrollable Player Table -->
+<div class="player-table-container">
+  <table class="player-table">
+    <thead>
+      <tr>
+        <th
+          (click)="sortBy('position')"
+          [class.sorted]="sortKey === 'position'"
+        >
+          Position
+          <span *ngIf="sortKey === 'position'">{{ sortAsc ? "▲" : "▼" }}</span>
+        </th>
+        <th
+          (click)="sortBy('firstName')"
+          [class.sorted]="sortKey === 'firstName'"
+        >
+          First
+          <span *ngIf="sortKey === 'firstName'">{{ sortAsc ? "▲" : "▼" }}</span>
+        </th>
+        <th
+          (click)="sortBy('lastName')"
+          [class.sorted]="sortKey === 'lastName'"
+        >
+          Last
+          <span *ngIf="sortKey === 'lastName'">{{ sortAsc ? "▲" : "▼" }}</span>
+        </th>
+        <th (click)="sortBy('team')" [class.sorted]="sortKey === 'team'">
+          Team <span *ngIf="sortKey === 'team'">{{ sortAsc ? "▲" : "▼" }}</span>
+        </th>
+        <th
+          (click)="sortBy('isRookie')"
+          [class.sorted]="sortKey === 'isRookie'"
+        >
+          Rookie
+          <span *ngIf="sortKey === 'isRookie'">{{ sortAsc ? "▲" : "▼" }}</span>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        *ngFor="let player of availablePlayers"
+        (click)="assignPlayerToSlot(player)"
+      >
+        <td>{{ player.position }}</td>
+        <td>{{ player.firstName }}</td>
+        <td>{{ player.lastName }}</td>
+        <td>{{ player.team }}</td>
+        <td>{{ player.isRookie ? "✓" : "❌" }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

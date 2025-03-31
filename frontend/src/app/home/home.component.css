@@ -1,32 +1,311 @@
-h1 {
-  text-align: center;
-  color: #eee;
-  margin-top: 40px;
+.home-container {
+  font-family: "Montserrat", "Arial", sans-serif;
+  color: #fff;
+  min-height: 100vh;
 }
 
-.button-container {
+.hero-section {
+  position: relative;
+  height: 80vh;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-image: url("/assets/ice-rink.jpg");
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(20, 0, 0, 0.9) 0%,
+    rgba(40, 0, 0, 0.85) 50%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  z-index: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  padding: 0 20px;
+}
+
+.main-title {
+  font-size: 4rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(255, 50, 50, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+  animation: neonPulse 2s infinite;
+}
+
+.season {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #ff3232;
+  margin: 10px 0 25px;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.4);
+}
+
+.puck-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 25px auto;
+  width: 80%;
+  max-width: 500px;
+}
+
+.puck-line {
+  height: 2px;
+  flex-grow: 1;
+  background: linear-gradient(90deg, transparent, #ff3232, transparent);
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+}
+
+.puck {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #000;
+  border: 3px solid #ff3232;
+  margin: 0 15px;
+  position: relative;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.puck::before,
+.puck::after {
+  content: "";
+  position: absolute;
+  background: #ff3232;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+}
+
+.puck::before {
+  width: 70%;
+  top: 33%;
+}
+
+.puck::after {
+  width: 70%;
+  bottom: 33%;
+}
+
+.tagline {
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 40px;
+  color: #e4e4e4;
+}
+
+.auth-container {
   display: flex;
   justify-content: center;
   gap: 20px;
+  margin-top: 40px;
+}
+
+.welcome-panel {
+  background: rgba(50, 0, 0, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  padding: 30px;
   margin-top: 30px;
+  box-shadow: 0 4px 28px rgba(255, 0, 0, 0.2);
+  border: 1px solid rgba(255, 50, 50, 0.3);
 }
 
-button {
+.user-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.avatar-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #ff3232, #990000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+}
+
+.initials {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.user-info {
+  text-align: left;
+}
+
+.welcome-message {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.action-button {
   padding: 12px 24px;
-  font-size: 16px;
   border: none;
-  background-color: #444;
-  color: #eee;
   border-radius: 5px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  font-size: 1rem;
 }
 
-button:hover:not(:disabled) {
-  background-color: #666;
+.register-btn {
+  background: #c90c0f;
+  color: white;
+  box-shadow: 0 0 13px rgba(255, 0, 0, 0.4);
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.register-btn:hover {
+  background: #ff0000;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(255, 0, 0, 0.5);
+}
+
+.login-btn {
+  background: rgba(50, 0, 0, 0.3);
+  color: white;
+  border: 2px solid #ff3232;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+}
+
+.login-btn:hover {
+  background: rgba(255, 0, 0, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(255, 0, 0, 0.3);
+}
+
+.bracket-btn {
+  background: #990000;
+  color: white;
+}
+
+.bracket-btn:hover {
+  background: #cc0000;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(255, 0, 0, 0.3);
+}
+
+.logout-btn {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #ff3232;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 0, 0, 0.1);
+}
+
+.features-section {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  background: #0a0a0a;
+  padding: 60px 20px;
+  gap: 30px;
+  border-top: 1px solid #ff3232;
+}
+
+.feature {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+  text-align: center;
+  padding: 30px;
+  border-radius: 10px;
+  background: #1a1a1a;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 50, 50, 0.1);
+}
+
+.feature:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(255, 0, 0, 0.2);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #ff3232;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.feature h3 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: #ff3232;
+}
+
+.feature p {
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.app-footer {
+  background: #0a0a0a;
+  padding: 20px;
+  text-align: center;
+  color: #777;
+}
+
+@keyframes neonPulse {
+  0% {
+    text-shadow: 0 0 10px rgba(255, 50, 50, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(255, 50, 50, 0.9), 0 0 30px rgba(255, 0, 0, 0.7),
+      0 0 45px rgba(255, 0, 0, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(255, 50, 50, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2.5rem;
+  }
+
+  .season {
+    font-size: 1.3rem;
+  }
+
+  .user-card {
+    flex-direction: column;
+  }
+
+  .user-info {
+    text-align: center;
+  }
 }

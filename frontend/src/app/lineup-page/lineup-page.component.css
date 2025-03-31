@@ -1,0 +1,408 @@
+/* Section Header */
+
+.lineup-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* top-aligned */
+  gap: 40px; /* space between buttons and slot grid */
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* allows stacking on smaller screens */
+}
+
+/* Lineup Grid & Rows */
+.lineup-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.slot-container.empty {
+  visibility: hidden;
+}
+
+/* Slot Box */
+.slot {
+  padding: 10px 16px;
+  margin: 3px 6px;
+  background-color: #333;
+  color: #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid #444;
+  font-family: "Orbitron", monospace;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  width: 180px;
+}
+
+.slot.active {
+  border-color: #ff4444;
+  font-weight: bold;
+  box-shadow: 0 0 6px #ff4444;
+}
+
+/* Scrollable Player Table */
+.player-table-container {
+  max-height: 340px;
+  overflow-y: auto;
+  margin: 0 auto;
+  max-width: 100%;
+  border: 1px solid #444;
+  border-radius: 8px;
+}
+
+.player-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Orbitron", monospace;
+}
+
+.player-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #444;
+  z-index: 1;
+  text-align: left;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.player-table thead th.sorted {
+  color: #ff4444;
+  text-shadow: 0 0 4px #ff4444;
+}
+
+.player-table thead th.sorted span {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.player-table td {
+  padding: 8px;
+  border-top: 1px solid #aaa;
+}
+
+.player-table tr:hover {
+  background-color: #222;
+  cursor: pointer;
+}
+
+/* Search Input */
+.search-box {
+  margin: 5px;
+  margin-top: 0;
+  padding: 7px;
+  width: 20%;
+  box-sizing: border-box;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background-color: #222;
+  color: #eee;
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #ff4444;
+  box-shadow: 0 0 5px #ff4444;
+}
+
+/* --- Team color classes scoped to this component --- */
+
+/* Dallas */
+.team.selected.dal {
+  background-color: #006847;
+  color: #8f8f8c;
+  border: 2px solid #111;
+  font-weight: bold;
+}
+
+/* Vegas */
+.team.selected.vgk {
+  background-color: #b4975a;
+  color: #333f42;
+  border: 2px solid #c8102e;
+  font-weight: bold;
+}
+
+/* Winnipeg */
+.team.selected.wpg {
+  background-color: #004c97;
+  color: #fff;
+  border: 2px solid #ac162c;
+  font-weight: bold;
+}
+
+/* Colorado */
+.team.selected.col {
+  background-color: #6f263d;
+  color: #a2aaad;
+  border: 2px solid #236192;
+  font-weight: bold;
+}
+
+/* Vancouver */
+.team.selected.van {
+  background-color: #00205b;
+  color: #99999a;
+  border: 2px solid #00843d;
+  font-weight: bold;
+}
+
+/* Nashville */
+.team.selected.nsh {
+  background-color: #ffb81c;
+  color: #041e42;
+  border: 2px solid #fff;
+  font-weight: bold;
+}
+
+/* Edmonton */
+.team.selected.edm {
+  background-color: #e44500;
+  color: #041e42;
+  border: 2px solid #fff;
+  font-weight: bold;
+}
+
+/* Las Angeles */
+.team.selected.lak {
+  background-color: #111111;
+  color: #a2aaad;
+  border: 2px solid #fff;
+  font-weight: bold;
+}
+
+/* Florida */
+.team.selected.fla {
+  background-color: #c8102e;
+  color: #fff;
+  border: 2px solid #041e42;
+  font-weight: bold;
+}
+
+/* Tampa Bay */
+.team.selected.tbl {
+  background-color: #002868;
+  color: #fff;
+  border: 2px solid #fff;
+  font-weight: bold;
+}
+
+/* Boston Bruins */
+.team.selected.bos {
+  background-color: #000c; /* Gold */
+  color: #ffb81c;
+  border: 2px solid #ffb81c;
+  font-weight: bold;
+}
+
+/* Toronto Maple Leafs */
+.team.selected.tor {
+  background-color: #00205b;
+  color: white;
+  border: 2px solid #ffffff;
+  font-weight: bold;
+}
+
+/* New York Rangers */
+.team.selected.nyr {
+  background-color: #0038a8;
+  color: #ffffff;
+  border: 2px solid #c8102e; /* Accent red */
+  font-weight: bold;
+}
+
+/* Washington */
+.team.selected.wsh {
+  background-color: #041e42;
+  color: #c8102e;
+  border: 2px solid #fff; /* Accent red */
+  font-weight: bold;
+}
+
+/* Carolina */
+.team.selected.car {
+  background-color: #ce1126;
+  color: #ffffff;
+  border: 2px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.nyi {
+  background-color: #00539b;
+  color: #f47d30;
+  border: 2px solid #fff; /* Accent red */
+  font-weight: bold;
+}
+
+.contorls {
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: space-evenly;
+  gap: 20%;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.lineup-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+  min-width: 20%;
+}
+
+.lineup-button {
+  padding: 8px 20px;
+  font-size: 14px;
+  font-family: "Orbitron", monospace;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 5px 5px 5px;
+  width: 20%;
+}
+
+.lineup-button.clear {
+  background-color: #2a0000;
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+.lineup-button.clear:hover {
+  background-color: #400000;
+  color: white;
+}
+
+.lineup-button.save {
+  background-color: #002a00;
+  color: #44ff44;
+  border-color: #44ff44;
+}
+
+.lineup-button.save:hover {
+  background-color: #003300;
+  color: white;
+}
+
+.slot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Scrollbar Styling for WebKit-based browsers */
+.player-table-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.player-table-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 8px;
+}
+
+.player-table-container::-webkit-scrollbar-thumb {
+  background-color: #ff4444;
+  border-radius: 8px;
+  border: 2px solid #1a1a1a;
+}
+
+.player-table-container::-webkit-scrollbar-thumb:hover {
+  background-color: #ff2222;
+}
+
+@media (max-width: 620px) {
+  .lineup-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .lineup-buttons {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .lineup-button {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .slot {
+    width: 140px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .search-box {
+    width: 90%;
+    font-size: 12px;
+  }
+
+  .player-table-container {
+    max-height: 300px;
+    width: 100%;
+  }
+
+  .player-table thead th,
+  .player-table td {
+    font-size: 13px;
+    padding: 6px;
+  }
+}
+
+@media (max-width: 460px) {
+  .lineup-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .lineup-buttons {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .lineup-button {
+    width: 90%;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .slot {
+    width: 100px;
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  .search-box {
+    width: 90%;
+    font-size: 13px;
+  }
+
+  .player-table-container {
+    max-height: 260px;
+    width: 100%;
+  }
+
+  .player-table thead th,
+  .player-table td {
+    font-size: 12px;
+    padding: 5px;
+  }
+}

@@ -1,17 +1,72 @@
-<h1>Welcome to NHL Bracket Challenge</h1>
+<div class="home-container">
+  <div class="hero-section">
+    <div class="overlay"></div>
+    <div class="content">
+      <h1 class="main-title">NHL BRACKET CHALLENGE</h1>
+      <h2 class="season">2025 STANLEY CUP PLAYOFFS</h2>
 
-<div class="button-container" *ngIf="!loggedInUser">
-  <button routerLink="/register">Register</button>
-  <button routerLink="/login">Login</button>
-</div>
+      <div class="puck-divider">
+        <div class="puck-line"></div>
+        <div class="puck"></div>
+        <div class="puck-line"></div>
+      </div>
 
-<div *ngIf="loggedInUser" class="user-info">
-  <p>
-    You're logged in as <strong>{{ loggedInUser }}</strong>
-  </p>
-  <div *ngIf="loggedInUser" class="button-container">
-    <button routerLink="/bracket">Go to Bracket</button>
+      <p class="tagline">
+        Predict the winners. Compete with friends. Claim the glory.
+      </p>
+
+      <div *ngIf="!loggedInUser" class="auth-container">
+        <button class="action-button register-btn" routerLink="/register">
+          JOIN THE CHALLENGE
+        </button>
+        <button class="action-button login-btn" routerLink="/login">
+          SIGN IN
+        </button>
+      </div>
+
+      <div *ngIf="loggedInUser" class="welcome-panel">
+        <div class="user-card">
+          <div class="avatar-circle">
+            <span class="initials">{{ getUserInitials() }}</span>
+          </div>
+          <div class="user-info">
+            <p class="welcome-message">
+              Welcome back, <strong>{{ loggedInUser }}</strong
+              >!
+            </p>
+            <div class="user-actions">
+              <button class="action-button bracket-btn" routerLink="/bracket">
+                MY BRACKET
+              </button>
+              <button class="action-button logout-btn" (click)="logout()">
+                LOGOUT
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <button (click)="logout()">Logout</button>
+  <div class="features-section">
+    <div class="feature">
+      <div class="feature-icon">🏆</div>
+      <h3>PREDICT THE PLAYOFFS</h3>
+      <p>Select winners for all rounds of the Stanley Cup Playoffs</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📊</div>
+      <h3>TRACK YOUR RANKING</h3>
+      <p>See how your predictions stack up against your friends</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎯</div>
+      <h3>EARN POINTS</h3>
+      <p>Get points for correct picks and series length predictions</p>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>NHL Bracket Challenge 2025 &copy; All rights reserved</p>
+  </footer>
 </div>

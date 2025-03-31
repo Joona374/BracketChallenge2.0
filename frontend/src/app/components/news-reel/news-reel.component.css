@@ -1,0 +1,35 @@
+.news-reel-wrapper {
+  width: 100%;
+  overflow: hidden;
+  background-color: #111;
+  border-top: 2px solid #ff4444;
+  border-bottom: 2px solid #ff4444;
+  padding: 6px 0;
+  position: relative;
+}
+
+.news-reel-track {
+  display: inline-block;
+  white-space: nowrap;
+  color: #ff4444;
+  font-family: "Orbitron", monospace;
+  font-size: 18px;
+  animation: scroll-left 80s linear infinite;
+  text-shadow: 0 0 2px #ff0000;
+}
+
+/* Huge gap between headlines — ensures only one on screen at a time */
+.spacer {
+  display: inline-block;
+  width: 110vw; /* try 120vw, 150vw, even 200vw for long headlines */
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(120vw);
+  }
+
+  100% {
+    transform: translateX(-590vw); /* move far enough to carry full loop */
+  }
+}

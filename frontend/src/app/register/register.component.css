@@ -1,49 +1,90 @@
 h2 {
   text-align: center;
-  color: #eee;
+  color: #ff4444;
+  font-family: "Orbitron", monospace;
+  font-size: 24px;
+  text-shadow: 0 0 6px #ff0000;
+  margin-top: 40px;
 }
 
 form {
-  background-color: #2a2a2a;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 400px;
-  margin: 20px auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background-color: #1a1a1a;
+  padding: 20px 30px;
+  border-radius: 12px;
+  max-width: 450px;
+  margin: 40px auto;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
+  border: 2px solid #2e2e2e;
+  font-family: "Orbitron", monospace;
+  box-sizing: border-box;
+}
+
+form * {
+  box-sizing: border-box;
 }
 
 label {
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 5px;
   font-weight: bold;
   color: #ccc;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 input {
-  width: 95%;
-  padding: 8px;
-  margin-bottom: 5px;
-  border: 1px solid #444;
-  border-radius: 4px;
-  background-color: #333;
-  color: #bbb;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 7px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background-color: #222;
+  color: #eee;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ff4444;
+  box-shadow: 0 0 5px #ff4444;
 }
 
 button {
   width: 100%;
-  padding: 10px;
-  background-color: #444;
-  color: #eee;
+  padding: 12px;
+  background-color: #ff4444;
+  color: #000;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  text-transform: uppercase;
   cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
-  background-color: #555;
+  background-color: #ff2222;
+  transform: scale(1.02);
 }
 
 div[ngIf] {
   margin-top: 10px;
   font-weight: bold;
+  font-family: "Orbitron", monospace;
+  text-align: center;
+}
+
+div[ngIf][style*="green"] {
+  color: #66ff66;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+div[ngIf][style*="red"] {
+  color: #ff6666;
+  text-shadow: 0 0 5px #ff0000;
 }

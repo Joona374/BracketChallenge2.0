@@ -1,0 +1,30 @@
+/* Sticky layout base */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #111;
+  font-family: "Orbitron", monospace;
+  color: #eee;
+  overflow-x: hidden;
+}
+
+/* Sticky navbar */
+app-navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+/* Sticky ticker under navbar */
+app-news-reel {
+  position: sticky;
+  top: 54px; /* adjust based on your navbar height */
+  z-index: 1001;
+}
+
+/* Give some top padding to avoid content being hidden */
+router-outlet + * {
+  display: block;
+  padding-top: 100px; /* adjust as needed based on navbar + ticker height */
+}

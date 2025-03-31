@@ -1,0 +1,46 @@
+<nav class="navbar" [class.mobile]="isMobileView">
+  <div class="navbar-left">
+    <a routerLink="/" class="brand">
+      <img src="assets/logo.png" alt="Logo" class="brand-logo" />NHL Bracket
+      Challenge 2025</a
+    >
+  </div>
+
+  <div class="navbar-center">
+    <button
+      class="hamburger"
+      *ngIf="isMobileView"
+      (click)="toggleMenu()"
+      aria-label="Toggle navigation"
+    >
+      ☰
+    </button>
+  </div>
+
+  <div class="navbar-timer" *ngIf="timeLeft !== ''">
+    <div class="ominous-timer" [class.locked]="timeLeft === 'LOCKED'">
+      <span *ngIf="timeLeft !== 'LOCKED'">⏳ {{ timeLeft }}</span>
+      <span *ngIf="timeLeft === 'LOCKED'">💀 LOCKED IN 💀</span>
+    </div>
+  </div>
+
+  <div class="navbar-right" [class.open]="menuOpen || !isMobileView">
+    <a
+      routerLink="/"
+      routerLinkActive="active-link"
+      [routerLinkActiveOptions]="{ exact: true }"
+      >Home</a
+    >
+
+    <ng-container *ngIf="isLoggedIn; else guestLinks">
+      <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
+      <a routerLink="/lineup" routerLinkActive="active-link">Lineup</a>
+      <a routerLink="/tbd" routerLinkActive="active-link">TBD</a>
+      <button (click)="logout()">Logout</button>
+    </ng-container>
+
+    <ng-template #guestLinks>
+      <a routerLink="/login" routerLinkActive="active-link">Login</a>
+    </ng-template>
+  </div>
+</nav>
