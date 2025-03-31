@@ -47,9 +47,32 @@ class Matchup(db.Model):
     team2 = db.Column(db.String(80), nullable=False)
 
 class Pick(db.Model):
+    __tablename__ = 'picks'
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     picks_json = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
 
     user = db.relationship('User', back_populates="picks")
+
+class Player(db.Model):
+    __tablename__ = 'players'
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+    team = db.Column(db.String(80), nullable=False)
+    position = db.Column(db.String(1), nullable=False) # L, C, R, D or G
+    is_rookie = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+
+class LineupPick(db.Model):
+    __tablename__ = 'lineup_picks'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    lineup_json = db.Column(db.Text, nullable=False)  # JSON format of selected players
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+
+    user = db.relationship("User", backref="lineup_pick", uselist=False)

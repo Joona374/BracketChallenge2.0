@@ -6,7 +6,7 @@ import json
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick
+from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick
 
 app = Flask(__name__)
 CORS(app) 
@@ -144,6 +144,71 @@ def get_picks():
     except Exception as e:
         print("Error parsing picks JSON:", e)
         return jsonify({"error": "Failed to parse picks", "details": str(e)}), 500
+
+@app.route("/api/players", methods=["GET"])
+def get_players():
+    players = Player.query.all()
+    if not players:
+        return jsonify({"error": "No players found"}), 404
+    
+    result = []
+    
+    for player in players:
+        result.append({
+            "id": player.id,
+            "firstName": player.first_name,
+            "lastName": player.last_name,
+            "team": player.team,
+            "position": player.position
+        })
+
+    return jsonify(result), 200
+
+@app.route("/api/lineup/save", methods=["POST"])
+def save_lineup():
+    data = request.json
+
+    user_id = data.get("user_id")
+    lineup = data.get("lineup")
+
+    if not user_id or not lineup:
+        return jsonify({"error": "Missing user_id or lineup"}), 400
+
+    existing = LineupPick.query.filter_by(user_id=user_id).first()
+    if existing:
+        db.session.delete(existing)
+
+    try:
+        new_lineup = LineupPick(
+            user_id=user_id,
+            lineup_json=json.dumps(lineup),
+            created_at=datetime.now(UTC)
+        )
+        db.session.add(new_lineup)
+        db.session.commit()
+        return jsonify({"message": "Lineup saved successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to save lineup", "details": str(e)}), 500
+
+@app.route("/api/lineup/get", methods=["GET"])
+def get_lineup():
+    user_id = request.args.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
+    lineup_pick = LineupPick.query.filter_by(user_id=user_id).first()
+
+    if not lineup_pick:
+        return jsonify({"error": "No lineup found for this user"}), 404
+
+    try:
+        lineup_data = json.loads(lineup_pick.lineup_json)
+        return jsonify({"lineup": lineup_data}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to parse lineup", "details": str(e)}), 500
+
 
 if __name__ == '__main__':
     with app.app_context():

@@ -4,7 +4,7 @@ from flask import Flask
 
 from config import Config
 from db import db_engine as db
-from models import RegistrationCode, Matchup
+from models import RegistrationCode, Matchup, Player
 
 def generate_random_code():
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -54,5 +54,31 @@ def create_matchups():
             print("✅ Seeded Round 1 matchups.")
 
 
+def add_mock_players():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    db.init_app(app)
+    with app.app_context():
+        if Player.query.count() == 0:
+            mock_players = [
+                Player(first_name='Saku', last_name='Koivula', team='MIN', position='L', is_rookie=False),
+                Player(first_name='Ville', last_name='Pelto', team='TOR', position='C', is_rookie=True),
+                Player(first_name='Teemu', last_name='Päijänne', team='EDM', position='D', is_rookie=False),
+                Player(first_name='Ville', last_name='Korhonen', team='BOS', position='D', is_rookie=True),
+                Player(first_name='Kari', last_name='Lehto', team='DAL', position='G', is_rookie=False),
+                Player(first_name='Antti', last_name='Rask', team='NYR', position='L', is_rookie=False),
+                Player(first_name='Mika', last_name='Kallio', team='WPG', position='D', is_rookie=False),
+                Player(first_name='Jussi', last_name='Markka', team='COL', position='G', is_rookie=True),
+                Player(first_name='Olli', last_name='Joki', team='VGK', position='R', is_rookie=False),
+                Player(first_name='Mikko', last_name='Koivunen', team='LAK', position='R', is_rookie=True),
+                Player(first_name='Joni', last_name='Kokko', team='NSH', position='C', is_rookie=False),
+            ]
+            
+            db.session.bulk_save_objects(mock_players)
+            db.session.commit()
+            print("✅ Seeded mock players.")
+        else:
+            print("❌ Players already seeded.")
+
 if __name__ == "__main__":
-    create_matchups()
+    add_mock_players()
