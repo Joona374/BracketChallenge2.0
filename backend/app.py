@@ -6,7 +6,7 @@ import json
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick
+from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction
 
 app = Flask(__name__)
 CORS(app) 
@@ -159,7 +159,9 @@ def get_players():
             "firstName": player.first_name,
             "lastName": player.last_name,
             "team": player.team,
-            "position": player.position
+            "position": player.position,
+            "isRookie": player.is_rookie,
+            "price": player.price,
         })
 
     return jsonify(result), 200
@@ -209,6 +211,53 @@ def get_lineup():
     except Exception as e:
         return jsonify({"error": "Failed to parse lineup", "details": str(e)}), 500
 
+@app.route('/api/predictions/save', methods=['POST'])
+def save_predictions():
+    data = request.json
+    user_id = data.get('user_id')
+    predictions_data = data.get('predictions')
+    
+    if not user_id or not predictions_data:
+        return jsonify({"error": "Missing required data"}), 400
+    
+    # Convert predictions data to JSON string
+    predictions_json = json.dumps(predictions_data)
+    
+    # Check if prediction already exists for this user
+    existing_prediction = Prediction.query.filter_by(user_id=user_id).first()
+    
+    if existing_prediction:
+        # Update existing prediction
+        existing_prediction.predictions_json = predictions_json
+        existing_prediction.created_at = datetime.now(UTC)
+    else:
+        # Create new prediction
+        new_prediction = Prediction(
+            user_id=user_id,
+            predictions_json=predictions_json,
+            created_at=datetime.now(UTC)
+        )
+        db.session.add(new_prediction)
+    
+    db.session.commit()
+    return jsonify({"message": "Predictions saved successfully"}), 200
+
+@app.route('/api/predictions/get', methods=['GET'])
+def get_predictions():
+    user_id = request.args.get('user_id')
+    
+    if not user_id:
+        return jsonify({"error": "User ID is required"}), 400
+    
+    prediction = Prediction.query.filter_by(user_id=user_id).first()
+    
+    if not prediction:
+        return jsonify({"message": "No predictions found for this user"}), 404
+    
+    # Parse the JSON string back into a dictionary
+    predictions_data = json.loads(prediction.predictions_json)
+    
+    return jsonify({"predictions": predictions_data}), 200
 
 if __name__ == '__main__':
     with app.app_context():

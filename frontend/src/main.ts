@@ -10,6 +10,7 @@ import { HomeComponent } from "./app/home/home.component";
 import { LoginComponent } from "./app/login/login.component";
 import { BracketComponent } from "./app/bracket/bracket.component"; // 👈
 import { LineupPageComponent } from "./app/lineup-page/lineup-page.component";
+import { PredictionsComponent } from "./app/predictions/predictions.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent }, // default route
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: "login", component: LoginComponent },
   { path: "bracket", component: BracketComponent },
   { path: "lineup", component: LineupPageComponent },
+  { path: "predictions", component: PredictionsComponent },
 ];
 
 bootstrapApplication(AppComponent, {

@@ -37,12 +37,54 @@ export class LineupPageComponent implements OnInit {
 
   searchTerm: string = "";
 
-  constructor(private playerService: PlayerService, private http: HttpClient) {}
+  constructor(private playerService: PlayerService, private http: HttpClient) { }
 
   ngOnInit(): void {
     this.playerService.getPlayers().subscribe((data) => {
       this.players = data;
+      // After players are loaded, load saved lineup if it exists
+      this.loadSavedLineup();
     });
+  }
+
+  loadSavedLineup(): void {
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+
+    if (!user?.id) {
+      console.log("User not logged in, not loading lineup");
+      return;
+    }
+
+    this.http.get(`http://localhost:5000/api/lineup/get?user_id=${user.id}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.lineup) {
+            // The lineup data is directly the slot map of player IDs
+            const savedLineup = res.lineup;
+
+            // Create a map of player IDs to player objects for quick lookup
+            const playerMap = new Map<number, Player>();
+            this.players.forEach(player => playerMap.set(player.id, player));
+
+            // For each slot, find the player by ID and assign it
+            Object.keys(savedLineup).forEach(slot => {
+              const playerId = savedLineup[slot];
+              if (playerId !== null) {
+                this.slotMap[slot as SlotKey] = playerMap.get(playerId) || null;
+              }
+            });
+
+            console.log("Lineup loaded successfully");
+          }
+        },
+        error: (err) => {
+          if (err.status === 404) {
+            console.log("No saved lineup found for this user");
+          } else {
+            console.error("Failed to load saved lineup", err);
+          }
+        }
+      });
   }
 
   get availablePlayers(): Player[] {
@@ -80,6 +122,15 @@ export class LineupPageComponent implements OnInit {
     return this.sortedPlayers(result);
   }
 
+  totalsBudget: number = 1000000;
+
+  get remainingBudget(): number {
+    const usedBudget = Object.values(this.slotMap)
+      .filter((player) => player !== null)
+      .reduce((sum, player) => sum + (player?.price || 0), 0);
+    return this.totalsBudget - usedBudget;
+  }
+
   private sortedPlayers(players: Player[]): Player[] {
     if (!this.sortKey) return players;
 
@@ -99,11 +150,33 @@ export class LineupPageComponent implements OnInit {
           : Number(bValue) - Number(aValue);
       }
 
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return this.sortAsc ? aValue - bValue : bValue - aValue;
+      }
+
       return 0;
     });
   }
 
   assignPlayerToSlot(player: Player): void {
+    // Check if adding this player would exceed the budget
+    let currentPrice = 0;
+
+    if (this.selectedSlot) {
+      const currentlyAssigned = this.slotMap[this.selectedSlot];
+      currentPrice = currentlyAssigned?.price || 0;
+    }
+
+    if (this.remainingBudget + currentPrice < player.price) {
+      alert(
+        `Cannot afford ${player.firstName} ${player.lastName
+        } (${this.formatPrice(
+          player.price
+        )}). Remaining budget: ${this.formatPrice(this.remainingBudget)}`
+      );
+      return;
+    }
+
     if (this.selectedSlot) {
       // If a slot is selected, assign to that one
       this.slotMap[this.selectedSlot] = player;
@@ -138,6 +211,11 @@ export class LineupPageComponent implements OnInit {
     const player = this.slotMap[slot];
     if (!player) return slot;
     return `${player.firstName[0]}. ${player.lastName} (${player.team})`;
+  }
+
+  // Helper method to format price as currency
+  formatPrice(price: number): string {
+    return "$" + price.toLocaleString();
   }
 
   sortKey: keyof Player | null = null;

@@ -5,4 +5,5 @@ export interface Player {
   team: string;
   position: "F" | "D" | "G";
   isRookie: boolean;
+  price: number;
 }

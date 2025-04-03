@@ -2,7 +2,7 @@
   <div class="hero-section">
     <div class="overlay"></div>
     <div class="content">
-      <h1 class="main-title">NHL BRACKET CHALLENGE</h1>
+      <h1 class="main-title">NHL BRACKET CHALLENGE 2.0</h1>
       <h2 class="season">2025 STANLEY CUP PLAYOFFS</h2>
 
       <div class="puck-divider">
@@ -26,14 +26,15 @@
 
       <div *ngIf="loggedInUser" class="welcome-panel">
         <div class="user-card">
-          <div class="avatar-circle">
-            <span class="initials">{{ getUserInitials() }}</span>
-          </div>
+          <p class="welcome-message">
+            Welcome back, <strong>{{ loggedInUser }}</strong
+            >!
+          </p>
+
           <div class="user-info">
-            <p class="welcome-message">
-              Welcome back, <strong>{{ loggedInUser }}</strong
-              >!
-            </p>
+            <div class="avatar-circle">
+              <span class="initials">{{ getUserInitials() }}</span>
+            </div>
             <div class="user-actions">
               <button class="action-button bracket-btn" routerLink="/bracket">
                 MY BRACKET

@@ -1,0 +1,151 @@
+<h2 class="section-header">NHL Season Predictions</h2>
+<p class="section-subheader">Pick 3 players for each category</p>
+
+<div class="predictions-container">
+  <!-- Category selection tabs -->
+  <div class="category-tabs">
+    <div
+      *ngFor="let cat of predictions | keyvalue"
+      class="category-tab"
+      [class.active]="selectedCategory === cat.key"
+      (click)="changeCategory(castToPredictionCategory(cat.key))"
+    >
+      {{ categoryLabels[castToPredictionCategory(cat.key)] }}
+      <span class="pick-count">{{ cat.value.length }}/3</span>
+    </div>
+  </div>
+
+  <div class="predictions-content">
+    <!-- Left side: Current picks -->
+    <div class="current-picks-panel">
+      <div class="current-picks-header">
+        <h3>{{ categoryLabels[selectedCategory] }}</h3>
+      </div>
+      <div class="picks-list">
+        <!-- No picks message -->
+
+        <!-- Player picks first -->
+        <div
+          *ngFor="let player of predictions[selectedCategory]; let i = index"
+          class="pick-item"
+          [ngClass]="'team-' + player.team.toLowerCase()"
+        >
+          <div class="pick-rank">#{{ i + 1 }}</div>
+          <div class="pick-player-info">
+            <div class="player-name">
+              {{ player.firstName }} {{ player.lastName }}
+            </div>
+            <div class="player-details">
+              {{ player.position }} | {{ player.team }}
+            </div>
+          </div>
+          <button
+            class="remove-pick"
+            (click)="removePlayer(selectedCategory, i)"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Empty slots after player picks -->
+        <div class="empty-slots">
+          <div
+            *ngFor="
+              let _ of [].constructor(3 - predictions[selectedCategory].length);
+              let i = index
+            "
+            class="empty-slot"
+          >
+            Empty slot
+          </div>
+        </div>
+        <div
+          *ngIf="predictions[selectedCategory].length === 0"
+          class="no-picks"
+        >
+          No players selected yet
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side: Player selection -->
+    <div class="player-selection-panel">
+      <div class="search-controls">
+        <input
+          type="text"
+          placeholder="Search players..."
+          [(ngModel)]="searchTerm"
+          class="search-box"
+        />
+      </div>
+
+      <!-- Player table -->
+      <div class="player-table-container">
+        <table class="player-table">
+          <thead>
+            <tr>
+              <th
+                (click)="sortBy('position')"
+                [class.sorted]="sortKey === 'position'"
+              >
+                Pos
+                <span *ngIf="sortKey === 'position'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th
+                (click)="sortBy('firstName')"
+                [class.sorted]="sortKey === 'firstName'"
+              >
+                First
+                <span *ngIf="sortKey === 'firstName'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th
+                (click)="sortBy('lastName')"
+                [class.sorted]="sortKey === 'lastName'"
+              >
+                Last
+                <span *ngIf="sortKey === 'lastName'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th (click)="sortBy('team')" [class.sorted]="sortKey === 'team'">
+                Team
+                <span *ngIf="sortKey === 'team'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let player of filteredPlayers"
+              (click)="selectPlayer(player)"
+              class="player-row"
+            >
+              <td>{{ player.position }}</td>
+              <td>{{ player.firstName }}</td>
+              <td>{{ player.lastName }}</td>
+              <td>{{ player.team }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global action buttons -->
+  <div class="action-buttons-container">
+    <button class="prediction-button save" (click)="savePredictions()">
+      💾 Save All Predictions
+    </button>
+    <button class="prediction-button reset" (click)="resetPredictions()">
+      🔄 Reset Predictions
+    </button>
+    <button class="prediction-button load" (click)="loadPredictions()">
+      📂 Load Saved Predictions
+    </button>
+  </div>
+</div>

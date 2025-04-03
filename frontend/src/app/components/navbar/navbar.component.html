@@ -35,7 +35,9 @@
     <ng-container *ngIf="isLoggedIn; else guestLinks">
       <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
       <a routerLink="/lineup" routerLinkActive="active-link">Lineup</a>
-      <a routerLink="/tbd" routerLinkActive="active-link">TBD</a>
+      <a routerLink="/predictions" routerLinkActive="active-link"
+        >Top 3 Picks</a
+      >
       <button (click)="logout()">Logout</button>
     </ng-container>
 

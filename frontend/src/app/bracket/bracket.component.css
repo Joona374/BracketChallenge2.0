@@ -227,10 +227,40 @@
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.bracket-button:hover {
+/* Save button style */
+.bracket-button:nth-child(1) {
+  background-color: #002a00;
+  color: #44ff44;
+  border-color: #44ff44;
+}
+
+.bracket-button:nth-child(1):hover {
+  background-color: #003300;
+  color: white;
+}
+
+/* Reset button style */
+.bracket-button:nth-child(2) {
   background-color: #2a0000;
-  color: #fff;
-  transform: scale(1.05);
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+.bracket-button:nth-child(2):hover {
+  background-color: #330000;
+  color: white;
+}
+
+/* Load button style */
+.bracket-button:nth-child(3) {
+  background-color: #001e2a;
+  color: #44ddff;
+  border-color: #44ddff;
+}
+
+.bracket-button:nth-child(3):hover {
+  background-color: #002a33;
+  color: white;
 }
 
 .game-control {

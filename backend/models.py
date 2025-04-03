@@ -65,6 +65,7 @@ class Player(db.Model):
     team = db.Column(db.String(80), nullable=False)
     position = db.Column(db.String(1), nullable=False) # L, C, R, D or G
     is_rookie = db.Column(db.Boolean, default=False)
+    price = db.Column(db.Integer, default=250000)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
 
 class LineupPick(db.Model):
@@ -76,3 +77,16 @@ class LineupPick(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
 
     user = db.relationship("User", backref="lineup_pick", uselist=False)
+
+class Prediction(db.Model):
+    __tablename__ = 'predictions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    predictions_json = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+    
+    user = db.relationship('User', backref=db.backref('predictions', lazy=True))
+    
+    def __repr__(self):
+        return f'<Prediction {self.id} by User {self.user_id}>'

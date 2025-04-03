@@ -61,17 +61,17 @@ def add_mock_players():
     with app.app_context():
         if Player.query.count() == 0:
             mock_players = [
-                Player(first_name='Saku', last_name='Koivula', team='MIN', position='L', is_rookie=False),
-                Player(first_name='Ville', last_name='Pelto', team='TOR', position='C', is_rookie=True),
-                Player(first_name='Teemu', last_name='Päijänne', team='EDM', position='D', is_rookie=False),
-                Player(first_name='Ville', last_name='Korhonen', team='BOS', position='D', is_rookie=True),
-                Player(first_name='Kari', last_name='Lehto', team='DAL', position='G', is_rookie=False),
-                Player(first_name='Antti', last_name='Rask', team='NYR', position='L', is_rookie=False),
-                Player(first_name='Mika', last_name='Kallio', team='WPG', position='D', is_rookie=False),
-                Player(first_name='Jussi', last_name='Markka', team='COL', position='G', is_rookie=True),
-                Player(first_name='Olli', last_name='Joki', team='VGK', position='R', is_rookie=False),
-                Player(first_name='Mikko', last_name='Koivunen', team='LAK', position='R', is_rookie=True),
-                Player(first_name='Joni', last_name='Kokko', team='NSH', position='C', is_rookie=False),
+                Player(first_name='Saku', last_name='Koivula', team='MIN', position='L', is_rookie=False, price=250000),
+                Player(first_name='Ville', last_name='Pelto', team='TOR', position='C', is_rookie=True, price=300000),
+                Player(first_name='Teemu', last_name='Päijänne', team='EDM', position='D', is_rookie=False, price=200000),
+                Player(first_name='Ville', last_name='Korhonen', team='BOS', position='D', is_rookie=True, price=150000),
+                Player(first_name='Kari', last_name='Lehto', team='DAL', position='G', is_rookie=False, price=175000),
+                Player(first_name='Antti', last_name='Rask', team='NYR', position='L', is_rookie=False, price=220000),
+                Player(first_name='Mika', last_name='Kallio', team='WPG', position='D', is_rookie=False, price=320000),
+                Player(first_name='Jussi', last_name='Markka', team='COL', position='G', is_rookie=True, price=112000),
+                Player(first_name='Olli', last_name='Joki', team='VGK', position='R', is_rookie=False, price=331000),
+                Player(first_name='Mikko', last_name='Koivunen', team='LAK', position='R', is_rookie=True, price=215000),
+                Player(first_name='Joni', last_name='Kokko', team='NSH', position='C', is_rookie=False, price=210000),
             ]
             
             db.session.bulk_save_objects(mock_players)

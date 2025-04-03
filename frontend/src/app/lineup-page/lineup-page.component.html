@@ -1,62 +1,87 @@
-<h2 class="section-header">Select Your Starting Lineup</h2>
+<!-- New container for top section -->
+<div class="lineup-top-container">
+  <!-- Left side: player slots -->
+  <div class="lineup-wrapper">
+    <h2 class="section-header">Select Your Starting Lineup</h2>
 
-<div class="lineup-wrapper">
-  <div class="slot-container">
-    <!-- Forwards -->
-    <div class="lineup-row forwards">
-      <div
-        *ngFor="let slot of forwardSlots"
-        class="slot"
-        [ngClass]="getPlayerClass(slot)"
-        [class.active]="selectedSlot === slot"
-        (click)="selectedSlot = slot"
-      >
-        <span>{{ formatPlayer(slot) }}</span>
+    <div class="slot-container">
+      <!-- Forwards -->
+      <div class="lineup-row forwards">
+        <div
+          *ngFor="let slot of forwardSlots"
+          class="slot"
+          [ngClass]="getPlayerClass(slot)"
+          [class.active]="selectedSlot === slot"
+          (click)="selectedSlot = slot"
+        >
+          <span>{{ formatPlayer(slot) }}</span>
+        </div>
       </div>
-    </div>
 
-    <!-- Defenders -->
-    <div class="lineup-row defenders">
-      <div class="spacer"></div>
-      <div
-        *ngFor="let slot of defenderSlots"
-        class="slot"
-        [ngClass]="getPlayerClass(slot)"
-        [class.active]="selectedSlot === slot"
-        (click)="selectedSlot = slot"
-      >
-        <span>{{ formatPlayer(slot) }}</span>
+      <!-- Defenders -->
+      <div class="lineup-row defenders">
+        <div class="spacer"></div>
+        <div
+          *ngFor="let slot of defenderSlots"
+          class="slot"
+          [ngClass]="getPlayerClass(slot)"
+          [class.active]="selectedSlot === slot"
+          (click)="selectedSlot = slot"
+        >
+          <span>{{ formatPlayer(slot) }}</span>
+        </div>
       </div>
-    </div>
 
-    <!-- Goalie -->
-    <div class="lineup-row goalie">
-      <div class="spacer"></div>
-      <div class="spacer"></div>
-      <div
-        class="slot"
-        [ngClass]="getPlayerClass(goalieSlot)"
-        [class.active]="selectedSlot === goalieSlot"
-        (click)="selectedSlot = goalieSlot"
-      >
-        <span>{{ formatPlayer(goalieSlot) }}</span>
+      <!-- Goalie -->
+      <div class="lineup-row goalie">
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <div
+          class="slot"
+          [ngClass]="getPlayerClass(goalieSlot)"
+          [class.active]="selectedSlot === goalieSlot"
+          (click)="selectedSlot = goalieSlot"
+        >
+          <span>{{ formatPlayer(goalieSlot) }}</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Right side: budget and controls -->
+  <div class="lineup-side-panel">
+    <!-- Budget display -->
+    <div class="budget-display">
+      <span class="budget-label">Remaining Budget:</span>
+      <span
+        class="budget-value"
+        [ngClass]="{ 'budget-warning': remainingBudget < 100000 }"
+      >
+        {{ formatPrice(remainingBudget) }}
+      </span>
+    </div>
+
+    <!-- Controls (fixed typo in class name) -->
+    <div class="controls">
+      <button class="lineup-button save" (click)="saveLineup()">
+        💾 Save Lineup
+      </button>
+      <button class="lineup-button clear" (click)="clearLineup()">
+        🧹 Clear Lineup
+      </button>
+      <input
+        type="text"
+        placeholder="Search by name or team..."
+        [(ngModel)]="searchTerm"
+        class="search-box"
+      />
+    </div>
+  </div>
 </div>
-<div class="contorls">
-  <input
-    type="text"
-    placeholder="Search by name or team..."
-    [(ngModel)]="searchTerm"
-    class="search-box"
-  />
-  <button class="lineup-button save" (click)="saveLineup()">
-    💾 Save Lineup
-  </button>
-  <button class="lineup-button clear" (click)="clearLineup()">
-    🧹 Clear Lineup
-  </button>
+
+<!-- Scrollable Player Table -->
+<div class="player-table-container">
+  <!-- Table content remains unchanged -->
 </div>
 
 <!-- Scrollable Player Table -->
@@ -95,6 +120,10 @@
           Rookie
           <span *ngIf="sortKey === 'isRookie'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
+        <th (click)="sortBy('price')" [class.sorted]="sortKey === 'price'">
+          Price
+          <span *ngIf="sortKey === 'price'">{{ sortAsc ? "▲" : "▼" }}</span>
+        </th>
       </tr>
     </thead>
 
@@ -108,6 +137,7 @@
         <td>{{ player.lastName }}</td>
         <td>{{ player.team }}</td>
         <td>{{ player.isRookie ? "✓" : "❌" }}</td>
+        <td>{{ formatPrice(player.price) }}</td>
       </tr>
     </tbody>
   </table>

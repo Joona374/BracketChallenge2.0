@@ -1,0 +1,504 @@
+/* Section headers */
+.section-header {
+  text-align: center;
+  font-family: "Orbitron", monospace;
+  color: #fff;
+  margin: 10px 0 2px 0; /* Reduced margins */
+  text-shadow: 0 0 1px #ff4444;
+}
+
+.section-subheader {
+  text-align: center;
+  color: #ccc;
+  margin: 0 0 10px 0; /* Reduced from 20px */
+  font-style: italic;
+}
+
+/* Main container */
+/* Update main container to respect viewport height */
+.predictions-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  height: calc(
+    100vh - 170px
+  ); /* Adjust 120px based on your header/navbar height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Category tabs */
+/* Make category tabs more compact */
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px; /* Reduced from 20px */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.category-tab {
+  padding: 8px 12px;
+  background-color: #333;
+  border: 2px solid #444;
+  border-radius: 8px;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Orbitron", monospace;
+  font-size: 13px;
+  position: relative;
+}
+
+.category-tab:hover {
+  background-color: #444;
+}
+
+.category-tab.active {
+  background-color: #222;
+  color: #fff;
+  border-color: #ff4444;
+  box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+}
+
+.pick-count {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  background-color: #444;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.category-tab.active .pick-count {
+  background-color: #ff4444;
+  color: #fff;
+}
+
+/* Adjust content layout to use flex-grow */
+.predictions-content {
+  display: flex;
+  gap: 20px;
+  flex-grow: 1;
+  min-height: 0; /* Important for Firefox */
+  overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+/* Adjust panels to be scrollable when needed */
+.current-picks-panel {
+  flex: 1;
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 15px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%; /* Take full height of parent */
+  overflow: hidden; /* Hide overflow */
+}
+
+.current-picks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.current-picks-header h3 {
+  margin: 0;
+  color: #ff4444;
+  font-size: 18px;
+  font-family: "Orbitron", monospace;
+}
+
+.player-selection-panel {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%; /* Take full height of parent */
+}
+
+/* Current picks */
+.current-picks-panel h3 {
+  margin: 0 0 10px 0; /* Compact margins */
+  color: #ff4444;
+  font-size: 18px;
+  text-align: center;
+  font-family: "Orbitron", monospace;
+  margin-bottom: 15px;
+}
+
+.picks-list {
+  overflow-y: auto; /* Scrollable */
+  margin-bottom: 10px;
+  flex-grow: 1;
+}
+
+.no-picks {
+  text-align: center;
+  padding: 20px 0;
+  color: #777;
+  font-style: italic;
+}
+
+.pick-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background-color: #333;
+  border-radius: 6px;
+  border-left: 6px solid #ff4444;
+}
+
+.pick-rank {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 15px;
+  background-color: #ff4444;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.pick-player-info {
+  flex-grow: 1;
+}
+
+.player-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.player-details {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.remove-pick {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #555;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-pick:hover {
+  background-color: #ff4444;
+}
+
+.empty-slots {
+  margin-bottom: 10px;
+}
+
+.empty-slots .empty-slot {
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px dashed #555;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  color: #666;
+  text-align: center;
+}
+
+/* Search and player table */
+.search-controls {
+  margin-bottom: 10px; /* Reduced from 15px */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.search-box {
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background-color: #222;
+  color: #eee;
+  font-size: 15px;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #ff4444;
+  box-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
+}
+
+.player-table-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  border: 1px solid #444;
+  border-radius: 8px;
+  min-height: 0; /* Important for Firefox */
+}
+
+.player-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Orbitron", monospace;
+}
+
+.player-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #444;
+  z-index: 1;
+  text-align: left;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.player-table thead th.sorted {
+  color: #ff4444;
+  text-shadow: 0 0 4px rgba(255, 68, 68, 0.5);
+}
+
+.player-table thead th.sorted span {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.player-table td {
+  padding: 10px;
+  border-top: 1px solid #444;
+}
+
+.player-row:hover {
+  background-color: #333;
+  cursor: pointer;
+}
+
+/* Action buttons container at bottom */
+.action-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+/* Redefine action-buttons to display properly */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.prediction-button {
+  padding: 8px 15px;
+  font-size: 14px;
+  font-family: "Orbitron", monospace;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.prediction-button.save {
+  background-color: #002a00;
+  color: #44ff44;
+  border-color: #44ff44;
+}
+
+.prediction-button.save:hover {
+  background-color: #003300;
+  color: white;
+}
+
+.prediction-button.reset {
+  background-color: #2a0000;
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+.prediction-button.reset:hover {
+  background-color: #330000;
+  color: white;
+}
+
+.prediction-button.load {
+  background-color: #001e2a;
+  color: #44ddff;
+  border-color: #44ddff;
+}
+
+.prediction-button.load:hover {
+  background-color: #002a33;
+  color: white;
+}
+
+/* Team specific styles for picks */
+.team-dal {
+  border-left-color: #006847;
+  .pick-rank {
+    background-color: #006847;
+    color: #8f8f8c;
+  }
+}
+.team-vgk {
+  border-left-color: #b4975a;
+  .pick-rank {
+    background-color: #b4975a;
+    color: #333f42;
+  }
+}
+.team-wpg {
+  border-left-color: #004c97;
+  .pick-rank {
+    background-color: #004c97;
+    color: #fff;
+  }
+}
+.team-col {
+  border-left-color: #6f263d;
+  .pick-rank {
+    background-color: #6f263d;
+    color: #a2aaad;
+  }
+}
+.team-van {
+  border-left-color: #00205b;
+  .pick-rank {
+    background-color: #00205b;
+    color: #99999a;
+  }
+}
+.team-nsh {
+  border-left-color: #ffb81c;
+  .pick-rank {
+    background-color: #ffb81c;
+    color: #041e42;
+  }
+}
+.team-edm {
+  border-left-color: #e44500;
+  .pick-rank {
+    background-color: #e44500;
+    color: #041e42;
+  }
+}
+.team-lak {
+  border-left-color: #111111;
+  .pick-rank {
+    background-color: #111111;
+    color: #a2aaad;
+  }
+}
+.team-fla {
+  border-left-color: #c8102e;
+  .pick-rank {
+    background-color: #c8102e;
+    color: #fff;
+  }
+}
+
+.team-tbl {
+  border-left-color: #002868;
+  .pick-rank {
+    background-color: #002868;
+    color: #fff;
+  }
+}
+.team-bos {
+  border-left-color: #000c;
+  .pick-rank {
+    background-color: #000c;
+    color: #ffb81c;
+  }
+}
+.team-tor {
+  border-left-color: #00205b;
+  .pick-rank {
+    background-color: #00205b;
+    color: #fff;
+  }
+}
+.team-nyr {
+  border-left-color: #0038a8;
+  .pick-rank {
+    background-color: #0038a8;
+    color: #fff;
+  }
+}
+.team-wsh {
+  border-left-color: #041e42;
+  .pick-rank {
+    background-color: #041e42;
+    color: #c8102e;
+  }
+}
+.team-car {
+  border-left-color: #ce1126;
+  .pick-rank {
+    background-color: #ce1126;
+    color: #fff;
+  }
+}
+.team-nyi {
+  border-left-color: #00539b;
+  .pick-rank {
+    background-color: #00539b;
+    color: #f47d30;
+  }
+}
+
+/* Scrollbar styling */
+.player-table-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.player-table-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 8px;
+}
+
+.player-table-container::-webkit-scrollbar-thumb {
+  background-color: #ff4444;
+  border-radius: 8px;
+  border: 2px solid #1a1a1a;
+}
+
+.player-table-container::-webkit-scrollbar-thumb:hover {
+  background-color: #ff2222;
+}
+
+/* Responsive design */
+@media (max-width: 800px) {
+  .predictions-content {
+    flex-direction: column;
+  }
+
+  .current-picks-panel {
+    max-width: none;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .category-tab {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .player-table th,
+  .player-table td {
+    padding: 8px 5px;
+    font-size: 14px;
+  }
+}

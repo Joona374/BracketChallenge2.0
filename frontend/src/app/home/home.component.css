@@ -71,7 +71,7 @@
   height: 2px;
   flex-grow: 1;
   background: linear-gradient(90deg, transparent, #ff3232, transparent);
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.6);
 }
 
 .puck {
@@ -82,7 +82,7 @@
   border: 3px solid #ff3232;
   margin: 0 15px;
   position: relative;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
 }
 
 .puck::before,
@@ -125,12 +125,13 @@
   backdrop-filter: blur(10px);
   padding: 30px;
   margin-top: 30px;
-  box-shadow: 0 4px 28px rgba(255, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(255, 0, 0, 0.2);
   border: 1px solid rgba(255, 50, 50, 0.3);
 }
 
 .user-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 20px;
@@ -145,7 +146,8 @@
   align-items: center;
   justify-content: center;
   border: 2px solid #fff;
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
+  margin-right: 15px;
 }
 
 .initials {
@@ -155,12 +157,14 @@
 }
 
 .user-info {
+  display: flex;
+  flex-direction: row;
   text-align: left;
 }
 
 .welcome-message {
   font-size: 1.2rem;
-  margin-bottom: 15px;
+  margin: 10px;
 }
 
 .user-actions {

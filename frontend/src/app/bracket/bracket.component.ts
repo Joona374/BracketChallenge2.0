@@ -36,20 +36,20 @@ export class BracketComponent implements OnInit {
     final: RoundPicks;
     finalGames: { [key: string]: number };
   } = {
-    round1: {},
-    round1Games: {},
+      round1: {},
+      round1Games: {},
 
-    round2: {},
-    round2Games: {},
+      round2: {},
+      round2Games: {},
 
-    round3: {},
-    round3Games: {},
+      round3: {},
+      round3Games: {},
 
-    final: {},
-    finalGames: {},
-  };
+      final: {},
+      finalGames: {},
+    };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
@@ -225,6 +225,18 @@ export class BracketComponent implements OnInit {
           alert("Error saving picks.");
         },
       });
+  }
+
+  loadSavedPicks(): void {
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+
+    if (!user?.id) {
+      alert("You must be logged in to load saved picks.");
+      return;
+    }
+
+    // Call the existing method to load previous picks
+    this.loadPreviousPicks(user.id);
   }
 
   loadPreviousPicks(userId: number) {
