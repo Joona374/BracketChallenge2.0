@@ -33,10 +33,14 @@
     >
 
     <ng-container *ngIf="isLoggedIn; else guestLinks">
+      <a routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
       <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
       <a routerLink="/lineup" routerLinkActive="active-link">Lineup</a>
       <a routerLink="/predictions" routerLinkActive="active-link"
         >Top 3 Picks</a
+      >
+      <a routerLink="/leaderboard" routerLinkActive="active-link"
+        >Leaderboard</a
       >
       <button (click)="logout()">Logout</button>
     </ng-container>

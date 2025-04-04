@@ -259,6 +259,23 @@ def get_predictions():
     
     return jsonify({"predictions": predictions_data}), 200
 
+@app.route("/api/user/by-team-name", methods=["GET"])
+def get_user_by_team_name():
+    team_name = request.args.get("teamName")
+    
+    if not team_name:
+        return jsonify({"error": "Missing teamName parameter"}), 400
+    
+    user = User.query.filter_by(team_name=team_name).first()
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify({
+        "userId": user.id,
+        "teamName": user.team_name
+    }), 200
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create database tables if they don't exist

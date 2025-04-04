@@ -1,0 +1,287 @@
+/* Header styling */
+.section-header {
+  text-align: center;
+  font-family: "Orbitron", monospace;
+  color: #fff;
+  margin: 20px 0 5px 0;
+  text-shadow: 0 0 4px #ff4444;
+  font-size: 24px;
+}
+
+.section-subheader {
+  text-align: center;
+  color: #ccc;
+  margin: 0 0 20px 0;
+  font-style: italic;
+}
+
+/* Main container */
+.leaderboard-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Table container */
+.leaderboard-table-container {
+  overflow-x: auto;
+  background-color: #1a1a1a;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.15);
+  border: 1px solid #333;
+  margin-top: 30px;
+}
+
+/* Table styling */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Orbitron", monospace;
+  color: #eee;
+  overflow: hidden;
+}
+
+/* Header styling */
+.leaderboard-table thead {
+  background-color: #222;
+}
+
+.leaderboard-table th {
+  padding: 15px 10px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid #ff4444;
+}
+
+.team-column th {
+  text-align: left;
+  padding-left: 20px;
+}
+
+/* Team link styling */
+.team-link {
+  color: #eee;
+  text-decoration: none;
+  position: relative;
+  padding: 2px 4px;
+  transition: all 0.2s ease;
+  font-family: "Orbitron", monospace;
+  display: inline-block;
+}
+
+/* Subtle indicator that it's clickable */
+.team-link:before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #ff4444;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+/* Hover effects */
+.team-link:hover {
+  color: #ff4444;
+  text-shadow: 0 0 2px rgba(255, 68, 68, 0.3);
+}
+
+.team-link:hover:before {
+  transform: scaleX(1);
+}
+
+/* Active state */
+.team-link:active {
+  transform: translateY(1px);
+}
+
+/* Current user's team link */
+tr.current-user .team-link {
+  color: #ff6666;
+}
+
+tr.current-user .team-link:before {
+  background-color: #ff6666;
+  transform: scaleX(0.3);
+}
+
+/* Top three styling */
+tr:nth-child(1) .team-link {
+  color: #ffd700; /* Gold */
+}
+
+tr:nth-child(2) .team-link {
+  color: #c0c0c0; /* Silver */
+}
+
+tr:nth-child(3) .team-link {
+  color: #cd7f32; /* Bronze */
+}
+
+tr:nth-child(1) .team-link:before,
+tr:nth-child(2) .team-link:before,
+tr:nth-child(3) .team-link:before {
+  background-color: currentColor;
+}
+
+.leaderboard-table th:hover {
+  background-color: #2a2a2a;
+}
+
+.leaderboard-table th.sorted {
+  color: #ff4444;
+  text-shadow: 0 0 4px #ff4444;
+}
+
+/* Body styling */
+.leaderboard-table tbody tr {
+  border-bottom: 1px solid #333;
+  transition: background-color 0.3s;
+}
+
+.leaderboard-table tbody tr:hover {
+  background-color: #222;
+}
+
+.leaderboard-table td {
+  padding: 12px 10px;
+}
+
+/* Column specific styling */
+.rank-column {
+  width: 8%;
+  min-width: 8%;
+  max-width: 8%;
+  padding: 0;
+  text-align: center;
+}
+
+.rank-number {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #333;
+  font-weight: bold;
+}
+
+/* Style for top 3 ranks */
+tr:nth-child(1) .rank-number {
+  background-color: #ffd700; /* Gold */
+  color: #000;
+}
+
+tr:nth-child(2) .rank-number {
+  background-color: #c0c0c0; /* Silver */
+  color: #000;
+}
+
+tr:nth-child(3) .rank-number {
+  background-color: #cd7f32; /* Bronze */
+  color: #000;
+}
+
+.team-column {
+  width: 30%;
+  font-weight: 600;
+  text-align: left;
+}
+
+.username-column {
+  width: 20%;
+  color: #ccc;
+}
+
+.points-column {
+  width: 10%;
+  text-align: center;
+  font-family: monospace;
+  font-size: 16px;
+}
+
+.total-column {
+  width: 10%;
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
+.total-points {
+  font-weight: bold;
+  color: #ff4444;
+  font-size: 18px;
+}
+
+/* Current user highlighting */
+tr.current-user {
+  background-color: rgba(255, 68, 68, 0.15);
+}
+
+tr.current-user .rank-number {
+  background-color: #ff4444;
+  color: #000;
+}
+
+tr.current-user td {
+  border-bottom: 1px solid rgba(255, 68, 68, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 10px 5px;
+    font-size: 14px;
+  }
+
+  .rank-number {
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    font-size: 12px;
+  }
+
+  .total-points {
+    font-size: 16px;
+  }
+
+  .points-column {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .rank-number {
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    font-size: 10px;
+  }
+
+  .section-header {
+    font-size: 18px;
+  }
+
+  .section-subheader {
+    font-size: 12px;
+  }
+
+  .points-column {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,344 @@
+/* Main container */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: "Orbitron", monospace;
+  color: #eee;
+}
+
+/* Header section */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
+  border: 1px solid #2e2e2e;
+  flex-wrap: wrap;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #ff3232, #990000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.initials {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.user-info h1 {
+  margin: 0 0 5px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.4);
+}
+
+.user-info h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #ff3232;
+}
+
+/* Points summary */
+.points-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(30, 0, 0, 0.5);
+  padding: 15px 25px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+}
+
+.total-points {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.points-value {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ff3232;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.points-label {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.points-breakdown {
+  display: flex;
+  gap: 15px;
+}
+
+.point-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 5px;
+  background: #2a0000;
+  border: 1px solid #ff3232;
+}
+
+.category-name {
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.category-points {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ff6666;
+}
+
+/* Dashboard content */
+.dashboard-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+/* Cards */
+.dashboard-card {
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #2e2e2e;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(255, 0, 0, 0.2);
+  border-color: rgba(255, 50, 50, 0.5);
+}
+
+.bracket-card {
+  background-image: linear-gradient(to bottom, #1a1a1a, #1e0000);
+}
+
+.lineup-card {
+  background-image: linear-gradient(to bottom, #1a1a1a, #001e00);
+}
+
+.predictions-card {
+  background-image: linear-gradient(to bottom, #1a1a1a, #00001e);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 50, 50, 0.2);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #ff3232;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+}
+
+.action-link {
+  background: #ff3232;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 15px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: "Orbitron", monospace;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.action-link:hover {
+  background: #ff5555;
+  transform: scale(1.05);
+}
+
+.card-content {
+  padding: 20px;
+}
+
+/* Progress bars */
+.progress-container {
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  height: 10px;
+  background: #333;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #ff3232, #ff6666);
+  border-radius: 5px;
+  transition: width 0.5s ease-out;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #ccc;
+  text-align: center;
+}
+
+/* Card stats */
+.card-stats {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 15px;
+  background: rgba(255, 50, 50, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 50, 50, 0.3);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff3232;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+/* Lineup specific */
+.lineup-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.lineup-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lineup-stat .stat-label {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.lineup-stat .stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #66ff66;
+}
+
+.budget-detail {
+  text-align: center;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+/* Summary details */
+.summary-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-label {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.detail-value {
+  font-weight: 700;
+  color: #ff6666;
+}
+
+/* Predictions specific */
+.picks-list {
+  margin: 15px 0;
+}
+
+.pick-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pick-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #ff3232;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-right: 10px;
+}
+
+.pick-name {
+  font-weight: 500;
+}
+
+.pick-name.empty {
+  color: #777;
+  font-style: italic;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .points-summary {
+    width: 100%;
+  }
+}

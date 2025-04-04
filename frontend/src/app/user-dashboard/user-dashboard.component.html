@@ -1,0 +1,177 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <div class="user-profile">
+      <div class="avatar-circle">
+        <span class="initials">{{ getUserInitials() }}</span>
+      </div>
+      <div class="user-info">
+        <h1>{{ user?.username }}'s Dashboard</h1>
+        <h2>{{ user?.teamName || "Team Name Not Set" }}</h2>
+      </div>
+    </div>
+
+    <div class="points-summary">
+      <div class="total-points">
+        <span class="points-value">{{ points.total }}</span>
+        <span class="points-label">TOTAL POINTS</span>
+      </div>
+      <div class="points-breakdown">
+        <div class="point-category">
+          <span class="category-name">Bracket</span>
+          <span class="category-points">{{ points.bracket }}</span>
+        </div>
+        <div class="point-category">
+          <span class="category-name">Lineup</span>
+          <span class="category-points">{{ points.lineup }}</span>
+        </div>
+        <div class="point-category">
+          <span class="category-name">Predictions</span>
+          <span class="category-points">{{ points.predictions }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Bracket Summary Card -->
+    <div class="dashboard-card bracket-card">
+      <div class="card-header">
+        <h3>Playoff Bracket</h3>
+        <button routerLink="/bracket" class="action-link">Edit</button>
+      </div>
+
+      <div class="card-content">
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="
+                getProgressPercentage(
+                  bracketSummary.completed,
+                  bracketSummary.total
+                )
+              "
+            ></div>
+          </div>
+          <div class="progress-text">
+            {{ bracketSummary.completed }}/{{ bracketSummary.total }} Matchups
+            Selected
+          </div>
+        </div>
+
+        <div class="summary-detail" *ngIf="bracketSummary.topPick">
+          <span class="detail-label">Your Champion:</span>
+          <span class="detail-value">{{ bracketSummary.topPick }}</span>
+        </div>
+
+        <div class="card-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ points.bracket }}</span>
+            <span class="stat-label">Points</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lineup Summary Card -->
+    <div class="dashboard-card lineup-card">
+      <div class="card-header">
+        <h3>Player Lineup</h3>
+        <button routerLink="/lineup" class="action-link">Edit</button>
+      </div>
+
+      <div class="card-content">
+        <div class="lineup-stats">
+          <div class="lineup-stat">
+            <span class="stat-label">Forwards</span>
+            <span class="stat-value">{{ lineupSummary.forwards }}</span>
+          </div>
+          <div class="lineup-stat">
+            <span class="stat-label">Defenders</span>
+            <span class="stat-value">{{ lineupSummary.defenders }}</span>
+          </div>
+          <div class="lineup-stat">
+            <span class="stat-label">Goalies</span>
+            <span class="stat-value">{{ lineupSummary.goalies }}</span>
+          </div>
+        </div>
+
+        <div class="summary-detail budget-detail">
+          <span class="detail-label">Budget Used:</span>
+          <span class="detail-value"
+            >{{ formatCurrency(lineupSummary.usedBudget) }} /
+            {{ formatCurrency(lineupSummary.totalBudget) }}</span
+          >
+        </div>
+
+        <div class="card-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ points.lineup }}</span>
+            <span class="stat-label">Points</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Predictions Summary Card -->
+    <div class="dashboard-card predictions-card">
+      <div class="card-header">
+        <h3>Top 3 Predictions</h3>
+        <button routerLink="/predictions" class="action-link">Edit</button>
+      </div>
+
+      <div class="card-content">
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="
+                getProgressPercentage(
+                  predictionsSummary.completed,
+                  predictionsSummary.totalToComplete
+                )
+              "
+            ></div>
+          </div>
+          <div class="progress-text">
+            {{ predictionsSummary.completed }}/{{
+              predictionsSummary.totalToComplete
+            }}
+            Predictions Made
+          </div>
+        </div>
+
+        <div class="picks-list">
+          <div
+            class="pick-item"
+            *ngFor="let pick of predictionsSummary.top3Picks; let i = index"
+          >
+            <span class="pick-number">{{ i + 1 }}.</span>
+            <span class="pick-name">{{ pick }}</span>
+          </div>
+          <div
+            class="pick-item empty"
+            *ngFor="
+              let empty of [].constructor(
+                predictionsSummary.totalToComplete -
+                  predictionsSummary.top3Picks.length
+              )
+            "
+          >
+            <span class="pick-number"
+              >{{ predictionsSummary.top3Picks.length + 1 }}.</span
+            >
+            <span class="pick-name empty">Not Selected</span>
+          </div>
+        </div>
+
+        <div class="card-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ points.predictions }}</span>
+            <span class="stat-label">Points</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

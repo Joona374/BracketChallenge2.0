@@ -1,0 +1,419 @@
+<div class="user-view-container">
+  <!-- Loading and error states remain unchanged -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading user data...</p>
+  </div>
+
+  <div class="error-container" *ngIf="error">
+    <p class="error-message">{{ error }}</p>
+  </div>
+
+  <div class="content-container" *ngIf="!loading && !error">
+    <!-- User summary section -->
+    <div class="user-summary-card">
+      <div class="user-header">
+        <div class="avatar-container">
+          <img src="assets/logo.png" alt="Team Logo" class="team-logo" />
+        </div>
+        <div class="user-info">
+          <h1 class="team-name">{{ teamName }}</h1>
+          <div class="points-container">
+            <div class="total-points">
+              <span class="points-value">{{ getTotalPoints() }}</span>
+              <span class="points-label">TOTAL POINTS</span>
+            </div>
+            <div class="points-breakdown">
+              <div class="point-category" *ngIf="getBracketPoints()">
+                <span class="category-name">Bracket</span>
+                <span class="category-points">{{ getBracketPoints() }}</span>
+              </div>
+              <div class="point-category" *ngIf="getLineupPoints()">
+                <span class="category-name">Lineup</span>
+                <span class="category-points">{{ getLineupPoints() }}</span>
+              </div>
+              <div class="point-category" *ngIf="getPredictionsPoints()">
+                <span class="category-name">Predictions</span>
+                <span class="category-points">{{
+                  getPredictionsPoints()
+                }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="rank-display" *ngIf="getUserRank()">
+            <div class="rank-badge">
+              <span class="rank-number">#{{ getUserRank() }}</span>
+            </div>
+            <span class="rank-label">OVERALL RANKING</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tab-navigation">
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'bracket'"
+        (click)="setActiveTab('bracket')"
+      >
+        Bracket
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'lineup'"
+        (click)="setActiveTab('lineup')"
+      >
+        Lineup
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'predictions'"
+        (click)="setActiveTab('predictions')"
+      >
+        Predictions
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Bracket Tab -->
+      <div
+        *ngIf="activeTab === 'bracket' && userData.bracket"
+        class="bracket-view"
+      >
+        <h3>Playoff Bracket Predictions</h3>
+
+        <div class="bracket-summary">
+          <div class="bracket-stat">
+            <span class="stat-value">{{ getBracketCompletionCount() }}/15</span>
+            <span class="stat-label">Matchups Picked</span>
+          </div>
+          <div class="bracket-stat" *ngIf="getChampionPick()">
+            <span class="stat-value champion-pick">{{
+              getChampionPick()
+            }}</span>
+            <span class="stat-label">Champion Pick</span>
+          </div>
+        </div>
+
+        <div class="bracket-grid-mini">
+          <!-- Round 1 -->
+          <div class="bracket-round">
+            <h4>Round 1</h4>
+            <div class="matchups-column">
+              <div
+                *ngFor="let matchup of getMatchupsByRound('round1')"
+                class="matchup-card"
+              >
+                <div class="series-teams">
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                    [ngClass]="
+                      isTeamWinner(matchup.id, matchup.team1)
+                        ? 'team-' + matchup.team1.toLowerCase()
+                        : ''
+                    "
+                  >
+                    {{ matchup.team1 || "TBD" }}
+                  </div>
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                    [ngClass]="
+                      isTeamWinner(matchup.id, matchup.team2)
+                        ? 'team-' + matchup.team2.toLowerCase()
+                        : ''
+                    "
+                  >
+                    {{ matchup.team2 || "TBD" }}
+                  </div>
+                </div>
+                <div class="series-games" *ngIf="getSeriesResult(matchup.id)">
+                  Games: {{ getSeriesResult(matchup.id) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Round 2 -->
+          <div class="bracket-round">
+            <h4>Round 2</h4>
+            <div class="matchups-column">
+              <div
+                *ngFor="let matchup of getMatchupsByRound('round2')"
+                class="matchup-card"
+              >
+                <div class="series-teams">
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                  >
+                    {{ matchup.team1 || "TBD" }}
+                  </div>
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                  >
+                    {{ matchup.team2 || "TBD" }}
+                  </div>
+                </div>
+                <div class="series-games" *ngIf="getSeriesResult(matchup.id)">
+                  Games: {{ getSeriesResult(matchup.id) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conference Finals -->
+          <div class="bracket-round">
+            <h4>Conference Finals</h4>
+            <div class="matchups-column">
+              <div
+                *ngFor="let matchup of getMatchupsByRound('round3')"
+                class="matchup-card"
+              >
+                <div class="series-teams">
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                  >
+                    {{ matchup.team1 || "TBD" }}
+                  </div>
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                  >
+                    {{ matchup.team2 || "TBD" }}
+                  </div>
+                </div>
+                <div class="series-games" *ngIf="getSeriesResult(matchup.id)">
+                  Games: {{ getSeriesResult(matchup.id) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stanley Cup Final -->
+          <div class="bracket-round">
+            <h4>Stanley Cup Final</h4>
+            <div class="matchups-column">
+              <div class="matchup-card final-matchup">
+                <div class="cup-icon">🏆</div>
+                <div class="series-teams">
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner('cup', getFinalTeams()[0])"
+                    [ngClass]="
+                      isTeamWinner('cup', getFinalTeams()[0])
+                        ? 'team-' + getFinalTeams()[0].toLowerCase()
+                        : ''
+                    "
+                  >
+                    {{ getFinalTeams()[0] || "TBD" }}
+                  </div>
+                  <div
+                    class="team"
+                    [class.winner]="isTeamWinner('cup', getFinalTeams()[1])"
+                    [ngClass]="
+                      isTeamWinner('cup', getFinalTeams()[1])
+                        ? 'team-' + getFinalTeams()[1].toLowerCase()
+                        : ''
+                    "
+                  >
+                    {{ getFinalTeams()[1] || "TBD" }}
+                  </div>
+                </div>
+                <div class="series-games" *ngIf="getSeriesResult('cup-winner')">
+                  Games: {{ getSeriesResult("cup-winner") }}
+                </div>
+                <div
+                  class="champion"
+                  *ngIf="getChampionPick()"
+                  [ngClass]="
+                    getChampionPick()
+                      ? 'team-text-' +
+                        (getChampionPick()
+                          ? getChampionPick()!.toLowerCase()
+                          : '')
+                      : ''
+                  "
+                >
+                  Champion: {{ getChampionPick() }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lineup Tab -->
+      <div
+        *ngIf="activeTab === 'lineup' && userData.lineup"
+        class="lineup-view"
+      >
+        <h3>Player Lineup</h3>
+
+        <div class="lineup-summary">
+          <div class="lineup-stat">
+            <span class="stat-label">Budget Used</span>
+            <span class="stat-value"
+              >{{ formatBudget(getUsedBudget()) }} /
+              {{ formatBudget(5000000) }}</span
+            >
+          </div>
+        </div>
+
+        <div class="lineup-grid">
+          <!-- Forwards -->
+          <div class="lineup-section">
+            <h4>Forwards</h4>
+            <div class="player-row">
+              <div
+                *ngFor="let pos of ['L', 'C', 'R']"
+                class="player-card"
+                [ngClass]="'team-' + getPlayerTeamClass(pos)"
+              >
+                <div class="position-label">{{ pos }}</div>
+                <div
+                  *ngIf="getPlayerByPosition(pos); else emptySlot"
+                  class="player-info"
+                >
+                  <div class="player-name">{{ getPlayerName(pos) }}</div>
+                  <div class="player-team">{{ getPlayerTeam(pos) }}</div>
+                  <div class="player-price">
+                    {{ formatBudget(getPlayerPrice(pos)) }}
+                  </div>
+                </div>
+                <ng-template #emptySlot>
+                  <div class="empty-slot">No player selected</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Defenders -->
+          <div class="lineup-section">
+            <h4>Defenders</h4>
+            <div class="player-row">
+              <div
+                *ngFor="let pos of ['LD', 'RD']"
+                class="player-card"
+                [ngClass]="'team-' + getPlayerTeamClass(pos)"
+              >
+                <div class="position-label">{{ pos }}</div>
+                <div
+                  *ngIf="getPlayerByPosition(pos); else emptyDefender"
+                  class="player-info"
+                >
+                  <div class="player-name">{{ getPlayerName(pos) }}</div>
+                  <div class="player-team">{{ getPlayerTeam(pos) }}</div>
+                  <div class="player-price">
+                    {{ formatBudget(getPlayerPrice(pos)) }}
+                  </div>
+                </div>
+                <ng-template #emptyDefender>
+                  <div class="empty-slot">No player selected</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goalie -->
+          <div class="lineup-section">
+            <h4>Goalie</h4>
+            <div class="player-row">
+              <div class="player-card goalie-card" [ngClass]="getGoalieClass()">
+                <div class="position-label">G</div>
+                <div
+                  *ngIf="getPlayerByPosition('G'); else emptyGoalie"
+                  class="player-info"
+                >
+                  <div class="player-name">{{ getPlayerName("G") }}</div>
+                  <div class="player-team">{{ getPlayerTeam("G") }}</div>
+                  <div class="player-price">
+                    {{ formatBudget(getPlayerPrice("G")) }}
+                  </div>
+                </div>
+                <ng-template #emptyGoalie>
+                  <div class="empty-slot">No player selected</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Predictions Tab -->
+      <div
+        *ngIf="activeTab === 'predictions' && userData.predictions"
+        class="predictions-view"
+      >
+        <h3>Top Player Predictions</h3>
+
+        <div class="predictions-categories">
+          <div
+            *ngFor="let category of getPredictionCategories()"
+            class="prediction-category"
+          >
+            <h4 class="category-title">{{ getCategoryLabel(category) }}</h4>
+
+            <div class="prediction-cards">
+              <div
+                *ngFor="
+                  let player of getPredictionsByCategory(category);
+                  let i = index
+                "
+                class="player-prediction-card"
+              >
+                <div class="prediction-rank">#{{ i + 1 }}</div>
+                <div class="prediction-content">
+                  <div class="player-name">
+                    {{ player.firstName }} {{ player.lastName }}
+                  </div>
+                  <div class="player-details">
+                    <span class="player-position">{{ player.position }}</span> |
+                    <span
+                      class="player-team"
+                      [ngClass]="'team-text-' + player.team.toLowerCase()"
+                      >{{ player.team }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty slots if fewer than 3 picks -->
+              <div
+                *ngFor="let i of getEmptySlotsArray(category)"
+                class="player-prediction-card empty"
+              >
+                <div class="prediction-rank">
+                  #{{ getPredictionsByCategory(category).length + i + 1 }}
+                </div>
+                <div class="prediction-content">
+                  <div class="player-name empty">No Player Selected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No data messages remain unchanged -->
+      <div *ngIf="activeTab === 'bracket' && !userData.bracket" class="no-data">
+        No bracket data available for this user
+      </div>
+
+      <div *ngIf="activeTab === 'lineup' && !userData.lineup" class="no-data">
+        No lineup data available for this user
+      </div>
+
+      <div
+        *ngIf="activeTab === 'predictions' && !userData.predictions"
+        class="no-data"
+      >
+        No predictions data available for this user
+      </div>
+    </div>
+  </div>
+</div>

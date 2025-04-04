@@ -1,0 +1,86 @@
+<div class="leaderboard-container">
+  <h2 class="section-header">NHL Bracket Challenge Leaderboard</h2>
+  <p class="section-subheader">
+    See how your bracket stacks up against the competition
+  </p>
+
+  <div class="leaderboard-table-container">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th class="rank-column">#</th>
+          <th
+            class="team-column"
+            (click)="sortBy('teamName')"
+            [class.sorted]="sortKey === 'teamName'"
+          >
+            Team
+            <span *ngIf="sortKey === 'teamName'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+
+          <th
+            class="points-column total-column"
+            (click)="sortBy('totalPoints')"
+            [class.sorted]="sortKey === 'totalPoints'"
+          >
+            PTS
+            <span *ngIf="sortKey === 'totalPoints'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            class="points-column"
+            (click)="sortBy('bracketPoints')"
+            [class.sorted]="sortKey === 'bracketPoints'"
+          >
+            Bracket
+            <span *ngIf="sortKey === 'bracketPoints'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            class="points-column"
+            (click)="sortBy('lineupPoints')"
+            [class.sorted]="sortKey === 'lineupPoints'"
+          >
+            Lineup
+            <span *ngIf="sortKey === 'lineupPoints'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            class="points-column"
+            (click)="sortBy('predictionsPoints')"
+            [class.sorted]="sortKey === 'predictionsPoints'"
+          >
+            Predictions
+            <span *ngIf="sortKey === 'predictionsPoints'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let entry of leaderboardEntries"
+          [class.current-user]="isCurrentUser(entry.id)"
+        >
+          <td class="rank-column">
+            <span class="rank-number">{{ entry.rank }}</span>
+          </td>
+          <td class="team-column">
+            <a [routerLink]="['/user', entry.teamName]" class="team-link">{{
+              entry.teamName
+            }}</a>
+          </td>
+          <td class="points-column total-points">{{ entry.totalPoints }}</td>
+          <td class="points-column">{{ entry.bracketPoints }}</td>
+          <td class="points-column">{{ entry.lineupPoints }}</td>
+          <td class="points-column">{{ entry.predictionsPoints }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
