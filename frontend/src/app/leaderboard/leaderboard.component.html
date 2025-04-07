@@ -4,6 +4,15 @@
     See how your bracket stacks up against the competition
   </p>
 
+  <!-- Loading indicator -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading leaderboard data...</div>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-message" *ngIf="error">{{ error }}</div>
+
   <div class="leaderboard-table-container">
     <table class="leaderboard-table">
       <thead>

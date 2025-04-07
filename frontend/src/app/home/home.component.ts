@@ -31,4 +31,11 @@ export class HomeComponent implements OnInit {
       .toUpperCase()
       .substring(0, 2);
   }
+
+  scrollToFeatures(): void {
+    const featuresSection = document.querySelector('.features-section');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
 }

@@ -1,4 +1,10 @@
 <div class="home-container">
+  <!-- Add Font Awesome link -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+
   <div class="hero-section">
     <div class="overlay"></div>
     <div class="content">
@@ -7,20 +13,27 @@
 
       <div class="puck-divider">
         <div class="puck-line"></div>
-        <div class="puck"></div>
+        <div class="puck">
+          <img
+            src="assets/logo.png"
+            alt="NHL Bracket Challenge Logo"
+            class="home-logo"
+          />
+        </div>
         <div class="puck-line"></div>
       </div>
 
       <p class="tagline">
-        Predict the winners. Compete with friends. Claim the glory.
+        Exceleiden ja Google sheetsien aika on ohi!
+        <b>Tämä NHL Bracket Challenge 2.0!</b>
       </p>
 
       <div *ngIf="!loggedInUser" class="auth-container">
         <button class="action-button register-btn" routerLink="/register">
-          JOIN THE CHALLENGE
+          LIITY PELIIN!
         </button>
         <button class="action-button login-btn" routerLink="/login">
-          SIGN IN
+          Kirjaudu Sisään
         </button>
       </div>
 
@@ -32,7 +45,11 @@
           </p>
 
           <div class="user-info">
-            <div class="avatar-circle">
+            <div
+              class="avatar-circle"
+              routerLink="/dashboard"
+              title="Go to Dashboard"
+            >
               <span class="initials">{{ getUserInitials() }}</span>
             </div>
             <div class="user-actions">
@@ -40,30 +57,54 @@
                 MY BRACKET
               </button>
               <button class="action-button logout-btn" (click)="logout()">
-                LOGOUT
+                Kirjaudu ulos
               </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Improved scroll indicator -->
+    <div class="scroll-indicator" (click)="scrollToFeatures()">
+      <div class="scroll-text">Tutustu Tarkemmin</div>
+      <div class="arrow-down">
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </div>
   </div>
 
   <div class="features-section">
     <div class="feature">
-      <div class="feature-icon">🏆</div>
-      <h3>PREDICT THE PLAYOFFS</h3>
-      <p>Select winners for all rounds of the Stanley Cup Playoffs</p>
-    </div>
-    <div class="feature">
       <div class="feature-icon">📊</div>
-      <h3>TRACK YOUR RANKING</h3>
-      <p>See how your predictions stack up against your friends</p>
+      <h3>BRÄKETTI 2.0</h3>
+
+      <p>
+        Legendaarinen peli, jossa ihmiset jotka kuvittelevat tietävänsä
+        jääkiekosta jotakin, eivät tiedä jääkiekosta mitään.
+      </p>
     </div>
     <div class="feature">
-      <div class="feature-icon">🎯</div>
-      <h3>EARN POINTS</h3>
-      <p>Get points for correct picks and series length predictions</p>
+      <div class="feature-icon">📜</div>
+      <h3>SÄÄNNÖT & OHJEET</h3>
+      <p>
+        Lue vuoden 2025 päivittyneet NHL Bracket Challenge -säännöt ja ohjeet.
+      </p>
+      <button class="feature-btn" routerLink="/rules">LUKEMAAN SÄÄNTÖJÄ</button>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">💰</div>
+      <h3>ÄÄNESTÄ JA VAIKUTA</h3>
+      <p>Osallistumismaksua ja voitonjako päätetään äänestyksellä</p>
+      <button class="feature-btn" routerLink="/betting">
+        TÄSTÄ ÄÄNESTÄMÄÄN
+      </button>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🗓️</div>
+      <h3>TÄRKEITÄ PÄIVÄMÄÄRIÄ</h3>
+      <p>Bracketin muokkaaminen lukkiutuu: <br />HH:MM DD:MM</p>
+      <p>Panosten äänestys päättyy: <br />HH:MM DD:MM</p>
     </div>
   </div>
 

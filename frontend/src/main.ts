@@ -14,6 +14,7 @@ import { PredictionsComponent } from "./app/predictions/predictions.component";
 import { UserDashboardComponent } from "./app/user-dashboard/user-dashboard.component";
 import { LeaderboardComponent } from "./app/leaderboard/leaderboard.component";
 import { UserViewComponent } from "./app/user-view/user-view.component";
+import { RulesComponent } from "./app/rules/rules.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: "dashboard", component: UserDashboardComponent },
   { path: "leaderboard", component: LeaderboardComponent },
   { path: "user/:teamName", component: UserViewComponent },
+  { path: "rules", component: RulesComponent },
 ];
 
 bootstrapApplication(AppComponent, {

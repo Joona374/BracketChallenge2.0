@@ -42,10 +42,13 @@
       <a routerLink="/leaderboard" routerLinkActive="active-link"
         >Leaderboard</a
       >
+      <a routerLink="/rules" routerLinkActive="active-link">Rules</a>
       <button (click)="logout()">Logout</button>
     </ng-container>
 
     <ng-template #guestLinks>
+      <a routerLink="/rules" routerLinkActive="active-link">Rules</a>
+
       <a routerLink="/login" routerLinkActive="active-link">Login</a>
     </ng-template>
   </div>

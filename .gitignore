@@ -4,6 +4,13 @@ __pycache__/
 *.pyo
 *.pyd
 
+#  Images and other media files
+*.bmp
+*.png
+*.jpg
+*.jpeg
+*.gif
+
 # 🔒 Secrets (if using them)
 .env
 

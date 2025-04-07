@@ -56,17 +56,6 @@ class Pick(db.Model):
 
     user = db.relationship('User', back_populates="picks")
 
-class Player(db.Model):
-    __tablename__ = 'players'
-
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(80), nullable=False)
-    last_name = db.Column(db.String(80), nullable=False)
-    team = db.Column(db.String(80), nullable=False)
-    position = db.Column(db.String(1), nullable=False) # L, C, R, D or G
-    is_rookie = db.Column(db.Boolean, default=False)
-    price = db.Column(db.Integer, default=250000)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
 
 class LineupPick(db.Model):
     __tablename__ = 'lineup_picks'
@@ -90,3 +79,47 @@ class Prediction(db.Model):
     
     def __repr__(self):
         return f'<Prediction {self.id} by User {self.user_id}>'
+
+class Team(db.Model):
+    __tablename__ = 'teams'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    abbr = db.Column(db.String(10), nullable=False, unique=True)
+    logo_url = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    
+    def __repr__(self):
+        return f'<Team {self.name} ({self.abbr})>'
+
+class Player(db.Model):
+    __tablename__ = 'players'
+    id = db.Column(db.Integer, primary_key=True)
+    api_id = db.Column(db.Integer, unique=True, nullable=False)  # NHL API playerId
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+    team_abbr = db.Column(db.String(10), db.ForeignKey('teams.abbr'), nullable=False)
+    position = db.Column(db.String(2), nullable=False)  # e.g. L, C, R, D, G
+    jersey_number = db.Column(db.String(10), nullable=True)
+    birth_country = db.Column(db.String(10), nullable=True)
+    birth_year = db.Column(db.Integer, nullable=True)
+    headshot = db.Column(db.String(255), nullable=True)
+    is_U23 = db.Column(db.Boolean, default=False)
+    price = db.Column(db.Integer, default=1)
+    
+    # Regular season stats
+    reg_gp = db.Column(db.Integer, default=0)
+    reg_goals = db.Column(db.Integer, default=0)
+    reg_assists = db.Column(db.Integer, default=0)
+    reg_points = db.Column(db.Integer, default=0)
+    reg_plus_minus = db.Column(db.Integer, default=0)
+    
+    # Playoff stats (set as placeholders until available)
+    playoff_goals = db.Column(db.Integer, default=0)
+    playoff_assists = db.Column(db.Integer, default=0)
+    playoff_points = db.Column(db.Integer, default=0)
+    playoff_plus_minus = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    
+    def __repr__(self):
+        return f'<Player {self.first_name} {self.last_name} ({self.team_abbr})>'

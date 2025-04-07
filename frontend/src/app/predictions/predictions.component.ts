@@ -6,13 +6,14 @@ import { PlayerService } from "../services/player.service";
 import { HttpClient } from "@angular/common/http";
 
 type PredictionCategory =
+  | "connSmythe"
   | "penaltyMinutes"
   | "goals"
   | "points"
   | "defensePoints"
-  | "rookiePoints"
-  | "goalieSaves"
-  | "finnishGoals";
+  | "U23Points"
+  | "goalieGaa"
+  | "finnishPoints";
 
 @Component({
   selector: "app-predictions",
@@ -30,24 +31,26 @@ export class PredictionsComponent implements OnInit {
 
   // Store picks for each category (up to 3 players per category)
   predictions: Record<PredictionCategory, Player[]> = {
+    connSmythe: [],
     penaltyMinutes: [],
     goals: [],
     points: [],
     defensePoints: [],
-    rookiePoints: [],
-    goalieSaves: [],
-    finnishGoals: []
+    U23Points: [],
+    goalieGaa: [],
+    finnishPoints: []
   };
 
   // Category display names
   categoryLabels: Record<PredictionCategory, string> = {
-    penaltyMinutes: "Most Penalty Minutes",
-    goals: "Most Goals",
-    points: "Most Points",
-    defensePoints: "Most Points by Defenseman",
-    rookiePoints: "Most Points by Rookie",
-    goalieSaves: "Best GAA Goalie",
-    finnishGoals: "Most Goals by Finnish Players"
+    connSmythe: "Conn Smythe voittaja",
+    penaltyMinutes: "Jäähypörssi",
+    goals: "Maalipörssi",
+    points: "Pistepörssi",
+    defensePoints: "Puolustajien pistepörssi",
+    U23Points: "U23 pistepörssi",
+    goalieGaa: "Paras GAA Maalivahti",
+    finnishPoints: "Suomalaisten pisepörssi"
   };
 
   sortKey: keyof Player | null = null;
@@ -72,13 +75,13 @@ export class PredictionsComponent implements OnInit {
       case "defensePoints":
         result = result.filter(p => p.position === "D");
         break;
-      case "rookiePoints":
-        result = result.filter(p => p.isRookie === true);
+      case "U23Points":
+        result = result.filter(p => p.isU23 === true);
         break;
-      case "goalieSaves":
+      case "goalieGaa":
         result = result.filter(p => p.position === "G");
         break;
-      // We'll add finnishGoals filter when nationality is added
+      // We'll add finnishPoints filter when nationality is added
     }
 
     // Filter out already picked players for this category

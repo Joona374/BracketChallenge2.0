@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -13,7 +13,8 @@ interface Matchups {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './user-view.component.html',
-  styleUrl: './user-view.component.css'
+  styleUrl: './user-view.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush // Enable OnPush strategy
 })
 export class UserViewComponent implements OnInit {
   teamName: string | null = null;
@@ -36,9 +37,13 @@ export class UserViewComponent implements OnInit {
 
   initialMatchups: Matchups = { west: [], east: [] };
 
+  private matchupsByRoundCache: { [key: string]: any[] } = {};
+  private teamWinnerCache: { [key: string]: boolean } = {};
+
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -65,50 +70,100 @@ export class UserViewComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.http.get(`http://localhost:5000/api/user/by-team-name?teamName=${teamName}`).subscribe({
+    const encodedTeamName = encodeURIComponent(teamName);
+
+    this.http.get(`http://localhost:5000/api/user/by-team-name?teamName=${encodedTeamName}`).subscribe({
       next: (response: any) => {
         const userId = response.userId;
 
-        this.loadBracket(userId);
-        this.loadLineup(userId);
-        this.loadPredictions(userId);
+        // Keep track of loading requests
+        let pendingRequests = 3; // bracket, lineup, predictions
+        const onRequestComplete = () => {
+          pendingRequests--;
+          if (pendingRequests <= 0) {
+            this.loading = false;
+            this.cdr.markForCheck();
+          }
+        };
+
+        this.loadBracket(userId, onRequestComplete);
+        this.loadLineup(userId, onRequestComplete);
+        this.loadPredictions(userId, onRequestComplete);
         this.loadUserStats(userId);
       },
       error: (err) => {
         console.error('Error finding user by team name', err);
         this.error = 'Could not find user with this team name';
         this.loading = false;
+
+        // Load mock data even if user lookup fails
+        this.loadMockData();
+        this.cdr.markForCheck();
       }
     });
   }
 
-  loadBracket(userId: number): void {
+  loadMockData(): void {
+    // Placeholder data to show when API requests fail
+    this.userPoints = {
+      total: 65,
+      bracket: 30,
+      lineup: 25,
+      predictions: 10
+    };
+    this.userRank = 4;
+    // You could add more mock data here if needed
+    console.log("Mock data loaded:", this.userPoints, this.userRank);
+  }
+
+  loadBracket(userId: number, onComplete: () => void): void {
     this.http.get(`http://localhost:5000/api/bracket/get-picks?user_id=${userId}`).subscribe({
       next: (res: any) => {
         this.userData.bracket = res.picks;
       },
-      error: () => { },
-      complete: () => this.checkLoadingComplete()
+      error: (err) => {
+        console.error('Error loading bracket data', err);
+        this.loadMockData();
+        this.userData.bracket = {}; // Set empty default
+      },
+      complete: () => {
+        this.checkLoadingComplete(); // Check loading state
+        onComplete();
+      }
     });
   }
 
-  loadLineup(userId: number): void {
+  loadLineup(userId: number, onComplete: () => void): void {
     this.http.get(`http://localhost:5000/api/lineup/get?user_id=${userId}`).subscribe({
       next: (res: any) => {
         this.userData.lineup = res.lineup;
       },
-      error: () => { },
-      complete: () => this.checkLoadingComplete()
+      error: (err) => {
+        console.error('Error loading lineup data', err);
+        this.loadMockData();
+        this.userData.lineup = {}; // Set empty default
+      },
+      complete: () => {
+        this.checkLoadingComplete(); // Check loading state
+        onComplete();
+      }
     });
   }
 
-  loadPredictions(userId: number): void {
+  loadPredictions(userId: number, onComplete: () => void): void {
     this.http.get(`http://localhost:5000/api/predictions/get?user_id=${userId}`).subscribe({
       next: (res: any) => {
         this.userData.predictions = res.predictions;
       },
-      error: () => { },
-      complete: () => this.checkLoadingComplete()
+      error: (err) => {
+        console.error('Error loading predictions data', err);
+        this.loadMockData();
+        this.userData.predictions = {}; // Set empty default
+      },
+      complete: () => {
+        this.checkLoadingComplete(); // Check loading state
+        onComplete();
+      }
     });
   }
 
@@ -122,26 +177,25 @@ export class UserViewComponent implements OnInit {
           this.userPoints = res.points;
         }
       },
-      error: () => {
-        this.userPoints = {
-          total: 65,
-          bracket: 30,
-          lineup: 25,
-          predictions: 10
-        };
-        this.userRank = 4;
+      error: (err) => {
+        console.error('Error loading user stats', err);
+        // Use placeholder stats if request fails
+        this.loadMockData();
       }
     });
   }
 
   checkLoadingComplete(): void {
-    if (this.userData.bracket || this.userData.lineup || this.userData.predictions) {
+    if (this.userData.bracket || this.userData.lineup || this.userData.predictions || this.userPoints) {
       this.loading = false;
+      this.cdr.markForCheck(); // Add this to update the view when loading completes
     }
   }
 
   setActiveTab(tab: 'bracket' | 'lineup' | 'predictions'): void {
     this.activeTab = tab;
+    this.matchupsByRoundCache = {}; // Clear cache on tab change
+    this.teamWinnerCache = {};
   }
 
   getTotalPoints(): number {
@@ -195,6 +249,10 @@ export class UserViewComponent implements OnInit {
   }
 
   getMatchupsByRound(round: string): any[] {
+    if (this.matchupsByRoundCache[round]) {
+      return this.matchupsByRoundCache[round];
+    }
+
     if (!this.userData.bracket || !this.userData.bracket[round]) {
       return [];
     }
@@ -252,25 +310,34 @@ export class UserViewComponent implements OnInit {
       }
     }
 
+    this.matchupsByRoundCache[round] = matchups;
     return matchups;
   }
 
   isTeamWinner(matchupId: string | number, team: string): boolean {
+    const cacheKey = `${matchupId}-${team}`;
+    if (this.teamWinnerCache[cacheKey] !== undefined) {
+      return this.teamWinnerCache[cacheKey];
+    }
+
     if (!this.userData.bracket) return false;
 
+    let result = false;
+
     if (typeof matchupId === 'number' || (!isNaN(Number(matchupId)) && Number(matchupId) <= 8)) {
-      return this.userData.bracket.round1[matchupId] === team;
+      result = this.userData.bracket.round1[matchupId] === team;
     } else if (typeof matchupId === 'string') {
       if (matchupId.includes('semi')) {
-        return this.userData.bracket.round2[`${matchupId}-winner`] === team;
+        result = this.userData.bracket.round2[`${matchupId}-winner`] === team;
       } else if (matchupId.includes('final') && !matchupId.includes('cup')) {
-        return this.userData.bracket.round3[`${matchupId}-winner`] === team;
+        result = this.userData.bracket.round3[`${matchupId}-winner`] === team;
       } else if (matchupId === 'cup') {
-        return this.userData.bracket.final['cup-winner'] === team;
+        result = this.userData.bracket.final['cup-winner'] === team;
       }
     }
 
-    return false;
+    this.teamWinnerCache[cacheKey] = result;
+    return result;
   }
 
   getSeriesResult(matchupId: string | number): string | null {
@@ -323,7 +390,7 @@ export class UserViewComponent implements OnInit {
       'G': { id: 6, firstName: 'Andrei', lastName: 'Vasilevskiy', position: 'G', team: 'TBL', price: 790000 }
     };
 
-    return mockPlayers[position] || null;
+    return null;
   }
 
   getPlayerName(position: string): string {
@@ -357,11 +424,15 @@ export class UserViewComponent implements OnInit {
 
   getCategoryLabel(category: string): string {
     const labels = {
-      'goals': 'Most Goals',
-      'assists': 'Most Assists',
-      'points': 'Most Points',
-      'rookiePoints': 'Rookie Points Leader',
-      'wins': 'Most Wins (Goalie)'
+      'connSmythe': 'Conn Smythe voittaja',
+      'penatlyMinutes': 'Jäähypörssi',
+      'goals': 'Maalipörssi',
+      'points': 'Pistepörssi',
+      'defencePoints': 'Puolustajien pistepörssi',
+      'U23Points': 'U23 pistepörssi',
+      'finnishPoints': 'Suomalaisten pistepörssi',
+      'goalieGaa': 'Paras GAA Maalivahti',
+
     };
     return labels[category as keyof typeof labels] || category;
   }

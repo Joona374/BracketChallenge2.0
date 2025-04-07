@@ -113,12 +113,9 @@
         <th (click)="sortBy('team')" [class.sorted]="sortKey === 'team'">
           Team <span *ngIf="sortKey === 'team'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
-        <th
-          (click)="sortBy('isRookie')"
-          [class.sorted]="sortKey === 'isRookie'"
-        >
-          Rookie
-          <span *ngIf="sortKey === 'isRookie'">{{ sortAsc ? "▲" : "▼" }}</span>
+        <th (click)="sortBy('isU23')" [class.sorted]="sortKey === 'isU23'">
+          U23
+          <span *ngIf="sortKey === 'isU23'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th (click)="sortBy('price')" [class.sorted]="sortKey === 'price'">
           Price
@@ -136,7 +133,7 @@
         <td>{{ player.firstName }}</td>
         <td>{{ player.lastName }}</td>
         <td>{{ player.team }}</td>
-        <td>{{ player.isRookie ? "✓" : "❌" }}</td>
+        <td>{{ player.isU23 ? "✓" : "❌" }}</td>
         <td>{{ formatPrice(player.price) }}</td>
       </tr>
     </tbody>

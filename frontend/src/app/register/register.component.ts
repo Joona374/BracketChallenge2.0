@@ -22,7 +22,7 @@ export class RegisterComponent {
   message: string = "";
   error: string = "";
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   onSubmit() {
     this.message = ""; // Clear previous messages
@@ -43,6 +43,26 @@ export class RegisterComponent {
     this.http.post("http://localhost:5000/api/register", payload).subscribe({
       next: (response: any) => {
         this.message = response.message;
+
+        // After successful registration, log the user in
+        const loginPayload = {
+          username: this.formData.username,
+          password: this.formData.password
+        };
+
+        this.http.post("http://localhost:5000/api/login", loginPayload).subscribe({
+          next: (loginResponse: any) => {
+            // Save user data to localStorage
+            localStorage.setItem("loggedInUser", JSON.stringify(loginResponse));
+
+            // Redirect to homepage
+            window.location.href = "/";
+          },
+          error: (loginError) => {
+            this.error = "Registration successful, but automatic login failed. Please login manually.";
+            console.error("Auto-login error:", loginError);
+          }
+        });
       },
       error: (error: any) => {
         this.error =

@@ -8,8 +8,71 @@ from config import Config
 from db import db_engine as db
 from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction
 
+import os
+from openai import OpenAI
+import requests
+from threading import Thread
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# With this:
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OpenAI API key not found. Please set it in your environment variables.")
+    
+client = OpenAI(api_key=api_key)
+if not client:
+    raise ValueError("OpenAI API key not found. Please set it in your environment variables.")
+
+
+LOGO_DIR = "team_logos"
+os.makedirs(LOGO_DIR, exist_ok=True)
+
+def generate_team_logos(team_name, user_id):
+    """
+    Generates 4 team logos using OpenAI's DALL·E model and saves them locally.
+    """
+    prompt = (
+        f"Generate an image of logo for imaginary ice hockey team named {team_name}. "
+        "The surroundings of the image logo, meaning the background color of the image, should be black. "
+        "The logo itself can still have a colorful design and colorful background colors. "
+        "The style shouldn't be too serious, but instead lighthearted, ironic, and funny—without being too childish. "
+        "These logos are for a fantasy hockey league where all participants are adults who don't mind even offensive themes, "
+        "as it's all in a joking spirit. Make sure to center the logo inside the image as much as possible."
+    )
+    print(f"Generating logos for team: {team_name}")
+    try:
+        response = client.images.generate(
+            prompt=prompt,
+            n=1,
+            size="1024x1024",  # square aspect ratio
+            model="dall-e-3"  # ensure you have access to this model
+        )
+        # Iterate over the returned image data and save each image
+        for i, data in enumerate(response.data):
+            image_url = data.url
+            if image_url:
+                image_response = requests.get(image_url)
+                if image_response.status_code == 200:
+                    file_path = os.path.join(LOGO_DIR, f"{user_id}_logo_{i}.png")
+                    with open(file_path, "wb") as f:
+                        f.write(image_response.content)
+                else:
+                    print(f"Failed to download image {i} for user {user_id}")
+    except Exception as e:
+        print("Error generating team logos:", e)
+
+
 app = Flask(__name__)
-CORS(app) 
+# Configure CORS with more explicit settings
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:4200"],  # Angular dev server
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 app.config.from_object(Config)
 
 db.init_app(app)
@@ -35,6 +98,10 @@ def register():
     if existing_user:
         return jsonify({"error": "Username already exists"}), 400
     
+    existing_teamname = User.query.filter_by(team_name=team_name).first()
+    if existing_teamname:
+        return jsonify({"error": "Team name already exists"}), 400
+
     code = RegistrationCode.query.filter_by(code=registration_code, is_used=False).first()
     if not code:
         return jsonify({"error": "Invalid or already used registration code"}), 400
@@ -52,6 +119,10 @@ def register():
     db.session.add(new_user)
     code.is_used = True
     db.session.commit()
+
+    # Launch the image generation in a background thread so it doesn't delay the response
+    thread = Thread(target=generate_team_logos, args=(team_name, new_user.id))
+    thread.start()
 
     return jsonify({"message": "User registered successfully"}), 201
 
@@ -147,24 +218,34 @@ def get_picks():
 
 @app.route("/api/players", methods=["GET"])
 def get_players():
-    players = Player.query.all()
-    if not players:
-        return jsonify({"error": "No players found"}), 404
-    
-    result = []
-    
-    for player in players:
-        result.append({
-            "id": player.id,
-            "firstName": player.first_name,
-            "lastName": player.last_name,
-            "team": player.team,
-            "position": player.position,
-            "isRookie": player.is_rookie,
-            "price": player.price,
-        })
-
-    return jsonify(result), 200
+    try:
+        players = Player.query.all()
+        return jsonify([{
+            'id': p.id,
+            'api_id': p.api_id,
+            'first_name': p.first_name,
+            'last_name': p.last_name,
+            'team_abbr': p.team_abbr,
+            'position': p.position,
+            'jersey_number': p.jersey_number,
+            'birth_country': p.birth_country,
+            'birth_year': p.birth_year,
+            'headshot': p.headshot,
+            'is_U23': p.is_U23,
+            'price': p.price,
+            'reg_gp': p.reg_gp,
+            'reg_goals': p.reg_goals,
+            'reg_assists': p.reg_assists,
+            'reg_points': p.reg_points,
+            'reg_plus_minus': p.reg_plus_minus,
+            'playoff_goals': p.playoff_goals,
+            'playoff_assists': p.playoff_assists,
+            'playoff_points': p.playoff_points,
+            'playoff_plus_minus': p.playoff_plus_minus
+        } for p in players]), 200
+    except Exception as e:
+        print(f"Error in get_players: {str(e)}")  # Add logging
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 @app.route("/api/lineup/save", methods=["POST"])
 def save_lineup():
@@ -275,6 +356,50 @@ def get_user_by_team_name():
         "userId": user.id,
         "teamName": user.team_name
     }), 200
+
+@app.route("/api/user/stats", methods=["GET"])
+def get_user_stats():
+    # Get userId parameter but ignore it for now
+    user_id = request.args.get('userId')
+    
+    # Return placeholder data without checking the database
+    stats = {
+        "rank": 4,
+        "points": {
+            "total": 65,
+            "bracket": 30,
+            "lineup": 25,
+            "predictions": 10
+        }
+    }
+    
+    return jsonify(stats), 200
+
+@app.route("/api/leaderboard", methods=["GET"])
+def get_leaderboard():
+    # Return actual data from the database, keeping the rank and points using the mock data
+
+    users = User.query.all()
+    if not users:
+        return jsonify({"error": "No users found"}), 404
+    leaderboard = []
+
+    for i, user in enumerate(users):
+        # Assuming you have a way to calculate the points for each user
+        # For now, we will use mock data for points and ranks
+        leaderboard.append({
+            "id": user.id,
+            "rank": i + 1,  # Rank based on the order in the list
+            "username": user.username,
+            "teamName": user.team_name,
+            "totalPoints": 0,  # Placeholder total points
+            "bracketPoints": 0,  # Placeholder bracket points
+            "lineupPoints": 0,  # Placeholder lineup points
+            "predictionsPoints": 0  # Placeholder predictions points
+        })
+
+
+    return jsonify(leaderboard), 200
 
 if __name__ == '__main__':
     with app.app_context():

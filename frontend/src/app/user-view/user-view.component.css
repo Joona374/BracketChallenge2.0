@@ -59,8 +59,8 @@
 }
 
 .avatar-container {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid #ff4444;
@@ -69,6 +69,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.avatar-container:hover {
+  transform: scale(1.05) rotate(3deg);
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+  border-color: #ff7777;
+}
+
+.avatar-container:active {
+  transform: scale(0.97);
 }
 
 .team-logo {
@@ -272,6 +284,55 @@
   gap: 15px;
 }
 
+/* Bracket vertical alignment fixes */
+.rounds-container {
+  display: flex;
+  gap: 5px;
+  height: 400px; /* Fixed height to ensure proper alignment */
+}
+
+.rounds-container.east {
+  flex-direction: row-reverse;
+}
+
+.bracket-round {
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.matchups-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 100%;
+  flex: 1;
+}
+
+/* Round-specific vertical spacing adjustments */
+.bracket-round:nth-child(1) .matchups-column {
+  padding: 15px 0;
+}
+
+.bracket-round:nth-child(2) .matchups-column {
+  padding: 40px 0;
+}
+
+.bracket-round:nth-child(3) .matchups-column {
+  padding: 80px 0;
+}
+
+/* Cup final section alignment */
+.cup-final-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  padding: 0 10px;
+}
+
 .matchup-card {
   background-color: #222;
   border-radius: 8px;
@@ -285,10 +346,135 @@
   gap: 5px;
 }
 
+/* Base team styling */
 .team {
   padding: 5px;
   background-color: #333;
   border-radius: 4px;
+}
+
+/* Winner state - generic */
+.team.winner {
+  font-weight: bold;
+}
+
+/* Team-specific styling for winners that override the generic winner styles */
+/* Dallas Stars */
+.team.winner.team-dal {
+  background-color: #006847;
+  color: #8f8f8c;
+  border-left: 4px solid #8f8f8c;
+}
+
+/* Vegas */
+.team.winner.team-vgk {
+  background-color: #b4975a;
+  color: #333f42;
+  border-left: 4px solid #333f42;
+}
+
+/* Winnipeg */
+.team.winner.team-wpg {
+  background-color: #004c97;
+  color: #fff;
+  border-left: 4px solid #ac162c;
+}
+
+/* Colorado */
+.team.winner.team-col {
+  background-color: #6f263d;
+  color: #a2aaad;
+  border-left: 4px solid #236192;
+}
+
+/* Vancouver */
+.team.winner.team-van {
+  background-color: #00205b;
+  color: #99999a;
+  border-left: 4px solid #00843d;
+}
+
+/* Nashville */
+.team.winner.team-nsh {
+  background-color: #ffb81c;
+  color: #041e42;
+  border-left: 4px solid #041e42;
+}
+
+/* Edmonton */
+.team.winner.team-edm {
+  background-color: #e44500;
+  color: #041e42;
+  border-left: 4px solid #041e42;
+}
+
+/* Los Angeles */
+.team.winner.team-lak {
+  background-color: #111111;
+  color: #a2aaad;
+  border-left: 4px solid #a2aaad;
+}
+
+/* Florida */
+.team.winner.team-fla {
+  background-color: #c8102e;
+  color: #fff;
+  border-left: 4px solid #041e42;
+}
+
+/* Tampa Bay */
+.team.winner.team-tbl {
+  background-color: #002868;
+  color: #fff;
+  border-left: 4px solid #00a3e0;
+}
+
+/* Boston Bruins */
+.team.winner.team-bos {
+  background-color: #000000;
+  color: #ffb81c;
+  border-left: 4px solid #ffb81c;
+}
+
+/* Toronto Maple Leafs */
+.team.winner.team-tor {
+  background-color: #00205b;
+  color: white;
+  border-left: 4px solid #ffffff;
+}
+
+/* New York Rangers */
+.team.winner.team-nyr {
+  background-color: #0038a8;
+  color: #ffffff;
+  border-left: 4px solid #c8102e;
+}
+
+/* Washington */
+.team.winner.team-wsh {
+  background-color: #041e42;
+  color: #c8102e;
+  border-left: 4px solid #c8102e;
+}
+
+/* Carolina */
+.team.winner.team-car {
+  background-color: #ce1126;
+  color: #ffffff;
+  border-left: 4px solid #000000;
+}
+
+/* New York Islanders */
+.team.winner.team-nyi {
+  background-color: #00539b;
+  color: #f47d30;
+  border-left: 4px solid #f47d30;
+}
+
+/* For non-winners or unknown teams, use default styling */
+.team:not(.winner) {
+  background-color: #555;
+  color: #ccc;
 }
 
 .team.winner {
@@ -322,10 +508,208 @@
   text-align: center;
   margin-top: 10px;
   padding: 5px;
-  background-color: rgba(255, 204, 0, 0.2);
   border-radius: 4px;
-  color: #ffcc00;
   font-weight: bold;
+}
+
+/* Team-specific champion styling */
+.champion.team-dal {
+  background-color: #006847;
+  color: #8f8f8c;
+  border-left: 4px solid #8f8f8c;
+}
+
+.champion.team-vgk {
+  background-color: #b4975a;
+  color: #333f42;
+  border-left: 4px solid #333f42;
+}
+
+.champion.team-wpg {
+  background-color: #004c97;
+  color: #fff;
+  border-left: 4px solid #ac162c;
+}
+
+.champion.team-col {
+  background-color: #6f263d;
+  color: #a2aaad;
+  border-left: 4px solid #236192;
+}
+
+.champion.team-van {
+  background-color: #00205b;
+  color: #99999a;
+  border-left: 4px solid #00843d;
+}
+
+.champion.team-nsh {
+  background-color: #ffb81c;
+  color: #041e42;
+  border-left: 4px solid #041e42;
+}
+
+.champion.team-edm {
+  background-color: #e44500;
+  color: #041e42;
+  border-left: 4px solid #041e42;
+}
+
+.champion.team-lak {
+  background-color: #111111;
+  color: #a2aaad;
+  border-left: 4px solid #a2aaad;
+}
+
+.champion.team-fla {
+  background-color: #c8102e;
+  color: #fff;
+  border-left: 4px solid #041e42;
+}
+
+.champion.team-tbl {
+  background-color: #002868;
+  color: #fff;
+  border-left: 4px solid #00a3e0;
+}
+
+.champion.team-bos {
+  background-color: #000000;
+  color: #ffb81c;
+  border-left: 4px solid #ffb81c;
+}
+
+.champion.team-tor {
+  background-color: #00205b;
+  color: white;
+  border-left: 4px solid #ffffff;
+}
+
+.champion.team-nyr {
+  background-color: #0038a8;
+  color: #ffffff;
+  border-left: 4px solid #c8102e;
+}
+
+.champion.team-wsh {
+  background-color: #041e42;
+  color: #c8102e;
+  border-left: 4px solid #c8102e;
+}
+
+.champion.team-car {
+  background-color: #ce1126;
+  color: #ffffff;
+  border-left: 4px solid #000000;
+}
+
+.champion.team-nyi {
+  background-color: #00539b;
+  color: #f47d30;
+  border-left: 4px solid #f47d30;
+}
+
+/* Default champion style if no team class is applied */
+.champion:not([class*="team-"]) {
+  background-color: #555;
+  color: #ffcc00;
+  border-left: 4px solid #ffcc00;
+}
+
+.compact-bracket-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.conference-bracket {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+}
+
+.conference-header {
+  text-align: center;
+  color: #ff4444;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.rounds-container {
+  display: flex;
+  gap: 5px;
+}
+
+.rounds-container.east {
+  flex-direction: row-reverse;
+}
+
+.bracket-round {
+  min-width: 150px;
+}
+
+.round-title {
+  text-align: center;
+  margin: 0 0 10px 0;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.matchup-card.small {
+  background-color: #333;
+  border-radius: 6px;
+  padding: 8px;
+  border: 1px solid #555;
+  margin-bottom: 5px;
+}
+
+.cup-final-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+  min-width: 200px;
+}
+
+.cup-icon.large {
+  font-size: 32px;
+  margin: 10px 0;
+  color: gold;
+}
+
+.matchup-card.cup-center {
+  width: 100%;
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
+}
+
+.team {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+}
+
+.series-games {
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .compact-bracket-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .rounds-container,
+  .rounds-container.east {
+    flex-direction: row;
+  }
+
+  .conference-bracket {
+    width: 100%;
+  }
 }
 
 /* Lineup View */
@@ -457,74 +841,84 @@
   color: #ffb81c;
 }
 
-/* Predictions View */
-.predictions-categories {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+.team-dal {
+  background-color: #006847;
+  color: #8f8f8c;
 }
 
-.prediction-category {
-  background-color: #222;
-  border-radius: 8px;
-  padding: 15px;
-  border: 1px solid #444;
+.team-vgk {
+  background-color: #b4975a;
+  color: #333f42;
 }
 
-.category-title {
-  text-align: center;
-  color: #ff4444;
-  margin: 0 0 20px 0;
-  font-size: 1.2rem;
-}
-
-.prediction-cards {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.player-prediction-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background-color: #2a2a2a;
-  border-radius: 8px;
-  padding: 10px 15px;
-  min-width: 250px;
-  border-left: 5px solid #ff4444;
-}
-
-.player-prediction-card.empty {
-  background-color: #1a1a1a;
-  border-left-color: #444;
-  opacity: 0.6;
-}
-
-.prediction-rank {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: #ff4444;
+.team-wpg {
+  background-color: #004c97;
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
 }
 
-.player-prediction-card.empty .prediction-rank {
-  background-color: #444;
+.team-col {
+  background-color: #6f263d;
+  color: #a2aaad;
 }
 
-.prediction-content {
-  flex: 1;
+.team-van {
+  background-color: #00205b;
+  color: #99999a;
 }
 
-.player-details {
-  font-size: 0.8rem;
-  color: #ccc;
+.team-nsh {
+  background-color: #ffb81c;
+  color: #041e42;
+}
+
+.team-edm {
+  background-color: #e44500;
+  color: #041e42;
+}
+
+.team-lak {
+  background-color: #111111;
+  color: #a2aaad;
+}
+
+.team-fla {
+  background-color: #c8102e;
+  color: #fff;
+}
+
+.team-tbl {
+  background-color: #002868;
+  color: #fff;
+}
+
+.team-bos {
+  background-color: #000000;
+  color: #ffb81c;
+}
+
+.team-tor {
+  background-color: #00205b;
+  color: white;
+}
+
+.team-nyr {
+  background-color: #0038a8;
+  color: #ffffff;
+}
+
+.team-wsh {
+  background-color: #041e42;
+  color: #c8102e;
+}
+
+.team-car {
+  background-color: #ce1126;
+  color: #ffffff;
+}
+
+.team-nyi {
+  background-color: #00539b;
+  color: #f47d30;
 }
 
 /* Team text colors for predictions */
@@ -542,6 +936,39 @@
 }
 .team-text-nsh {
   color: #ffb81c;
+}
+.team-text-dal {
+  color: #006847;
+}
+.team-text-vgk {
+  color: #b4975a;
+}
+.team-text-wpg {
+  color: #004c97;
+}
+.team-text-van {
+  color: #00205b;
+}
+.team-text-lak {
+  color: #111111;
+}
+.team-text-fla {
+  color: #c8102e;
+}
+.team-text-tor {
+  color: #00205b;
+}
+.team-text-nyr {
+  color: #0038a8;
+}
+.team-text-wsh {
+  color: #c8102e;
+}
+.team-text-car {
+  color: #ce1126;
+}
+.team-text-nyi {
+  color: #f47d30;
 }
 
 /* Responsive styles */
@@ -571,5 +998,272 @@
   .player-card {
     width: 100%;
     max-width: 200px;
+  }
+}
+
+/* Predictions Section Styles */
+.predictions-view {
+  padding: 20px 0;
+}
+
+.predictions-view h3 {
+  text-align: center;
+  font-family: "Orbitron", monospace;
+  color: #fff;
+  margin-bottom: 20px;
+  text-shadow: 0 0 1px #ff4444;
+}
+
+.predictions-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.prediction-category {
+  background-color: #222;
+  border-radius: 8px;
+  padding: 15px;
+  width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.category-title {
+  color: #ff4444;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-family: "Orbitron", monospace;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+}
+
+.prediction-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-prediction-card {
+  display: flex;
+  align-items: center;
+  background-color: #333;
+  border-radius: 6px;
+  padding: 10px;
+  border-left: 6px solid #555; /* Default border color */
+  transition: transform 0.2s ease;
+}
+
+.player-prediction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.player-prediction-card.empty {
+  background-color: #2a2a2a;
+  border-left-color: #444;
+  opacity: 0.7;
+}
+
+.prediction-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #ff4444;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.prediction-rank.empty-rank {
+  background-color: #555;
+}
+
+.prediction-content {
+  flex-grow: 1;
+}
+
+.player-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 14px;
+}
+
+.player-name.empty {
+  color: #777;
+  font-style: italic;
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.player-position {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.empty-position {
+  width: 10px;
+  display: inline-block;
+}
+
+.player-team-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* Team Colors */
+/* Western Conference Teams */
+.team-min {
+  border-left-color: #154734;
+}
+.team-min .player-team-badge {
+  background-color: #154734;
+  color: #eee;
+}
+
+.team-col {
+  border-left-color: #6f263d;
+}
+.team-col .player-team-badge {
+  background-color: #6f263d;
+  color: #a2aaad;
+}
+
+.team-dal {
+  border-left-color: #00843d;
+}
+.team-dal .player-team-badge {
+  background-color: #00843d;
+  color: white;
+}
+
+.team-wpg {
+  border-left-color: #041e42;
+}
+.team-wpg .player-team-badge {
+  background-color: #041e42;
+  color: #fff;
+}
+
+.team-nsh {
+  border-left-color: #ffb81c;
+}
+.team-nsh .player-team-badge {
+  background-color: #ffb81c;
+  color: #041e42;
+}
+
+.team-edm {
+  border-left-color: #ff4c00;
+}
+.team-edm .player-team-badge {
+  background-color: #ff4c00;
+  color: #041e42;
+}
+
+.team-van {
+  border-left-color: #00843d;
+}
+.team-van .player-team-badge {
+  background-color: #00843d;
+  color: #fff;
+}
+
+.team-vgk {
+  border-left-color: #b4975a;
+}
+.team-vgk .player-team-badge {
+  background-color: #b4975a;
+  color: #333;
+}
+
+/* Eastern Conference Teams */
+.team-fla {
+  border-left-color: #c8102e;
+}
+.team-fla .player-team-badge {
+  background-color: #c8102e;
+  color: #fff;
+}
+
+.team-bos {
+  border-left-color: #ffb81c;
+}
+.team-bos .player-team-badge {
+  background-color: #000;
+  color: #ffb81c;
+}
+
+.team-tor {
+  border-left-color: #00205b;
+}
+.team-tor .player-team-badge {
+  background-color: #00205b;
+  color: #fff;
+}
+
+.team-nyr {
+  border-left-color: #0038a8;
+}
+.team-nyr .player-team-badge {
+  background-color: #0038a8;
+  color: #fff;
+}
+
+.team-car {
+  border-left-color: #ce1126;
+}
+.team-car .player-team-badge {
+  background-color: #ce1126;
+  color: #fff;
+}
+
+.team-tbl {
+  border-left-color: #002868;
+}
+.team-tbl .player-team-badge {
+  background-color: #002868;
+  color: #fff;
+}
+
+.team-nyi {
+  border-left-color: #00539b;
+}
+.team-nyi .player-team-badge {
+  background-color: #00539b;
+  color: #f47d30;
+}
+
+.team-wsh {
+  border-left-color: #041e42;
+}
+.team-wsh .player-team-badge {
+  background-color: #041e42;
+  color: #c8102e;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .predictions-categories {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .prediction-category {
+    width: 100%;
+    max-width: 350px;
   }
 }

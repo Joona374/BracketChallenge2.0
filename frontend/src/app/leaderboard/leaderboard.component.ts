@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 interface LeaderboardEntry {
   id: number;
@@ -24,14 +25,44 @@ export class LeaderboardComponent implements OnInit {
   leaderboardEntries: LeaderboardEntry[] = [];
   sortKey: keyof LeaderboardEntry | null = 'totalPoints';
   sortAsc = false;
+  loading: boolean = false;
+  error: string | null = null; // To display error messages
 
   // To highlight the current user in the table
-  currentUserId = 1; // Mock for now, would be set from auth state
+  currentUserId: number = 0;
+
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.loadMockData();
-    this.updateRanks();
+    const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+    this.currentUserId = user?.id || 0;
+
+    this.loadLeaderboardData();
   }
+
+  loadLeaderboardData(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.http.get<LeaderboardEntry[]>('http://localhost:5000/api/leaderboard')
+      .subscribe({
+        next: (data) => {
+          this.leaderboardEntries = data;
+          this.updateRanks();
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Failed to load leaderboard data', err);
+          this.error = 'Failed to load leaderboard data. Using mock data instead.';
+          // this.loadMockData(); // Fallback to mock data
+          this.loading = false;
+          this.updateRanks();
+        }
+      });
+
+  }
+
+
 
   loadMockData(): void {
     this.leaderboardEntries = [
@@ -136,6 +167,7 @@ export class LeaderboardComponent implements OnInit {
         predictionsPoints: 10
       }
     ];
+    this.updateRanks();
   }
 
   sortBy(key: keyof LeaderboardEntry): void {

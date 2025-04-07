@@ -13,7 +13,11 @@
     <!-- User summary section -->
     <div class="user-summary-card">
       <div class="user-header">
-        <div class="avatar-container">
+        <div
+          class="avatar-container"
+          routerLink="/dashboard"
+          title="Go to Dashboard"
+        >
           <img src="assets/logo.png" alt="Team Logo" class="team-logo" />
         </div>
         <div class="user-info">
@@ -39,12 +43,12 @@
                 }}</span>
               </div>
             </div>
-          </div>
-          <div class="rank-display" *ngIf="getUserRank()">
-            <div class="rank-badge">
-              <span class="rank-number">#{{ getUserRank() }}</span>
+            <div class="rank-display" *ngIf="getUserRank()">
+              <div class="rank-badge">
+                <span class="rank-number">#{{ getUserRank() }}</span>
+              </div>
+              <span class="rank-label">OVERALL RANKING</span>
             </div>
-            <span class="rank-label">OVERALL RANKING</span>
           </div>
         </div>
       </div>
@@ -96,150 +100,324 @@
           </div>
         </div>
 
-        <div class="bracket-grid-mini">
-          <!-- Round 1 -->
-          <div class="bracket-round">
-            <h4>Round 1</h4>
-            <div class="matchups-column">
-              <div
-                *ngFor="let matchup of getMatchupsByRound('round1')"
-                class="matchup-card"
-              >
-                <div class="series-teams">
+        <div class="compact-bracket-container">
+          <!-- West Conference -->
+          <div class="conference-bracket">
+            <h4 class="conference-header">Western Conference</h4>
+            <div class="rounds-container">
+              <!-- Round 1 - West -->
+              <div class="bracket-round">
+                <h5 class="round-title">Round 1</h5>
+                <div class="matchups-column">
                   <div
-                    class="team"
-                    [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                    [ngClass]="
-                      isTeamWinner(matchup.id, matchup.team1)
-                        ? 'team-' + matchup.team1.toLowerCase()
-                        : ''
+                    *ngFor="
+                      let matchup of getMatchupsByRound('round1').slice(0, 4)
                     "
+                    class="matchup-card small"
                   >
-                    {{ matchup.team1 || "TBD" }}
-                  </div>
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                    [ngClass]="
-                      isTeamWinner(matchup.id, matchup.team2)
-                        ? 'team-' + matchup.team2.toLowerCase()
-                        : ''
-                    "
-                  >
-                    {{ matchup.team2 || "TBD" }}
+                    <div class="series-teams">
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                        [ngClass]="
+                          matchup.team1
+                            ? 'team-' + matchup.team1.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team1 || "TBD" }}
+                      </div>
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                        [ngClass]="
+                          matchup.team2
+                            ? 'team-' + matchup.team2.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team2 || "TBD" }}
+                      </div>
+                    </div>
+                    <div
+                      class="series-games"
+                      *ngIf="getSeriesResult(matchup.id)"
+                    >
+                      Games: {{ getSeriesResult(matchup.id) }}
+                    </div>
                   </div>
                 </div>
-                <div class="series-games" *ngIf="getSeriesResult(matchup.id)">
-                  Games: {{ getSeriesResult(matchup.id) }}
+              </div>
+
+              <!-- Round 2 - West -->
+              <div class="bracket-round">
+                <h5 class="round-title">Round 2</h5>
+                <div class="matchups-column">
+                  <div
+                    *ngFor="
+                      let matchup of getMatchupsByRound('round2').slice(0, 2)
+                    "
+                    class="matchup-card small"
+                  >
+                    <div class="series-teams">
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                        [ngClass]="
+                          matchup.team1
+                            ? 'team-' + matchup.team1.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team1 || "TBD" }}
+                      </div>
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                        [ngClass]="
+                          matchup.team2
+                            ? 'team-' + matchup.team2.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team2 || "TBD" }}
+                      </div>
+                    </div>
+                    <div
+                      class="series-games"
+                      *ngIf="getSeriesResult(matchup.id)"
+                    >
+                      Games: {{ getSeriesResult(matchup.id) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conference Final - West -->
+              <div class="bracket-round">
+                <h5 class="round-title">Conf. Final</h5>
+                <div class="matchups-column">
+                  <div
+                    *ngFor="
+                      let matchup of getMatchupsByRound('round3').slice(0, 1)
+                    "
+                    class="matchup-card small"
+                  >
+                    <div class="series-teams">
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                        [ngClass]="
+                          matchup.team1
+                            ? 'team-' + matchup.team1.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team1 || "TBD" }}
+                      </div>
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                        [ngClass]="
+                          matchup.team2
+                            ? 'team-' + matchup.team2.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team2 || "TBD" }}
+                      </div>
+                    </div>
+                    <div
+                      class="series-games"
+                      *ngIf="getSeriesResult(matchup.id)"
+                    >
+                      Games: {{ getSeriesResult(matchup.id) }}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Round 2 -->
-          <div class="bracket-round">
-            <h4>Round 2</h4>
-            <div class="matchups-column">
-              <div
-                *ngFor="let matchup of getMatchupsByRound('round2')"
-                class="matchup-card"
-              >
-                <div class="series-teams">
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                  >
-                    {{ matchup.team1 || "TBD" }}
-                  </div>
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                  >
-                    {{ matchup.team2 || "TBD" }}
-                  </div>
-                </div>
-                <div class="series-games" *ngIf="getSeriesResult(matchup.id)">
-                  Games: {{ getSeriesResult(matchup.id) }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Conference Finals -->
-          <div class="bracket-round">
-            <h4>Conference Finals</h4>
-            <div class="matchups-column">
-              <div
-                *ngFor="let matchup of getMatchupsByRound('round3')"
-                class="matchup-card"
-              >
-                <div class="series-teams">
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                  >
-                    {{ matchup.team1 || "TBD" }}
-                  </div>
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                  >
-                    {{ matchup.team2 || "TBD" }}
-                  </div>
-                </div>
-                <div class="series-games" *ngIf="getSeriesResult(matchup.id)">
-                  Games: {{ getSeriesResult(matchup.id) }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Stanley Cup Final -->
-          <div class="bracket-round">
-            <h4>Stanley Cup Final</h4>
-            <div class="matchups-column">
-              <div class="matchup-card final-matchup">
-                <div class="cup-icon">🏆</div>
-                <div class="series-teams">
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner('cup', getFinalTeams()[0])"
-                    [ngClass]="
-                      isTeamWinner('cup', getFinalTeams()[0])
-                        ? 'team-' + getFinalTeams()[0].toLowerCase()
-                        : ''
-                    "
-                  >
-                    {{ getFinalTeams()[0] || "TBD" }}
-                  </div>
-                  <div
-                    class="team"
-                    [class.winner]="isTeamWinner('cup', getFinalTeams()[1])"
-                    [ngClass]="
-                      isTeamWinner('cup', getFinalTeams()[1])
-                        ? 'team-' + getFinalTeams()[1].toLowerCase()
-                        : ''
-                    "
-                  >
-                    {{ getFinalTeams()[1] || "TBD" }}
-                  </div>
-                </div>
-                <div class="series-games" *ngIf="getSeriesResult('cup-winner')">
-                  Games: {{ getSeriesResult("cup-winner") }}
-                </div>
+          <!-- Stanley Cup Final (Center) -->
+          <div class="cup-final-section">
+            <h4 class="conference-header">Stanley Cup Final</h4>
+            <div class="cup-icon large">🏆</div>
+            <div class="matchup-card final-matchup cup-center">
+              <div class="series-teams">
                 <div
-                  class="champion"
-                  *ngIf="getChampionPick()"
+                  class="team"
+                  [class.winner]="isTeamWinner('cup', getFinalTeams()[0])"
                   [ngClass]="
-                    getChampionPick()
-                      ? 'team-text-' +
-                        (getChampionPick()
-                          ? getChampionPick()!.toLowerCase()
-                          : '')
+                    getFinalTeams()[0]
+                      ? 'team-' + getFinalTeams()[0].toLowerCase()
                       : ''
                   "
                 >
-                  Champion: {{ getChampionPick() }}
+                  {{ getFinalTeams()[0] || "TBD" }}
+                </div>
+                <div
+                  class="team"
+                  [class.winner]="isTeamWinner('cup', getFinalTeams()[1])"
+                  [ngClass]="
+                    getFinalTeams()[1]
+                      ? 'team-' + getFinalTeams()[1].toLowerCase()
+                      : ''
+                  "
+                >
+                  {{ getFinalTeams()[1] || "TBD" }}
+                </div>
+              </div>
+              <div class="series-games" *ngIf="getSeriesResult('cup-winner')">
+                Games: {{ getSeriesResult("cup-winner") }}
+              </div>
+              <div
+                class="champion"
+                *ngIf="getChampionPick()"
+                [ngClass]="
+                  getChampionPick()
+                    ? 'team-' + getChampionPick()!.toLowerCase()
+                    : ''
+                "
+              >
+                Champion: {{ getChampionPick() }}
+              </div>
+            </div>
+          </div>
+
+          <!-- East Conference -->
+          <div class="conference-bracket">
+            <h4 class="conference-header">Eastern Conference</h4>
+            <div class="rounds-container east">
+              <!-- Round 1 - East -->
+              <div class="bracket-round">
+                <h5 class="round-title">Round 1</h5>
+                <div class="matchups-column">
+                  <div
+                    *ngFor="
+                      let matchup of getMatchupsByRound('round1').slice(4)
+                    "
+                    class="matchup-card small"
+                  >
+                    <div class="series-teams">
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                        [ngClass]="
+                          matchup.team1
+                            ? 'team-' + matchup.team1.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team1 || "TBD" }}
+                      </div>
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                        [ngClass]="
+                          matchup.team2
+                            ? 'team-' + matchup.team2.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team2 || "TBD" }}
+                      </div>
+                    </div>
+                    <div
+                      class="series-games"
+                      *ngIf="getSeriesResult(matchup.id)"
+                    >
+                      Games: {{ getSeriesResult(matchup.id) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Round 2 - East -->
+              <div class="bracket-round">
+                <h5 class="round-title">Round 2</h5>
+                <div class="matchups-column">
+                  <div
+                    *ngFor="
+                      let matchup of getMatchupsByRound('round2').slice(2, 4)
+                    "
+                    class="matchup-card small"
+                  >
+                    <div class="series-teams">
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                        [ngClass]="
+                          matchup.team1
+                            ? 'team-' + matchup.team1.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team1 || "TBD" }}
+                      </div>
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                        [ngClass]="
+                          matchup.team2
+                            ? 'team-' + matchup.team2.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team2 || "TBD" }}
+                      </div>
+                    </div>
+                    <div
+                      class="series-games"
+                      *ngIf="getSeriesResult(matchup.id)"
+                    >
+                      Games: {{ getSeriesResult(matchup.id) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conference Final - East -->
+              <div class="bracket-round">
+                <h5 class="round-title">Conf. Final</h5>
+                <div class="matchups-column">
+                  <div
+                    *ngFor="
+                      let matchup of getMatchupsByRound('round3').slice(1, 2)
+                    "
+                    class="matchup-card small"
+                  >
+                    <div class="series-teams">
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
+                        [ngClass]="
+                          matchup.team1
+                            ? 'team-' + matchup.team1.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team1 || "TBD" }}
+                      </div>
+                      <div
+                        class="team"
+                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
+                        [ngClass]="
+                          matchup.team2
+                            ? 'team-' + matchup.team2.toLowerCase()
+                            : ''
+                        "
+                      >
+                        {{ matchup.team2 || "TBD" }}
+                      </div>
+                    </div>
+                    <div
+                      class="series-games"
+                      *ngIf="getSeriesResult(matchup.id)"
+                    >
+                      Games: {{ getSeriesResult(matchup.id) }}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -365,19 +543,21 @@
                   let i = index
                 "
                 class="player-prediction-card"
+                [ngClass]="'team-' + player.team.toLowerCase()"
               >
-                <div class="prediction-rank">#{{ i + 1 }}</div>
+                <div class="prediction-rank">{{ i + 1 }}</div>
                 <div class="prediction-content">
                   <div class="player-name">
                     {{ player.firstName }} {{ player.lastName }}
                   </div>
                   <div class="player-details">
-                    <span class="player-position">{{ player.position }}</span> |
+                    <span class="player-position">{{ player.position }}</span>
                     <span
-                      class="player-team"
-                      [ngClass]="'team-text-' + player.team.toLowerCase()"
-                      >{{ player.team }}</span
+                      class="player-team-badge"
+                      [ngClass]="'team-' + player.team.toLowerCase()"
                     >
+                      {{ player.team }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -387,11 +567,14 @@
                 *ngFor="let i of getEmptySlotsArray(category)"
                 class="player-prediction-card empty"
               >
-                <div class="prediction-rank">
-                  #{{ getPredictionsByCategory(category).length + i + 1 }}
+                <div class="prediction-rank empty-rank">
+                  {{ getPredictionsByCategory(category).length + i + 1 }}
                 </div>
                 <div class="prediction-content">
-                  <div class="player-name empty">No Player Selected</div>
+                  <div class="player-name empty">Not Selected</div>
+                  <div class="player-details">
+                    <span class="empty-position">-</span>
+                  </div>
                 </div>
               </div>
             </div>
