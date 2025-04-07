@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
+import { AuthService, User } from '../../services/auth.service';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
   selector: "app-navbar",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ClickOutsideDirective],
   templateUrl: "./navbar.component.html",
   styleUrls: ["./navbar.component.css"],
 })
@@ -20,6 +22,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   isMobileView = false;
   menuOpen = false;
+  isDropdownOpen = false;
+  user: any = null; // Add user property
 
   ngOnInit() {
     this.updateTimeLeft();
@@ -27,6 +31,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     this.checkViewport();
     window.addEventListener("resize", this.checkViewport.bind(this));
+
+    // Load user from localStorage
+    const storedUser = localStorage.getItem("loggedInUser");
+    if (storedUser) {
+      this.user = JSON.parse(storedUser);
+    }
   }
 
   ngOnDestroy() {
@@ -41,6 +51,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
   }
 
   updateTimeLeft() {
@@ -67,8 +81,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return n.toString().padStart(2, "0");
   }
 
+  getUserInitials(): string {
+    if (!this.user?.username) return "";
+
+    return this.user.username
+      .split(" ")
+      .map((name: string) => name[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
   logout(): void {
     localStorage.removeItem("loggedInUser");
+    this.user = null; // Clear user property when logging out
     window.location.href = "/";
   }
 }

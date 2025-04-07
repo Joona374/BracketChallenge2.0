@@ -145,8 +145,30 @@ def login():
         "message": "Login successful",
         "username": user.username,
         "teamName": user.team_name,
-        "id": user.id
+        "id": user.id,
+        "logoUrl": user.selected_logo_url,
     }), 200
+
+@app.route("/api/user-logos", methods=["GET"])
+def get_user_logos():
+    user_id = request.args.get("userId")
+
+    if not user_id:
+        return jsonify({"error": "Missing userId parameter"}), 400
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    logos = {
+        "logo1": user.logo1_url,
+        "logo2": user.logo2_url,
+        "logo3": user.logo3_url,
+        "logo4": user.logo4_url
+    }
+
+    return jsonify(logos), 200
 
 @app.route("/api/bracket/matchups", methods=["GET"])
 def get_matchups():

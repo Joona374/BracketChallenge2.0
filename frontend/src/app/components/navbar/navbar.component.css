@@ -9,6 +9,8 @@
   font-family: "Segoe UI", sans-serif;
   flex-wrap: wrap;
   position: relative;
+  z-index: 1000; /* Add z-index to the navbar container */
+  isolation: isolate;
 }
 
 /* Layout zones inside navbar */
@@ -141,6 +143,128 @@
   transform: scale(1.05);
 }
 
+.avatar-circle-nav {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #ff3232, #990000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden; /* Add this to contain the team logo */
+}
+
+.avatar-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.avatar-nav-link:hover .avatar-circle-nav {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(255, 50, 50, 0.8);
+}
+
+.avatar-circle-nav .initials {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.team-logo-nav {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.avatar-nav-link:hover .team-logo-nav {
+  transform: scale(1.1);
+}
+
+/* Dropdown Menu Styles */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 101; /* Changed to ensure dropdown appears above other elements */
+}
+
+.dropdown-toggle {
+  background-color: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 0 15px;
+  font-size: 16px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-toggle:hover {
+  color: #ff4444;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  min-width: 160px;
+  display: none;
+  z-index: 101; /* Increased z-index to ensure it appears above other elements */
+  overflow: hidden;
+}
+
+.dropdown-menu.show {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+.dropdown-menu a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #333;
+}
+
+.dropdown-menu a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+  background-color: #333;
+  color: #ff4444;
+}
+
+.dropdown-menu a.active-link {
+  color: #ff4444;
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 580px) {
   .navbar {
     padding: 8px 12px;
@@ -179,5 +303,29 @@
   .navbar-right button {
     margin: 6px 0;
     font-size: 17px;
+  }
+}
+
+/* Mobile View Dropdown Adjustments */
+@media (max-width: 1000px) {
+  .dropdown-menu {
+    position: static;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    margin-top: 0;
+    border-radius: 0;
+  }
+
+  .dropdown-toggle {
+    padding: 15px;
+    width: 100%;
+    text-align: left;
+    justify-content: space-between;
+  }
+
+  .dropdown {
+    width: 100%;
   }
 }

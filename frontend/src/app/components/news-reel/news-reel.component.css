@@ -6,6 +6,7 @@
   border-bottom: 2px solid #ff4444;
   padding: 6px 0;
   position: relative;
+  z-index: 99; /* Lower than navbar but higher than regular content */
 }
 
 .news-reel-track {

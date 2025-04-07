@@ -12,7 +12,20 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
     registration_code = db.Column(db.String(80), db.ForeignKey('registration_codes.code'), nullable=False)
 
+    # Cloudinary logo URLs
+    logo1_url = db.Column(db.String(255))
+    logo2_url = db.Column(db.String(255))
+    logo3_url = db.Column(db.String(255))
+    logo4_url = db.Column(db.String(255))
+
+    # Currently selected logo (default is placeholder)
+    selected_logo_url = db.Column(
+        db.String(255),
+        default="https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744022575/logo_cyjav5.png"
+    )
+
     picks = db.relationship("Pick", back_populates="user", uselist=True)
+
 
 
     def set_password(self, password):

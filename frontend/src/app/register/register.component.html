@@ -53,3 +53,8 @@
 
 <div *ngIf="message" style="color: green">{{ message }}</div>
 <div *ngIf="error" style="color: red">{{ error }}</div>
+
+<!-- Add the login link below the form -->
+<div class="auth-toggle">
+  <p>Onko sinulla jo tunnus? <a routerLink="/login">Kirjaudu sisään</a></p>
+</div>

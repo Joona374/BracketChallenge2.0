@@ -15,7 +15,7 @@
         <div class="puck-line"></div>
         <div class="puck">
           <img
-            src="assets/logo.png"
+            src="https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744022575/logo_cyjav5.png"
             alt="NHL Bracket Challenge Logo"
             class="home-logo"
           />
@@ -50,7 +50,16 @@
               routerLink="/dashboard"
               title="Go to Dashboard"
             >
-              <span class="initials">{{ getUserInitials() }}</span>
+              <!-- Show team logo if available, fallback to initials -->
+              <img
+                *ngIf="userLogo"
+                [src]="userLogo"
+                class="team-logo"
+                alt="Team Logo"
+              />
+              <span *ngIf="!userLogo" class="initials">{{
+                getUserInitials()
+              }}</span>
             </div>
             <div class="user-actions">
               <button class="action-button bracket-btn" routerLink="/bracket">
@@ -103,8 +112,18 @@
     <div class="feature">
       <div class="feature-icon">🗓️</div>
       <h3>TÄRKEITÄ PÄIVÄMÄÄRIÄ</h3>
-      <p>Bracketin muokkaaminen lukkiutuu: <br />HH:MM DD:MM</p>
-      <p>Panosten äänestys päättyy: <br />HH:MM DD:MM</p>
+      <p>
+        Bracketin muokkaaminen lukkiutuu: <br /><span
+          style="font-weight: bold; color: #ff4500"
+          >20.04.2025 00:00</span
+        >
+      </p>
+      <p>
+        Panosten äänestys päättyy: <br /><span
+          style="font-weight: bold; color: #ff4500"
+          >27.04.2025 00:00</span
+        >
+      </p>
     </div>
   </div>
 

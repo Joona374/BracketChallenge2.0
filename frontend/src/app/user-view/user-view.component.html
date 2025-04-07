@@ -18,7 +18,11 @@
           routerLink="/dashboard"
           title="Go to Dashboard"
         >
-          <img src="assets/logo.png" alt="Team Logo" class="team-logo" />
+          <img
+            [src]="userData?.logoUrl || 'assets/logo.png'"
+            alt="Team Logo"
+            class="team-logo"
+          />
         </div>
         <div class="user-info">
           <h1 class="team-name">{{ teamName }}</h1>

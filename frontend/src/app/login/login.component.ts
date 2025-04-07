@@ -1,8 +1,8 @@
 import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { HttpClient } from "@angular/common/http";
-import { RouterModule } from "@angular/router";
+import { RouterModule, Router } from "@angular/router";
+import { AuthService } from "../services/auth.service";
 
 @Component({
   selector: "app-login",
@@ -20,20 +20,23 @@ export class LoginComponent {
   message: string = "";
   error: string = "";
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   onSubmit() {
     this.message = "";
     this.error = "";
 
-    this.http.post("http://localhost:5000/api/login", this.formData).subscribe({
-      next: (res: any) => {
-        localStorage.setItem("loggedInUser", JSON.stringify(res));
-        this.message = res.message || "Login successful!";
-        window.location.href = "/";
+    this.authService.login(this.formData.username, this.formData.password).subscribe({
+      next: () => {
+        this.message = "Login successful!";
+        // Navigate to home page after successful login
+        this.router.navigate(['/']);
       },
       error: (err) => {
-        this.error = err.error.error || "Login failed";
+        this.error = err.error?.error || "Login failed";
       },
     });
   }

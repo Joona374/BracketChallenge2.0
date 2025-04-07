@@ -24,3 +24,11 @@
 
 <div *ngIf="message" style="color: green">{{ message }}</div>
 <div *ngIf="error" style="color: red">{{ error }}</div>
+
+<!-- Add the registration link below the form -->
+<div class="auth-toggle">
+  <p>
+    Eikö sinulla ole vielä käyttäjää?
+    <a routerLink="/register">Rekisteröidy täältä</a>
+  </p>
+</div>

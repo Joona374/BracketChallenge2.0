@@ -7,6 +7,7 @@ interface User {
   id: number;
   username: string;
   teamName: string;
+  logoUrl?: string; // Add optional logoUrl property
 }
 
 interface BracketSummary {

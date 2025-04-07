@@ -1,8 +1,11 @@
 <nav class="navbar" [class.mobile]="isMobileView">
   <div class="navbar-left">
     <a routerLink="/" class="brand">
-      <img src="assets/logo.png" alt="Logo" class="brand-logo" />NHL Bracket
-      Challenge 2025</a
+      <img
+        src="https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744022575/logo_cyjav5.png"
+        alt="Logo"
+        class="brand-logo"
+      />NHL Bracket Challenge 2025</a
     >
   </div>
 
@@ -33,23 +36,50 @@
     >
 
     <ng-container *ngIf="isLoggedIn; else guestLinks">
-      <a routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
-      <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
-      <a routerLink="/lineup" routerLinkActive="active-link">Kentälliset</a>
-      <a routerLink="/predictions" routerLinkActive="active-link"
-        >Top 3 Pelaajat</a
-      >
+      <!-- Dropdown menu for gameplay options -->
+      <div class="dropdown" (clickOutside)="isDropdownOpen = false">
+        <button class="dropdown-toggle" (click)="toggleDropdown()">
+          Veikkaukset <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="dropdown-menu" [class.show]="isDropdownOpen">
+          <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
+          <a routerLink="/lineup" routerLinkActive="active-link">Kentälliset</a>
+          <a routerLink="/predictions" routerLinkActive="active-link"
+            >Top 3 Pelaajat</a
+          >
+        </div>
+      </div>
+
       <a routerLink="/leaderboard" routerLinkActive="active-link"
         >Sarjataulukko</a
       >
       <a routerLink="/rules" routerLinkActive="active-link">Säännöt & Ohjeet</a>
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active-link"
+        class="avatar-nav-link"
+      >
+        <div class="avatar-circle-nav">
+          <!-- Show team logo if available, fallback to initials -->
+          <img
+            *ngIf="user?.logoUrl"
+            [src]="user.logoUrl"
+            class="team-logo-nav"
+            alt="Team Logo"
+          />
+          <span *ngIf="!user?.logoUrl" class="initials">{{
+            getUserInitials()
+          }}</span>
+        </div>
+      </a>
       <button (click)="logout()">Logout</button>
     </ng-container>
 
     <ng-template #guestLinks>
-      <a routerLink="/rules" routerLinkActive="active-link">Rules</a>
+      <a routerLink="/rules" routerLinkActive="active-link">Säänöt & Ohjeet</a>
+      <a routerLink="/vote" routerLinkActive="active-link">Äänestys</a>
 
-      <a routerLink="/login" routerLinkActive="active-link">Login</a>
+      <a routerLink="/login" routerLinkActive="active-link">Kirjautuminen</a>
     </ng-template>
   </div>
 </nav>

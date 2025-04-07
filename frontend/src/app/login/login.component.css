@@ -61,3 +61,27 @@ button:hover {
   background-color: #ff2222;
   transform: scale(1.02);
 }
+
+/* At the bottom of the file */
+.auth-toggle {
+  text-align: center;
+  margin-top: 20px;
+  font-family: "Orbitron", monospace;
+}
+
+.auth-toggle p {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.auth-toggle a {
+  color: #ff4444;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.auth-toggle a:hover {
+  color: #ff6666;
+  text-shadow: 0 0 5px rgba(255, 68, 68, 0.4);
+}

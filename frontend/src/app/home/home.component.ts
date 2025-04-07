@@ -1,6 +1,10 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
+import { Router } from "@angular/router";
+import { DatePipe } from "@angular/common";
+import { AuthService, User } from "../../app/services/auth.service";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-home",
@@ -9,17 +13,31 @@ import { RouterModule } from "@angular/router";
   templateUrl: "./home.component.html",
   styleUrls: ["./home.component.css"],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   loggedInUser: string | null = null;
+  userLogo: string | null = null;
+  private userSubscription: Subscription | null = null;
+
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
-    const user = localStorage.getItem("loggedInUser");
-    this.loggedInUser = user ? JSON.parse(user).username : null;
+    // Subscribe to auth changes
+    this.userSubscription = this.authService.currentUser$.subscribe((user: User | null) => {
+      this.loggedInUser = user ? user.username : null;
+      this.userLogo = user?.logoUrl || null;
+      console.log('HomeComponent Auth State Updated:', { loggedInUser: this.loggedInUser, userLogo: this.userLogo });
+    });
   }
 
-  logout() {
-    localStorage.removeItem("loggedInUser");
-    window.location.href = "/";
+  ngOnDestroy(): void {
+    // Clean up subscription
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 
   getUserInitials(): string {
