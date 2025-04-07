@@ -8,6 +8,7 @@
       *ngFor="let cat of predictions | keyvalue"
       class="category-tab"
       [class.active]="selectedCategory === cat.key"
+      [class.completed]="cat.value.length === 3"
       (click)="changeCategory(castToPredictionCategory(cat.key))"
     >
       {{ categoryLabels[castToPredictionCategory(cat.key)] }}
@@ -117,6 +118,46 @@
                   sortAsc ? "▲" : "▼"
                 }}</span>
               </th>
+              <th
+                (click)="sortBy('reg_goals')"
+                [class.sorted]="sortKey === 'reg_goals'"
+                class="stat-column"
+              >
+                G
+                <span *ngIf="sortKey === 'reg_goals'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th
+                (click)="sortBy('reg_assists')"
+                [class.sorted]="sortKey === 'reg_assists'"
+                class="stat-column"
+              >
+                A
+                <span *ngIf="sortKey === 'reg_assists'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th
+                (click)="sortBy('reg_points')"
+                [class.sorted]="sortKey === 'reg_points'"
+                class="stat-column"
+              >
+                P
+                <span *ngIf="sortKey === 'reg_points'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th
+                (click)="sortBy('reg_plus_minus')"
+                [class.sorted]="sortKey === 'reg_plus_minus'"
+                class="stat-column"
+              >
+                +/-
+                <span *ngIf="sortKey === 'reg_plus_minus'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -125,10 +166,16 @@
               (click)="selectPlayer(player)"
               class="player-row"
             >
-              <td>{{ player.position }}</td>
-              <td>{{ player.firstName }}</td>
-              <td>{{ player.lastName }}</td>
-              <td>{{ player.team }}</td>
+              <td>{{ player?.position || '' }}</td>
+              <td>{{ player?.firstName || '' }}</td>
+              <td>{{ player?.lastName || '' }}</td>
+              <td>{{ player?.team || '' }}</td>
+              <td class="stat-column">{{ player?.reg_goals || 0 }}</td>
+              <td class="stat-column">{{ player?.reg_assists || 0 }}</td>
+              <td class="stat-column">{{ player?.reg_points || 0 }}</td>
+              <td class="stat-column" [class.positive]="(player?.reg_plus_minus || 0) > 0" [class.negative]="(player?.reg_plus_minus || 0) < 0">
+                {{ (player?.reg_plus_minus || 0) > 0 ? '+' : '' }}{{ player?.reg_plus_minus || 0 }}
+              </td>
             </tr>
           </tbody>
         </table>

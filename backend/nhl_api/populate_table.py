@@ -93,6 +93,29 @@ def fetch_and_store_players_for_team(abbr):
         else:
             is_U23 = False
         
+        # Calculate player price based on regular season performance
+        # Base price depends on position and stats
+        base_price = 200000  # Starting base price
+        
+        # Add value based on points
+        if position in ['L', 'C', 'R', 'D']:
+            # Skaters - value based on points and plus/minus
+            points_value = reg_points * 5000
+            plus_minus_value = max(0, reg_plus_minus * 2000)  # Only positive contribution
+            position_value = 50000 if position == 'D' else 30000  # Defenders cost more
+            calculated_price = base_price + points_value + plus_minus_value + position_value
+        elif position == 'G':
+            # Goalies - value based on games played
+            games_value = reg_gp * 6000
+            calculated_price = base_price + games_value + 70000  # Goalies are premium
+            
+        # Cap the price between 100,000 and 500,000
+        calculated_price = max(100000, min(500000, calculated_price))
+        
+        # U23 players get a discount
+        if is_U23:
+            calculated_price = int(calculated_price * 0.9)
+        
         new_player = Player(
             api_id=api_id,
             first_name=first_name,
@@ -104,7 +127,7 @@ def fetch_and_store_players_for_team(abbr):
             birth_year=birth_year,
             headshot=headshot,
             is_U23=is_U23,
-            price=1,  # Default price, can be updated later with logic
+            price=calculated_price,  # Using the calculated price
             reg_gp=reg_gp,
             reg_goals=reg_goals,
             reg_assists=reg_assists,

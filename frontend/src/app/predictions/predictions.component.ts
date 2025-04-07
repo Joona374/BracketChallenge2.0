@@ -81,21 +81,22 @@ export class PredictionsComponent implements OnInit {
       case "goalieGaa":
         result = result.filter(p => p.position === "G");
         break;
-      // We'll add finnishPoints filter when nationality is added
+      case "finnishPoints":
+        result = result.filter(p => p.birth_country === "FIN");
+        break;
     }
 
     // Filter out already picked players for this category
     const pickedIds = this.predictions[this.selectedCategory].map(p => p.id);
     result = result.filter(p => !pickedIds.includes(p.id));
 
-    // Apply search filter
+    // Apply search term filter
     if (this.searchTerm.trim()) {
-      const term = this.searchTerm.trim().toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.firstName.toLowerCase().includes(term) ||
-          p.lastName.toLowerCase().includes(term) ||
-          p.team.toLowerCase().includes(term)
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(p => 
+        p.firstName.toLowerCase().includes(term) ||
+        p.lastName.toLowerCase().includes(term) ||
+        p.team.toLowerCase().includes(term)
       );
     }
 

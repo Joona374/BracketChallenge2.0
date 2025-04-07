@@ -20,7 +20,7 @@
   <div class="navbar-timer" *ngIf="timeLeft !== ''">
     <div class="ominous-timer" [class.locked]="timeLeft === 'LOCKED'">
       <span *ngIf="timeLeft !== 'LOCKED'">⏳ {{ timeLeft }}</span>
-      <span *ngIf="timeLeft === 'LOCKED'">💀 LOCKED IN 💀</span>
+      <span *ngIf="timeLeft === 'LOCKED'">💀 AIKA ONA PÄÄTTYNYT 💀</span>
     </div>
   </div>
 
@@ -29,20 +29,20 @@
       routerLink="/"
       routerLinkActive="active-link"
       [routerLinkActiveOptions]="{ exact: true }"
-      >Home</a
+      >Etusivu</a
     >
 
     <ng-container *ngIf="isLoggedIn; else guestLinks">
       <a routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
       <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
-      <a routerLink="/lineup" routerLinkActive="active-link">Lineup</a>
+      <a routerLink="/lineup" routerLinkActive="active-link">Kentälliset</a>
       <a routerLink="/predictions" routerLinkActive="active-link"
-        >Top 3 Picks</a
+        >Top 3 Pelaajat</a
       >
       <a routerLink="/leaderboard" routerLinkActive="active-link"
-        >Leaderboard</a
+        >Sarjataulukko</a
       >
-      <a routerLink="/rules" routerLinkActive="active-link">Rules</a>
+      <a routerLink="/rules" routerLinkActive="active-link">Säännöt & Ohjeet</a>
       <button (click)="logout()">Logout</button>
     </ng-container>
 

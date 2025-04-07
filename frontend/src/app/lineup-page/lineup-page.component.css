@@ -100,9 +100,29 @@
   font-size: 12px;
 }
 
+.player-table thead th.stat-column {
+  width: 50px;
+  text-align: center;
+}
+
 .player-table td {
   padding: 8px;
   border-top: 1px solid #aaa;
+}
+
+.player-table td.stat-column {
+  text-align: center;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.player-table td.positive {
+  color: #4caf50; /* Green color for positive values */
+}
+
+.player-table td.negative {
+  color: #f44336; /* Red color for negative values */
 }
 
 .player-table tr:hover {

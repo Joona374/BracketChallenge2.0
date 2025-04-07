@@ -51,6 +51,18 @@
   position: relative;
 }
 
+/* Add green highlight for completed categories with all 3 picks */
+.category-tab.completed {
+  border-color: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.category-tab.completed .pick-count {
+  background-color: #4caf50;
+  color: white;
+}
+
+/* Regular hover and active styles */
 .category-tab:hover {
   background-color: #444;
 }
@@ -243,6 +255,7 @@
   border: 1px solid #444;
   border-radius: 8px;
   min-height: 0; /* Important for Firefox */
+  max-width: 100%;
 }
 
 .player-table {
@@ -272,10 +285,30 @@
   font-size: 12px;
 }
 
+.player-table thead th.stat-column {
+  width: 50px;
+  text-align: center;
+}
+
 .player-table td {
   padding: 6px;
   font-size: 14px;
   border-top: 1px solid #444;
+}
+
+.player-table td.stat-column {
+  text-align: center;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.player-table td.positive {
+  color: #4caf50; /* Green color for positive values */
+}
+
+.player-table td.negative {
+  color: #f44336; /* Red color for negative values */
 }
 
 .player-row:hover {
