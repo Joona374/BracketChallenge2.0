@@ -119,6 +119,16 @@
                 }}</span>
               </th>
               <th
+                (click)="sortBy('reg_gp')"
+                [class.sorted]="sortKey === 'reg_gp'"
+                class="stat-column"
+              >
+                GP
+                <span *ngIf="sortKey === 'reg_gp'">{{
+                  sortAsc ? "▲" : "▼"
+                }}</span>
+              </th>
+              <th
                 (click)="sortBy('reg_goals')"
                 [class.sorted]="sortKey === 'reg_goals'"
                 class="stat-column"
@@ -166,15 +176,21 @@
               (click)="selectPlayer(player)"
               class="player-row"
             >
-              <td>{{ player?.position || '' }}</td>
-              <td>{{ player?.firstName || '' }}</td>
-              <td>{{ player?.lastName || '' }}</td>
-              <td>{{ player?.team || '' }}</td>
+              <td>{{ player?.position || "" }}</td>
+              <td>{{ player?.firstName || "" }}</td>
+              <td>{{ player?.lastName || "" }}</td>
+              <td>{{ player?.team || "" }}</td>
+              <td class="stat-column">{{ player?.reg_gp || 0 }}</td>
               <td class="stat-column">{{ player?.reg_goals || 0 }}</td>
               <td class="stat-column">{{ player?.reg_assists || 0 }}</td>
               <td class="stat-column">{{ player?.reg_points || 0 }}</td>
-              <td class="stat-column" [class.positive]="(player?.reg_plus_minus || 0) > 0" [class.negative]="(player?.reg_plus_minus || 0) < 0">
-                {{ (player?.reg_plus_minus || 0) > 0 ? '+' : '' }}{{ player?.reg_plus_minus || 0 }}
+              <td
+                class="stat-column"
+                [class.positive]="(player?.reg_plus_minus || 0) > 0"
+                [class.negative]="(player?.reg_plus_minus || 0) < 0"
+              >
+                {{ (player?.reg_plus_minus || 0) > 0 ? "+" : ""
+                }}{{ player?.reg_plus_minus || 0 }}
               </td>
             </tr>
           </tbody>

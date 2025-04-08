@@ -30,8 +30,10 @@ export class LoginComponent {
     this.error = "";
 
     this.authService.login(this.formData.username, this.formData.password).subscribe({
-      next: () => {
+      next: (response) => {
         this.message = "Login successful!";
+        // Store the full response which includes isAdmin
+        localStorage.setItem('loggedInUser', JSON.stringify(response));
         // Navigate to home page after successful login
         this.router.navigate(['/']);
       },

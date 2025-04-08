@@ -200,6 +200,102 @@
   font-weight: bold;
 }
 
+/* New York Islanders */
+.team.selected.min {
+  background-color: #154734;
+  color: #ddcba4;
+  border: 2px solid #a6192e; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.sea {
+  background-color: #001628;
+  color: #99d9d9;
+  border: 2px solid #e9072b; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.njd {
+  background-color: #ce1126;
+  color: #fff;
+  border: 2px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.ott {
+  background-color: #da1a32;
+  color: #fff;
+  border: 2px solid #b79257; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.mtl {
+  background-color: #af1e2d;
+  color: #fff;
+  border: 2px solid #242e8f; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.cbj {
+  background-color: #002654;
+  color: #fff;
+  border: 2px solid #ce1126; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.pit {
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fcb514; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.det {
+  background-color: #ce1126;
+  color: #fff;
+  border: 2px solid #ce1126; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.buf {
+  background-color: #003087;
+  color: #ffb81c;
+  border: 2px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.phi {
+  background-color: #f74902;
+  color: #fff;
+  border: 2px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.stl {
+  background-color: #002f87;
+  color: #fff;
+  border: 2px solid #fcb514; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.cgy {
+  background-color: #d2001c;
+  color: #fff;
+  border: 2px solid #faaf19; /* Accent red */
+  font-weight: bold;
+}
+
 .team.disabled {
   pointer-events: none;
   opacity: 0.4;

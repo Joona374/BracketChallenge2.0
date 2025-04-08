@@ -39,14 +39,17 @@ def create_matchups():
     with app.app_context():
         if Matchup.query.count() == 0:
             matchups = [
-                Matchup(round=1, conference='west', matchup_code='C1vsWC2', team1='DAL', team2='VGK'),
-                Matchup(round=1, conference='west', matchup_code='C2vsC3', team1='WPG', team2='COL'),
-                Matchup(round=1, conference='west', matchup_code='P1vsWC1', team1='VAN', team2='NSH'),
-                Matchup(round=1, conference='west', matchup_code='P2vsP3', team1='EDM', team2='LAK'),
-                Matchup(round=1, conference='east', matchup_code='A1vsWC1', team1='FLA', team2='TBL'),
-                Matchup(round=1, conference='east', matchup_code='A2vsA3', team1='BOS', team2='TOR'),
-                Matchup(round=1, conference='east', matchup_code='M1vsWC2', team1='NYR', team2='WSH'),
-                Matchup(round=1, conference='east', matchup_code='M2vsM3', team1='CAR', team2='NYI'),
+                # West Conference (using W1, W2, W3, W4)
+                Matchup(round=1, conference='west', matchup_code='W1', team1='DAL', team2='VGK'),
+                Matchup(round=1, conference='west', matchup_code='W2', team1='WPG', team2='COL'),
+                Matchup(round=1, conference='west', matchup_code='W3', team1='VAN', team2='NSH'),
+                Matchup(round=1, conference='west', matchup_code='W4', team1='EDM', team2='LAK'),
+                
+                # East Conference (using E1, E2, E3, E4)
+                Matchup(round=1, conference='east', matchup_code='E1', team1='FLA', team2='TBL'),
+                Matchup(round=1, conference='east', matchup_code='E2', team1='BOS', team2='TOR'),
+                Matchup(round=1, conference='east', matchup_code='E3', team1='NYR', team2='WSH'),
+                Matchup(round=1, conference='east', matchup_code='E4', team1='CAR', team2='NYI'),
             ]
 
             db.session.add_all(matchups)
@@ -191,4 +194,4 @@ def add_mock_players():
 
 if __name__ == "__main__":
     create_matchups()
-    add_mock_players()
+    # add_mock_players()

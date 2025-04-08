@@ -7,14 +7,17 @@
     <div class="column">
       <div *ngFor="let m of matchups.west" class="matchup">
         <div class="teams-and-games west">
-          <div class="game-control" *ngIf="userPicks.round1[m.id]">
-            <button class="plus-button" (click)="increaseGames('round1', m.id)">
+          <div class="game-control" *ngIf="userPicks.round1[m.matchupCode]">
+            <button
+              class="plus-button"
+              (click)="increaseGames('round1', m.matchupCode)"
+            >
               +
             </button>
-            <div>{{ getGames("round1", m.id) }}</div>
+            <div>{{ getGames("round1", m.matchupCode) }}</div>
             <button
               class="minus-button"
-              (click)="decreaseGames('round1', m.id)"
+              (click)="decreaseGames('round1', m.matchupCode)"
             >
               –
             </button>
@@ -22,15 +25,15 @@
           <div class="teams">
             <div
               class="team"
-              [class]="getTeamClass(m.id, m.team1)"
-              (click)="pickWinner(m.id, m.team1)"
+              [class]="getTeamClass(m.matchupCode, m.team1)"
+              (click)="pickWinner(m.matchupCode, m.team1)"
             >
               {{ m.team1 || "\u00A0" }}
             </div>
             <div
               class="team"
-              [class]="getTeamClass(m.id, m.team2)"
-              (click)="pickWinner(m.id, m.team2)"
+              [class]="getTeamClass(m.matchupCode, m.team2)"
+              (click)="pickWinner(m.matchupCode, m.team2)"
             >
               {{ m.team2 || "\u00A0" }}
             </div>
@@ -42,7 +45,7 @@
 
   <!-- Column 2: West R2 -->
   <div class="column-container">
-    <h4>Länsi Divisioona Finaalit</h4>
+    <h4>Länsi Div Finaalit</h4>
     <div class="column">
       <div *ngFor="let key of ['w-semi', 'w-semi2']" class="matchup">
         <div class="teams-and-games west">
@@ -80,7 +83,7 @@
 
   <!-- Column 3: West Final -->
   <div class="column-container">
-    <h4>Länsi Konferenssi Finaali</h4>
+    <h4>Länsi Konf Finaali</h4>
     <div class="column">
       <div class="matchup">
         <div class="teams-and-games west">
@@ -262,15 +265,17 @@
     <div class="column">
       <div *ngFor="let m of matchups.east" class="matchup">
         <div class="teams-and-games east">
-          <div class="game-control" *ngIf="userPicks.round1[m.id]">
-            <button class="plus-button" (click)="increaseGames('round1', m.id)">
+          <div class="game-control" *ngIf="userPicks.round1[m.matchupCode]">
+            <button
+              class="plus-button"
+              (click)="increaseGames('round1', m.matchupCode)"
+            >
               +
             </button>
-
-            <div>{{ getGames("round1", m.id) }}</div>
+            <div>{{ getGames("round1", m.matchupCode) }}</div>
             <button
               class="minus-button"
-              (click)="decreaseGames('round1', m.id)"
+              (click)="decreaseGames('round1', m.matchupCode)"
             >
               –
             </button>
@@ -278,15 +283,15 @@
           <div class="teams">
             <div
               class="team"
-              [class]="getTeamClass(m.id, m.team1)"
-              (click)="pickWinner(m.id, m.team1)"
+              [class]="getTeamClass(m.matchupCode, m.team1)"
+              (click)="pickWinner(m.matchupCode, m.team1)"
             >
               {{ m.team1 || "\u00A0" }}
             </div>
             <div
               class="team"
-              [class]="getTeamClass(m.id, m.team2)"
-              (click)="pickWinner(m.id, m.team2)"
+              [class]="getTeamClass(m.matchupCode, m.team2)"
+              (click)="pickWinner(m.matchupCode, m.team2)"
             >
               {{ m.team2 || "\u00A0" }}
             </div>

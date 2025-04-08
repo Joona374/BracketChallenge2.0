@@ -65,6 +65,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
         if (this.user && (!this.user.logoUrl || this.user.logoUrl === "null" || this.user.logoUrl === "undefined")) {
           this.user.logoUrl = null;
         }
+
+        console.log("User is admin:", this.user.isAdmin);
+        console.log("User ID:", this.user.id);
+
         console.log('User loaded from storage in navbar:', this.user);
       } catch (error) {
         console.error('Error parsing user from localStorage:', error);

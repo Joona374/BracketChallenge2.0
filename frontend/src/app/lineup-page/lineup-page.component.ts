@@ -122,7 +122,7 @@ export class LineupPageComponent implements OnInit {
     return this.sortedPlayers(result);
   }
 
-  totalsBudget: number = 1000000;
+  totalsBudget: number = 2000000;
 
   get remainingBudget(): number {
     const usedBudget = Object.values(this.slotMap)

@@ -60,6 +60,22 @@ class Matchup(db.Model):
     team1 = db.Column(db.String(80), nullable=False)
     team2 = db.Column(db.String(80), nullable=False)
 
+    def __repr__(self):
+        return f'<Matchup {self.conference} Round {self.round}: {self.team1} vs {self.team2}>'
+
+class MatchupResult(db.Model):
+    __tablename__ = 'matchup_results'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    matchup_id = db.Column(db.Integer, db.ForeignKey('matchups.id'), nullable=False)
+    winner = db.Column(db.String(10), nullable=False)
+    games = db.Column(db.Integer, nullable=False)
+    
+    matchup = db.relationship('Matchup', backref=db.backref('result', lazy=True))
+    
+    def __repr__(self):
+        return f'<Result for Matchup {self.matchup_id}: {self.winner} in {self.games} games>'
+
 class Pick(db.Model):
     __tablename__ = 'picks'
 

@@ -1,0 +1,330 @@
+<div class="admin-container">
+  <h1 class="admin-header">Admin Dashboard</h1>
+
+  <!-- Admin Navigation Tabs -->
+  <div class="admin-tabs">
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'bracket'"
+      (click)="setActiveTab('bracket')"
+    >
+      Bracket Management
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'users'"
+      (click)="setActiveTab('users')"
+    >
+      User Management
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'settings'"
+      (click)="setActiveTab('settings')"
+    >
+      Settings
+    </button>
+  </div>
+
+  <!-- Bracket Management Tab -->
+  <div class="admin-tab-content" *ngIf="activeTab === 'bracket'">
+    <div class="admin-section">
+      <h2>Bracket Management</h2>
+      <p>Configure and update NHL playoff bracket results.</p>
+
+      <!-- Setup/Update Toggle -->
+      <div class="phase-toggle">
+        <button
+          class="phase-button"
+          [class.active]="bracketPhase === 'setup'"
+          (click)="setBracketPhase('setup')"
+        >
+          Setup Initial Matchups
+        </button>
+        <button
+          class="phase-button"
+          [class.active]="bracketPhase === 'update'"
+          (click)="setBracketPhase('update')"
+        >
+          Update Round Results
+        </button>
+      </div>
+
+      <!-- Phase 1: Setup Initial Matchups -->
+      <div class="bracket-phase" *ngIf="bracketPhase === 'setup'">
+        <h3>Initial Playoff Matchups</h3>
+        <p>Set the first round matchups for each conference.</p>
+
+        <div class="conference-section">
+          <h4>Western Conference</h4>
+          <div class="matchup-grid">
+            <!-- West Matchup 1 -->
+            <div class="matchup-entry">
+              <h5>W1</h5>
+              <div class="matchup-pair">
+                <div class="team-entry">
+                  <label>Team 1 (Higher Seed):</label>
+                  <select [(ngModel)]="westMatchups[0].team1">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="team-entry">
+                  <label>Team 2 (Lower Seed):</label>
+                  <select [(ngModel)]="westMatchups[0].team2">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- West Matchups 2-4 (similar structure) -->
+            <div
+              class="matchup-entry"
+              *ngFor="let i of [1, 2, 3]; let index = index"
+            >
+              <h5>W{{ index + 2 }}</h5>
+              <div class="matchup-pair">
+                <div class="team-entry">
+                  <label>Team 1 (Higher Seed):</label>
+                  <select [(ngModel)]="westMatchups[i].team1">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="team-entry">
+                  <label>Team 2 (Lower Seed):</label>
+                  <select [(ngModel)]="westMatchups[i].team2">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="conference-section">
+          <h4>Eastern Conference</h4>
+          <div class="matchup-grid">
+            <!-- East Matchup 1 -->
+            <div class="matchup-entry">
+              <h5>E1</h5>
+              <div class="matchup-pair">
+                <div class="team-entry">
+                  <label>Team 1 (Higher Seed):</label>
+                  <select [(ngModel)]="eastMatchups[0].team1">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="team-entry">
+                  <label>Team 2 (Lower Seed):</label>
+                  <select [(ngModel)]="eastMatchups[0].team2">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- East Matchups 2-4 (similar structure) -->
+            <div
+              class="matchup-entry"
+              *ngFor="let i of [1, 2, 3]; let index = index"
+            >
+              <h5>E{{ index + 2 }}</h5>
+              <div class="matchup-pair">
+                <div class="team-entry">
+                  <label>Team 1 (Higher Seed):</label>
+                  <select [(ngModel)]="eastMatchups[i].team1">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="team-entry">
+                  <label>Team 2 (Lower Seed):</label>
+                  <select [(ngModel)]="eastMatchups[i].team2">
+                    <option *ngFor="let team of teams" [value]="team.code">
+                      {{ team.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-actions">
+          <button class="admin-button save" (click)="saveInitialMatchups()">
+            Save Initial Matchups
+          </button>
+        </div>
+      </div>
+
+      <!-- Phase 2: Update Round Results -->
+      <div class="bracket-phase" *ngIf="bracketPhase === 'update'">
+        <h3>Update Playoff Results</h3>
+        <p>Enter the results for each round as games are completed.</p>
+
+        <!-- Round Selector -->
+        <div class="round-selector">
+          <label>Select Round:</label>
+          <select [(ngModel)]="selectedRound" (change)="loadRoundMatchups()">
+            <option [value]="1">First Round</option>
+            <option [value]="2">Second Round</option>
+            <option [value]="3">Conference Finals</option>
+            <option [value]="4">Stanley Cup Final</option>
+          </select>
+        </div>
+
+        <!-- East Conference Results -->
+        <div class="conference-section" *ngIf="selectedRound < 4">
+          <h4>Eastern Conference</h4>
+          <div class="results-grid">
+            <div
+              class="matchup-result"
+              *ngFor="let matchup of eastRoundMatchups; let i = index"
+            >
+              <div class="matchup-teams">
+                <div class="team">{{ getTeamName(matchup.team1) }}</div>
+
+                <div class="team">{{ getTeamName(matchup.team2) }}</div>
+              </div>
+
+              <div class="result-entry">
+                <label>Winner:</label>
+                <select [(ngModel)]="eastRoundResults[i].winner">
+                  <option [value]="matchup.team1">
+                    {{ getTeamName(matchup.team1) }}
+                  </option>
+                  <option [value]="matchup.team2">
+                    {{ getTeamName(matchup.team2) }}
+                  </option>
+                </select>
+
+                <label>Games:</label>
+                <select [(ngModel)]="eastRoundResults[i].games">
+                  <option [value]="4">4-0</option>
+                  <option [value]="5">4-1</option>
+                  <option [value]="6">4-2</option>
+                  <option [value]="7">4-3</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- West Conference Results -->
+        <div class="conference-section" *ngIf="selectedRound < 4">
+          <h4>Western Conference</h4>
+          <div class="results-grid">
+            <div
+              class="matchup-result"
+              *ngFor="let matchup of westRoundMatchups; let i = index"
+            >
+              <div class="matchup-teams">
+                <div class="team">{{ getTeamName(matchup.team1) }}</div>
+
+                <div class="team">{{ getTeamName(matchup.team2) }}</div>
+              </div>
+
+              <div class="result-entry">
+                <label>Winner:</label>
+                <select [(ngModel)]="westRoundResults[i].winner">
+                  <option [value]="matchup.team1">
+                    {{ getTeamName(matchup.team1) }}
+                  </option>
+                  <option [value]="matchup.team2">
+                    {{ getTeamName(matchup.team2) }}
+                  </option>
+                </select>
+
+                <label>Games:</label>
+                <select [(ngModel)]="westRoundResults[i].games">
+                  <option [value]="4">4-0</option>
+                  <option [value]="5">4-1</option>
+                  <option [value]="6">4-2</option>
+                  <option [value]="7">4-3</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stanley Cup Final (Round 4) -->
+        <div class="conference-section" *ngIf="selectedRound === 4">
+          <h4>Stanley Cup Final</h4>
+          <div class="results-grid" *ngIf="finalMatchup">
+            <div class="matchup-result">
+              <div class="matchup-teams">
+                <div class="team">{{ getTeamName(finalMatchup.team1) }}</div>
+
+                <div class="team">{{ getTeamName(finalMatchup.team2) }}</div>
+              </div>
+
+              <div class="result-entry">
+                <label>Winner:</label>
+                <select [(ngModel)]="finalResult.winner">
+                  <option [value]="finalMatchup.team1">
+                    {{ getTeamName(finalMatchup.team1) }}
+                  </option>
+                  <option [value]="finalMatchup.team2">
+                    {{ getTeamName(finalMatchup.team2) }}
+                  </option>
+                </select>
+
+                <label>Games:</label>
+                <select [(ngModel)]="finalResult.games">
+                  <option [value]="4">4-0</option>
+                  <option [value]="5">4-1</option>
+                  <option [value]="6">4-2</option>
+                  <option [value]="7">4-3</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!finalMatchup" class="no-matchups">
+            Complete previous rounds to set up the Stanley Cup Final.
+          </div>
+        </div>
+
+        <div class="admin-actions">
+          <button class="admin-button save" (click)="saveRoundResults()">
+            Save Round Results
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Management Tab -->
+  <div class="admin-tab-content" *ngIf="activeTab === 'users'">
+    <div class="admin-section">
+      <h2>User Management</h2>
+      <p>Manage users and permissions.</p>
+      <!-- User management functionality will be implemented here -->
+    </div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div class="admin-tab-content" *ngIf="activeTab === 'settings'">
+    <div class="admin-section">
+      <h2>System Settings</h2>
+      <p>Configure application settings.</p>
+      <!-- Settings functionality will be implemented here -->
+    </div>
+  </div>
+</div>

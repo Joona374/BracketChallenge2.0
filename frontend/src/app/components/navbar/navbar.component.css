@@ -319,7 +319,7 @@
   }
 
   .dropdown-toggle {
-    padding: 15px;
+    padding: 0;
     width: 100%;
     text-align: left;
     justify-content: space-between;

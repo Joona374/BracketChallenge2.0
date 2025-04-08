@@ -24,8 +24,8 @@ export class BracketComponent implements OnInit {
   matchups: Matchups = { west: [], east: [] };
 
   userPicks: {
-    round1: { [key: number]: string };
-    round1Games: { [key: number]: number };
+    round1: { [key: string]: string }; // Changed from number to string
+    round1Games: { [key: string]: number }; // Changed from number to string
 
     round2: RoundPicks;
     round2Games: { [key: string]: number };
@@ -59,19 +59,13 @@ export class BracketComponent implements OnInit {
       return;
     }
 
+    // Single HTTP GET request
     this.http.get("http://localhost:5000/api/bracket/matchups").subscribe({
       next: (data: any) => {
         this.matchups = data;
-        this.loadPreviousPicks(user.id); // ← Load saved picks after matchups
-      },
-      error: (err) => {
-        console.error("Failed to load matchups", err);
-      },
-    });
 
-    this.http.get("http://localhost:5000/api/bracket/matchups").subscribe({
-      next: (data: any) => {
-        this.matchups = data;
+        // Load saved picks and compute next rounds
+        this.loadPreviousPicks(user.id);
         this.computeNextRounds();
       },
       error: (err) => {
@@ -84,8 +78,9 @@ export class BracketComponent implements OnInit {
     return Array.isArray(val);
   }
 
-  pickWinner(matchupId: number | string, team: string) {
-    if (typeof matchupId === "number") {
+  pickWinner(matchupId: string, team: string) {
+    if (matchupId.startsWith("W") || matchupId.startsWith("E")) {
+      // First round matchups (W1, W2, E1, E2, etc.)
       this.userPicks.round1[matchupId] = team;
     } else if (matchupId.startsWith("w-") || matchupId.startsWith("e-")) {
       this.userPicks.round2[`${matchupId}-winner`] = team;
@@ -97,8 +92,8 @@ export class BracketComponent implements OnInit {
     this.computeNextRounds();
   }
 
-  getPick(matchupId: number | string, team: string): boolean {
-    if (typeof matchupId === "number") {
+  getPick(matchupId: string, team: string): boolean {
+    if (matchupId.startsWith("W") || matchupId.startsWith("E")) {
       return this.userPicks.round1[matchupId] === team;
     } else if (matchupId.startsWith("w-") || matchupId.startsWith("e-")) {
       return this.userPicks.round2[`${matchupId}-winner`] === team;
@@ -139,14 +134,14 @@ export class BracketComponent implements OnInit {
     this.userPicks.final = {};
 
     // Step 3: Build round2 matchups from round1
-    const w1 = this.userPicks.round1[1];
-    const w2 = this.userPicks.round1[2];
-    const w3 = this.userPicks.round1[3];
-    const w4 = this.userPicks.round1[4];
-    const e1 = this.userPicks.round1[5];
-    const e2 = this.userPicks.round1[6];
-    const e3 = this.userPicks.round1[7];
-    const e4 = this.userPicks.round1[8];
+    const w1 = this.userPicks.round1["W1"];
+    const w2 = this.userPicks.round1["W2"];
+    const w3 = this.userPicks.round1["W3"];
+    const w4 = this.userPicks.round1["W4"];
+    const e1 = this.userPicks.round1["E1"];
+    const e2 = this.userPicks.round1["E2"];
+    const e3 = this.userPicks.round1["E3"];
+    const e4 = this.userPicks.round1["E4"];
 
     this.userPicks.round2["w-semi"] = orderedPair(w1, w2);
     this.userPicks.round2["w-semi2"] = orderedPair(w3, w4);
@@ -274,7 +269,7 @@ export class BracketComponent implements OnInit {
     this.computeNextRounds();
   }
 
-  getTeamClass(matchupId: number | string, team: string): string {
+  getTeamClass(matchupId: string, team: string): string {
     if (!this.isTeamSelectable(team)) return "team disabled";
 
     const selected = this.getPick(matchupId, team);
@@ -282,7 +277,7 @@ export class BracketComponent implements OnInit {
     return selected ? `team selected ${teamClass}` : "team";
   }
 
-  increaseGames(round: string, matchupId: number | string) {
+  increaseGames(round: string, matchupId: string) {
     const gamesKey = `${round}Games` as keyof typeof this.userPicks;
 
     // ✅ Make sure the object exists
@@ -304,7 +299,7 @@ export class BracketComponent implements OnInit {
     }
   }
 
-  decreaseGames(round: string, matchupId: number | string) {
+  decreaseGames(round: string, matchupId: string) {
     const gamesKey = `${round}Games` as keyof typeof this.userPicks;
 
     // ✅ Make sure the object exists
@@ -326,7 +321,7 @@ export class BracketComponent implements OnInit {
     }
   }
 
-  getGames(round: string, matchupId: number | string): number {
+  getGames(round: string, matchupId: string): number {
     const gamesObj = this.userPicks[
       `${round}Games` as keyof typeof this.userPicks
     ] as any;

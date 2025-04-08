@@ -54,6 +54,17 @@
         >Sarjataulukko</a
       >
       <a routerLink="/rules" routerLinkActive="active-link">Säännöt & Ohjeet</a>
+
+      <!-- Admin link - only shown for admin users -->
+      <a
+        *ngIf="user?.isAdmin"
+        routerLink="/admin"
+        routerLinkActive="active-link"
+        class="admin-link"
+      >
+        Hallintapaneeli
+      </a>
+
       <a
         routerLink="/dashboard"
         routerLinkActive="active-link"

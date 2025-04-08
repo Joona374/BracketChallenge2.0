@@ -40,6 +40,8 @@ export class UserViewComponent implements OnInit {
   private matchupsByRoundCache: { [key: string]: any[] } = {};
   private teamWinnerCache: { [key: string]: boolean } = {};
 
+  logoUrl: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
@@ -75,6 +77,7 @@ export class UserViewComponent implements OnInit {
     this.http.get(`http://localhost:5000/api/user/by-team-name?teamName=${encodedTeamName}`).subscribe({
       next: (response: any) => {
         const userId = response.userId;
+        this.logoUrl = response.logoUrl; // Store the logo URL
 
         // Keep track of loading requests
         let pendingRequests = 3; // bracket, lineup, predictions

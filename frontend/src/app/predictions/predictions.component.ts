@@ -93,7 +93,7 @@ export class PredictionsComponent implements OnInit {
     // Apply search term filter
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.firstName.toLowerCase().includes(term) ||
         p.lastName.toLowerCase().includes(term) ||
         p.team.toLowerCase().includes(term)
