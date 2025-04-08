@@ -18,7 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# With this:
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OpenAI API key not found. Please set it in your environment variables.")
@@ -30,7 +29,6 @@ if not client:
 
 LOGO_DIR = "team_logos"
 os.makedirs(LOGO_DIR, exist_ok=True)
-
 def generate_team_logos(team_name, user_id):
     """
     Generates 4 team logos using OpenAI's DALL·E model and saves them locally.
@@ -408,6 +406,45 @@ def update_user_logo():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to update logo: {str(e)}"}), 500
+
+@app.route("/api/user/assign-logos", methods=["POST"])
+def assign_custom_logos():
+    data = request.json
+    user_id = data.get("userId")
+    logo_urls = data.get("logoUrls")
+    
+    if not user_id or not logo_urls:
+        return jsonify({"error": "Missing userId or logoUrls"}), 400
+    
+    if len(logo_urls) != 4:
+        return jsonify({"error": "Exactly 4 logo URLs must be provided"}), 400
+    
+    user = User.query.get(user_id)
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    try:
+        user.logo1_url = logo_urls[0]
+        user.logo2_url = logo_urls[1]
+        user.logo3_url = logo_urls[2]
+        user.logo4_url = logo_urls[3]
+        
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Logo URLs assigned successfully",
+            "userId": user_id,
+            "logoUrls": {
+                "logo1": user.logo1_url,
+                "logo2": user.logo2_url,
+                "logo3": user.logo3_url,
+                "logo4": user.logo4_url
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to assign logo URLs: {str(e)}"}), 500
 
 @app.route("/api/user/stats", methods=["GET"])
 def get_user_stats():

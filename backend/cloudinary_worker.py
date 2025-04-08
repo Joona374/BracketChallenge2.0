@@ -65,13 +65,54 @@ def upload_logos_for_user(user_id, filenames):
         db.session.commit()
         print(f"✅ Logos uploaded and assigned to user {user.username}")
 
+
+def assign_cdn_urls_to_user(user_id, urls):
+    """
+    Assign 4 pre-uploaded Cloudinary URLs to a user in the DB.
+    
+    Args:
+        user_id (int): The ID of the user to assign the URLs to
+        urls (list): A list of 4 Cloudinary URLs
+    """
+    if len(urls) != 4:
+        print("❌ Please provide exactly 4 logo URLs.")
+        return
+
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    db.init_app(app)
+
+    with app.app_context():
+        user = User.query.get(user_id)
+        if not user:
+            print(f"❌ No user found with ID {user_id}")
+            return
+
+        user.logo1_url = urls[0]
+        user.logo2_url = urls[1]
+        user.logo3_url = urls[2]
+        user.logo4_url = urls[3]
+
+        db.session.commit()
+        print(f"✅ Logo URLs assigned to user {user.username}")
+
+
 if __name__ == "__main__":
-    upload_logos_for_user(
-    user_id=1,
-    filenames=[
-        "urho1.png",
-        "urho2.png",
-        "urho3.png",
-        "urho4.png"
-    ]
-)
+    # upload_logos_for_user(
+    # user_id=1,
+    # filenames=[
+    #     "urho1.png",
+    #     "urho2.png",
+    #     "urho3.png",
+    #     "urho4.png"
+    # ]
+    # )
+    assign_cdn_urls_to_user(
+        user_id=4,
+        urls=[
+            "https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png",
+            "https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744046029/nhl_bracket_logos/d9tlhq6qm90rdrf6macf.png",
+            "https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744022575/logo_cyjav5.png",
+            "https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744046022/nhl_bracket_logos/mgtn2l6zbpw2rpyia6vt.png"
+        ]
+    )

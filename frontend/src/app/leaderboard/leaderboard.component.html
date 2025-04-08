@@ -13,6 +13,68 @@
   <!-- Error message -->
   <div class="error-message" *ngIf="error">{{ error }}</div>
 
+  <!-- Top 3 Podium Display - Simplified Version -->
+  <div
+    class="podium-container"
+    *ngIf="leaderboardEntries.length >= 3 && !loading"
+  >
+    <div class="podium-wrapper">
+      <!-- Second Place -->
+      <div class="podium-place second-place">
+        <div class="podium-content">
+          <div class="podium-medal">🥈</div>
+          <div class="podium-logo-container">
+            <img
+              *ngIf="getTopThree()[1].logoUrl"
+              [src]="getTopThree()[1].logoUrl"
+              [alt]="getTopThree()[1].teamName + ' logo'"
+              class="podium-logo"
+            />
+          </div>
+          <div class="podium-team">{{ getTopThree()[1].teamName }}</div>
+          <div class="podium-points">{{ getTopThree()[1].totalPoints }}</div>
+        </div>
+        <div class="podium-block second"></div>
+      </div>
+
+      <!-- First Place -->
+      <div class="podium-place first-place">
+        <div class="podium-content">
+          <div class="podium-medal">🏆</div>
+          <div class="podium-logo-container">
+            <img
+              *ngIf="getTopThree()[0].logoUrl"
+              [src]="getTopThree()[0].logoUrl"
+              [alt]="getTopThree()[0].teamName + ' logo'"
+              class="podium-logo"
+            />
+          </div>
+          <div class="podium-team">{{ getTopThree()[0].teamName }}</div>
+          <div class="podium-points">{{ getTopThree()[0].totalPoints }}</div>
+        </div>
+        <div class="podium-block first"></div>
+      </div>
+
+      <!-- Third Place -->
+      <div class="podium-place third-place">
+        <div class="podium-content">
+          <div class="podium-medal">🥉</div>
+          <div class="podium-logo-container">
+            <img
+              *ngIf="getTopThree()[2].logoUrl"
+              [src]="getTopThree()[2].logoUrl"
+              [alt]="getTopThree()[2].teamName + ' logo'"
+              class="podium-logo"
+            />
+          </div>
+          <div class="podium-team">{{ getTopThree()[2].teamName }}</div>
+          <div class="podium-points">{{ getTopThree()[2].totalPoints }}</div>
+        </div>
+        <div class="podium-block third"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="leaderboard-table-container">
     <table class="leaderboard-table">
       <thead>

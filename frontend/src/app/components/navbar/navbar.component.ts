@@ -60,7 +60,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (storedUser) {
       try {
         this.user = JSON.parse(storedUser);
-        console.log('User loaded from storage:', this.user); // For debugging
+
+        // Validate the logo URL exists and is not empty
+        if (this.user && (!this.user.logoUrl || this.user.logoUrl === "null" || this.user.logoUrl === "undefined")) {
+          this.user.logoUrl = null;
+        }
+        console.log('User loaded from storage in navbar:', this.user);
       } catch (error) {
         console.error('Error parsing user from localStorage:', error);
         this.user = null;
@@ -77,6 +82,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   handleLogoUpdate(event: CustomEvent) {
     if (this.user) {
       this.user.logoUrl = event.detail.logoUrl;
+
+      // Validate the logo URL exists and is not empty
+      if (!this.user.logoUrl || this.user.logoUrl === "null" || this.user.logoUrl === "undefined") {
+        this.user.logoUrl = null;
+      }
       console.log('Logo updated in navbar:', this.user.logoUrl);
     }
   }

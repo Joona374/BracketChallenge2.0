@@ -24,8 +24,8 @@ interface LeaderboardEntry {
 })
 export class LeaderboardComponent implements OnInit {
   leaderboardEntries: LeaderboardEntry[] = [];
-  sortKey: keyof LeaderboardEntry | null = 'totalPoints';
-  sortAsc = false;
+  sortKey: keyof LeaderboardEntry = 'totalPoints'; // Initialize with totalPoints
+  sortAsc = false; // Set to false for descending order (highest points first)
   loading: boolean = false;
   error: string | null = null; // To display error messages
 
@@ -49,6 +49,7 @@ export class LeaderboardComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.leaderboardEntries = data;
+          this.sortLeaderboard(); // Sort the leaderboard with current sort settings
           this.updateRanks();
           this.loading = false;
         },
@@ -57,9 +58,28 @@ export class LeaderboardComponent implements OnInit {
           this.error = 'Failed to load leaderboard data. Using mock data instead.';
           this.loadMockData(); // Uncomment fallback to mock data
           this.loading = false;
+          this.sortLeaderboard(); // Sort mock data too
           this.updateRanks();
         }
       });
+  }
+
+  // New method to ensure leaderboard is always properly sorted
+  sortLeaderboard(): void {
+    // Sort the array based on the key and direction
+    this.leaderboardEntries.sort((a, b) => {
+      const valA = a[this.sortKey];
+      const valB = b[this.sortKey];
+
+      // If either value is undefined, handle the comparison accordingly
+      if (valA === undefined && valB === undefined) return 0;
+      if (valA === undefined) return this.sortAsc ? -1 : 1;
+      if (valB === undefined) return this.sortAsc ? 1 : -1;
+
+      if (valA < valB) return this.sortAsc ? -1 : 1;
+      if (valA > valB) return this.sortAsc ? 1 : -1;
+      return 0;
+    });
   }
 
   loadMockData(): void {
@@ -175,6 +195,7 @@ export class LeaderboardComponent implements OnInit {
         predictionsPoints: 10
       }
     ];
+    this.sortLeaderboard(); // Sort mock data
     this.updateRanks();
   }
 
@@ -184,25 +205,10 @@ export class LeaderboardComponent implements OnInit {
       this.sortAsc = !this.sortAsc;
     } else {
       this.sortKey = key;
-      this.sortAsc = false; // Default to ascending when switching keys
+      this.sortAsc = false; // Default to descending when switching keys
     }
 
-    // Sort the array based on the key and direction
-    this.leaderboardEntries.sort((a, b) => {
-      // Handle possible undefined values
-      const valA = a[key];
-      const valB = b[key];
-
-      // If either value is undefined, handle the comparison accordingly
-      if (valA === undefined && valB === undefined) return 0;
-      if (valA === undefined) return this.sortAsc ? -1 : 1;
-      if (valB === undefined) return this.sortAsc ? 1 : -1;
-
-      if (valA < valB) return this.sortAsc ? -1 : 1;
-      if (valA > valB) return this.sortAsc ? 1 : -1;
-      return 0;
-    });
-
+    this.sortLeaderboard(); // Use the sorting method
     this.updateRanks();
   }
 
@@ -219,5 +225,29 @@ export class LeaderboardComponent implements OnInit {
 
   isCurrentUser(id: number): boolean {
     return id === this.currentUserId;
+  }
+
+  // Get the top three teams for the podium display
+  getTopThree(): LeaderboardEntry[] {
+    // Create a copy of the entries, sort by totalPoints in descending order, and take the first 3
+    const sortedEntries = [...this.leaderboardEntries]
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .slice(0, 3);
+
+    // If there are fewer than 3 entries, pad the array
+    while (sortedEntries.length < 3) {
+      sortedEntries.push({
+        id: 0,
+        rank: sortedEntries.length + 1,
+        username: 'N/A',
+        teamName: 'No Team',
+        totalPoints: 0,
+        bracketPoints: 0,
+        lineupPoints: 0,
+        predictionsPoints: 0
+      });
+    }
+
+    return sortedEntries;
   }
 }

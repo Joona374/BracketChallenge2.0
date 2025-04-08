@@ -60,12 +60,13 @@
         class="avatar-nav-link"
       >
         <div class="avatar-circle-nav">
-          <!-- Show team logo if available, fallback to initials -->
+          <!-- Use ngIf with proper null check and error handling for the logo -->
           <img
-            *ngIf="user?.logoUrl"
+            *ngIf="user && user.logoUrl"
             [src]="user.logoUrl"
             class="team-logo-nav"
             alt="Team Logo"
+            (error)="user.logoUrl = null"
           />
           <span *ngIf="!user?.logoUrl" class="initials">{{
             getUserInitials()

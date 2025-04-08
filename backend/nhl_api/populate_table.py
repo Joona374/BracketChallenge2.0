@@ -10,6 +10,9 @@ from config import Config
 from db import db_engine as db
 from models import Team, Player
 
+MIN_PRICE = 200000
+MAX_PRICE = 500000
+
 def fetch_and_store_teams():
     teams_url = "https://api-web.nhle.com/v1/standings/now"
     response = requests.get(teams_url)
@@ -39,110 +42,160 @@ def fetch_and_store_teams():
 
 def fetch_and_store_players_for_team(abbr):
     roster_url = f'https://api-web.nhle.com/v1/roster/{abbr}/current'
-    roster_response = requests.get(roster_url)
-    if roster_response.status_code != 200:
-        print(f"Failed to fetch roster for {abbr}")
+    
+    try:
+        roster_response = requests.get(roster_url)
+        roster_data = roster_response.json()
+        
+        players = (
+            roster_data.get("forwards", []) +
+            roster_data.get("defensemen", []) +
+            roster_data.get("goalies", [])
+        )
+        
+        print(f"\n📋 Processing {len(players)} players for {abbr}")
+        
+        for player in players:
+            api_id = player['id']
+            first_name = player['firstName']['default']
+            last_name = player['lastName']['default']
+            position = player['positionCode']
+            jersey_number = player.get('sweaterNumber', '')
+            
+            # Get player info from the API
+            player_url = f"https://api-web.nhle.com/v1/player/{api_id}/landing"
+            player_response = requests.get(player_url)
+            player_data = player_response.json()
+            
+            birth_country = player_data.get("birthCountry", "")
+            birth_date = player_data.get("birthDate", "")
+            birth_year = None
+            if birth_date:
+                birth_year = int(birth_date.split("-")[0])
+            headshot = player.get("headshot", "")
+            
+            # Get stats via the landing endpoint
+            landing_url = f"https://api-web.nhle.com/v1/player/{api_id}/landing"
+            landing_response = requests.get(landing_url)
+            if landing_response.status_code == 200:
+                landing_data = landing_response.json()
+                stats = landing_data.get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
+                reg_gp = stats.get("gamesPlayed", 0)
+                reg_goals = stats.get("goals", 0)
+                reg_assists = stats.get("assists", 0)
+                reg_points = stats.get("points", 0)
+                reg_plus_minus = stats.get("plusMinus", 0)
+            else:
+                reg_gp = reg_goals = reg_assists = reg_points = reg_plus_minus = 0
+            
+            # Use placeholders for playoff stats (update later when available)
+            playoff_goals = playoff_assists = playoff_points = playoff_plus_minus = 0
+            
+            # Check if the player already exists in the DB using the API id
+            existing_player = Player.query.filter_by(api_id=api_id).first()
+            if existing_player:
+                print(f"Player {first_name} {last_name} already exists, skipping.")
+                continue
+
+            if birth_year and 2025 - birth_year <= 23:
+                is_U23 = True
+            else:
+                is_U23 = False
+            
+            # Set a default price - will be updated later by calculate_prices()
+            default_price = 200000
+            
+            new_player = Player(
+                api_id=api_id,
+                first_name=first_name,
+                last_name=last_name,
+                team_abbr=abbr,
+                position=position,
+                jersey_number=jersey_number,
+                birth_country=birth_country,
+                birth_year=birth_year,
+                headshot=headshot,
+                is_U23=is_U23,
+                price=default_price,  # Default price, will be updated later
+                reg_gp=reg_gp,
+                reg_goals=reg_goals,
+                reg_assists=reg_assists,
+                reg_points=reg_points,
+                reg_plus_minus=reg_plus_minus,
+                playoff_goals=playoff_goals,
+                playoff_assists=playoff_assists,
+                playoff_points=playoff_points,
+                playoff_plus_minus=playoff_plus_minus
+            )
+            db.session.add(new_player)
+            print(f"Added player: {first_name} {last_name} ({abbr})")
+            time.sleep(0.1)  # Small delay to be kind to the API
+        
+        db.session.commit()
+        
+    except Exception as e:
+        print(f"❌ Error processing team {abbr}: {e}")
+        db.session.rollback()
+
+def calculate_prices():
+    """
+    Calculate player prices based on regular season performance.
+    Scales prices between MIN_PRICE and MAX_PRICE based on performance.
+    Formula: (2 * reg_goals + reg_assists + reg_plus_minus) / reg_gp
+    """
+    print("📊 Calculating player prices based on performance...")
+    
+    # Get all players from database
+    players = Player.query.all()
+    
+    # Calculate performance score for each player
+    player_scores = []
+    for player in players:
+        # Skip players with no games played to avoid division by zero
+        if not player.reg_gp or player.reg_gp == 0:
+            performance = 0
+        else:
+            # Calculate performance using the formula
+            performance = (
+                (2 * player.reg_goals + player.reg_assists + 
+                 (abs(player.reg_plus_minus) if player.reg_plus_minus < 0 else player.reg_plus_minus))
+                / player.reg_gp
+            )
+        
+        player_scores.append((player, performance))
+    
+    # Find min and max scores (excluding zeros)
+    non_zero_scores = [score for _, score in player_scores if score > 0]
+    if not non_zero_scores:
+        print("⚠️ No valid player scores found. Skipping price calculation.")
         return
     
-    roster_data = roster_response.json()
-    # Combine forwards, defensemen, and goalies
-    players_list = (
-        roster_data.get("forwards", []) +
-        roster_data.get("defensemen", []) +
-        roster_data.get("goalies", [])
-    )
+    min_score = min(non_zero_scores)
+    max_score = max(non_zero_scores)
     
-    for player in players_list:
-        api_id = player.get("id")
-        first_name = player.get("firstName", {}).get("default", "")
-        last_name = player.get("lastName", {}).get("default", "")
-        position = player.get("positionCode", "")
-        jersey_number = player.get("sweaterNumber", "")
-        birth_country = player.get("birthCountry", "")
-        birth_year = None
-        birth_date = player.get("birthDate", "")
-        if birth_date:
-            birth_year = int(birth_date.split("-")[0])
-        headshot = player.get("headshot", "")
-        
-        # Get stats via the landing endpoint
-        landing_url = f"https://api-web.nhle.com/v1/player/{api_id}/landing"
-        landing_response = requests.get(landing_url)
-        if landing_response.status_code == 200:
-            landing_data = landing_response.json()
-            stats = landing_data.get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
-            reg_gp = stats.get("gamesPlayed", 0)
-            reg_goals = stats.get("goals", 0)
-            reg_assists = stats.get("assists", 0)
-            reg_points = stats.get("points", 0)
-            reg_plus_minus = stats.get("plusMinus", 0)
+    score_range = max_score - min_score
+    price_range = MAX_PRICE - MIN_PRICE
+    
+    # Update prices for all players
+    for player, score in player_scores:
+        if score_range == 0:  # Avoid division by zero if all players have the same score
+            player.price = MIN_PRICE
         else:
-            reg_gp = reg_goals = reg_assists = reg_points = reg_plus_minus = 0
-        
-        # Use placeholders for playoff stats (update later when available)
-        playoff_goals = playoff_assists = playoff_points = playoff_plus_minus = 0
-        
-        # Check if the player already exists in the DB using the API id
-        existing_player = Player.query.filter_by(api_id=api_id).first()
-        if existing_player:
-            print(f"Player {first_name} {last_name} already exists, skipping.")
-            continue
-
-        if birth_year and 2025 - birth_year <= 23:
-            is_U23 = True
-        else:
-            is_U23 = False
-        
-        # Calculate player price based on regular season performance
-        # Base price depends on position and stats
-        base_price = 200000  # Starting base price
-        
-        # Add value based on points
-        if position in ['L', 'C', 'R', 'D']:
-            # Skaters - value based on points and plus/minus
-            points_value = reg_points * 5000
-            plus_minus_value = max(0, reg_plus_minus * 2000)  # Only positive contribution
-            position_value = 50000 if position == 'D' else 30000  # Defenders cost more
-            calculated_price = base_price + points_value + plus_minus_value + position_value
-        elif position == 'G':
-            # Goalies - value based on games played
-            games_value = reg_gp * 6000
-            calculated_price = base_price + games_value + 70000  # Goalies are premium
+            # Scale the price between MIN_PRICE and MAX_PRICE
+            normalized_score = (score - min_score) / score_range
+            player.price = int(MIN_PRICE + (normalized_score * price_range))
             
-        # Cap the price between 100,000 and 500,000
-        calculated_price = max(100000, min(500000, calculated_price))
-        
-        # U23 players get a discount
-        if is_U23:
-            calculated_price = int(calculated_price * 0.9)
-        
-        new_player = Player(
-            api_id=api_id,
-            first_name=first_name,
-            last_name=last_name,
-            team_abbr=abbr,
-            position=position,
-            jersey_number=jersey_number,
-            birth_country=birth_country,
-            birth_year=birth_year,
-            headshot=headshot,
-            is_U23=is_U23,
-            price=calculated_price,  # Using the calculated price
-            reg_gp=reg_gp,
-            reg_goals=reg_goals,
-            reg_assists=reg_assists,
-            reg_points=reg_points,
-            reg_plus_minus=reg_plus_minus,
-            playoff_goals=playoff_goals,
-            playoff_assists=playoff_assists,
-            playoff_points=playoff_points,
-            playoff_plus_minus=playoff_plus_minus
-        )
-        db.session.add(new_player)
-        print(f"Added player: {first_name} {last_name} ({abbr})")
-        time.sleep(0.1)  # Small delay to be kind to the API
+            # Handle special cases
+            if player.is_U23:
+                # U23 players get a discount
+                player.price = int(player.price * 0.9)
+            
+            # Ensure price stays within bounds
+            player.price = max(MIN_PRICE, min(MAX_PRICE, player.price))
     
+    # Commit the changes to the database
     db.session.commit()
+    print(f"✅ Player prices calculated and updated. Price range: ${MIN_PRICE/1000:.1f}K - ${MAX_PRICE/1000:.1f}K")
 
 def populate_db():
     app = Flask(__name__)
@@ -159,6 +212,20 @@ def populate_db():
         for team in teams:
             print(f"Fetching players for team: {team.abbr}")
             fetch_and_store_players_for_team(team.abbr)
+        
+        # Calculate prices for all players
+        calculate_prices()
 
 if __name__ == '__main__':
-    populate_db()
+    # Create a Flask app context to run any database operations
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    db.init_app(app)
+    
+    with app.app_context():
+        # Check if specific argument is provided
+        if len(sys.argv) > 1 and sys.argv[1] == "populate":
+            populate_db()
+        else:
+            # By default, just recalculate prices for existing players
+            calculate_prices()
