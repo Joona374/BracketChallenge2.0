@@ -81,6 +81,7 @@ export class UserViewComponent implements OnInit {
         const onRequestComplete = () => {
           pendingRequests--;
           if (pendingRequests <= 0) {
+            // Force loading to false when all requests complete
             this.loading = false;
             this.cdr.markForCheck();
           }
@@ -127,8 +128,7 @@ export class UserViewComponent implements OnInit {
         this.userData.bracket = {}; // Set empty default
       },
       complete: () => {
-        this.checkLoadingComplete(); // Check loading state
-        onComplete();
+        onComplete(); // Just call onComplete, remove checkLoadingComplete call
       }
     });
   }
@@ -144,8 +144,7 @@ export class UserViewComponent implements OnInit {
         this.userData.lineup = {}; // Set empty default
       },
       complete: () => {
-        this.checkLoadingComplete(); // Check loading state
-        onComplete();
+        onComplete(); // Just call onComplete, remove checkLoadingComplete call
       }
     });
   }
@@ -161,8 +160,7 @@ export class UserViewComponent implements OnInit {
         this.userData.predictions = {}; // Set empty default
       },
       complete: () => {
-        this.checkLoadingComplete(); // Check loading state
-        onComplete();
+        onComplete(); // Just call onComplete, remove checkLoadingComplete call
       }
     });
   }
@@ -176,6 +174,8 @@ export class UserViewComponent implements OnInit {
         if (res && res.points) {
           this.userPoints = res.points;
         }
+        this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error loading user stats', err);
@@ -186,10 +186,10 @@ export class UserViewComponent implements OnInit {
   }
 
   checkLoadingComplete(): void {
-    if (this.userData.bracket || this.userData.lineup || this.userData.predictions || this.userPoints) {
-      this.loading = false;
-      this.cdr.markForCheck(); // Add this to update the view when loading completes
-    }
+    // Mark loading as complete regardless of whether data exists
+    // This fixes the issue where the page would get stuck loading if no data was found
+    this.loading = false;
+    this.cdr.markForCheck();
   }
 
   setActiveTab(tab: 'bracket' | 'lineup' | 'predictions'): void {

@@ -20,6 +20,7 @@
           <th class="rank-column">#</th>
           <th
             class="team-column"
+            style="text-align: start"
             (click)="sortBy('teamName')"
             [class.sorted]="sortKey === 'teamName'"
           >
@@ -79,7 +80,14 @@
           <td class="rank-column">
             <span class="rank-number">{{ entry.rank }}</span>
           </td>
+
           <td class="team-column">
+            <img
+              *ngIf="entry.logoUrl"
+              [src]="entry.logoUrl"
+              [alt]="entry.teamName + ' logo'"
+              class="team-logo"
+            />
             <a [routerLink]="['/user', entry.teamName]" class="team-link">{{
               entry.teamName
             }}</a>

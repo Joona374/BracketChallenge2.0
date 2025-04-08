@@ -144,8 +144,8 @@
 }
 
 .avatar-circle-nav {
-  width: 35px;
-  height: 35px;
+  width: 43px;
+  height: 43px;
   border-radius: 50%;
   background: linear-gradient(45deg, #ff3232, #990000);
   display: flex;

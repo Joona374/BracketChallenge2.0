@@ -21,6 +21,7 @@ venv/
 *.db
 *.sqlite3
 instance/
+backend/migrations/
 
 # 📦 Node / Angular
 frontend/node_modules/

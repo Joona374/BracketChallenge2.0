@@ -1,0 +1,299 @@
+<div class="vote-container">
+  <h2 class="section-header">NHL Bracket Challenge 2025 - Äänestys</h2>
+  <p class="section-subheader">
+    Äänestä osallistumismaksusta ja palkintojen jaosta
+  </p>
+
+  <!-- Login required notification -->
+  <div class="login-required-alert" *ngIf="!isLoggedIn">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="alert-content">
+      <h3>Kirjaudu sisään äänestääksesi</h3>
+      <p>
+        Sinun täytyy kirjautua sisään ennen kuin voit äänestää.
+        <a routerLink="/login">Kirjaudu sisään tästä</a> tai
+        <a routerLink="/register">rekisteröidy</a> jos sinulla ei ole vielä
+        käyttäjätiliä.
+      </p>
+    </div>
+  </div>
+
+  <!-- Alert messages -->
+  <div class="alert success" *ngIf="voteSuccess">
+    Äänesi on vastaanotettu! Kiitoksia äänetyksestä.
+  </div>
+  <div class="alert error" *ngIf="voteError">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Previous Vote Section (if user has already voted) -->
+  <div class="vote-section" *ngIf="hasUserVoted && previousVote">
+    <h3 class="vote-section-header">Äänestys lipukkeesi</h3>
+    <p class="vote-description">
+      Olet äänestänyt jo aiemmin. Valitsit nämä äänestäessäsi:
+    </p>
+
+    <div class="previous-vote-details">
+      <div class="previous-vote-item">
+        <div class="previous-vote-label">Osallistumismaksu:</div>
+        <div class="previous-vote-value">{{ previousVote.entryFee }} €</div>
+      </div>
+      <div class="previous-vote-item">
+        <div class="previous-vote-label">1. Sija:</div>
+        <div class="previous-vote-value">
+          {{ previousVote.distribution.first }}%
+        </div>
+      </div>
+      <div class="previous-vote-item">
+        <div class="previous-vote-label">2. Sija:</div>
+        <div class="previous-vote-value">
+          {{ previousVote.distribution.second }}%
+        </div>
+      </div>
+      <div class="previous-vote-item">
+        <div class="previous-vote-label">3. Sija:</div>
+        <div class="previous-vote-value">
+          {{ previousVote.distribution.third }}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry Fee Voting Section -->
+  <div class="vote-section" [class.user-already-voted]="hasUserVoted">
+    <h3 class="vote-section-header">Osallistumismaksu Äänestys</h3>
+    <p class="vote-description">
+      Valitse mieluisin osallstumismaksu vuoden 2025 Bracket Challengeen.
+    </p>
+
+    <div class="fee-selector">
+      <div
+        *ngFor="let fee of entryFeeOptions"
+        class="fee-option"
+        [class.selected]="selectedEntryFee === fee"
+        (click)="selectEntryFee(fee)"
+      >
+        <div class="fee-amount">{{ fee }} €</div>
+        <div class="vote-count" *ngIf="entryFeeVotes[fee]">
+          {{ entryFeeVotes[fee] }} ääntä
+        </div>
+        <div class="vote-percentage" *ngIf="getTotalVotes() > 0">
+          {{ getVotePercentage(entryFeeVotes[fee]) }}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prize Distribution Voting Section -->
+  <div class="vote-section" [class.user-already-voted]="hasUserVoted">
+    <h3 class="vote-section-header">Voitonjako Äänestys</h3>
+    <p class="vote-description">
+      Kuinka tahdot että voitot jaetaan? Valitse prosentit 1., 2. ja 3. sijalle.
+      <span class="total-note" [class.error]="totalDistribution !== 100"
+        >Summan tulee olla yhteensä 100%</span
+      >
+    </p>
+
+    <div class="distribution-form">
+      <div class="place-row">
+        <div class="place-label">1. Sija:</div>
+        <div class="slider-container">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            [(ngModel)]="prizeDistribution.first"
+            (input)="adjustDistribution('first')"
+            class="range-slider"
+          />
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            [(ngModel)]="prizeDistribution.first"
+            (change)="adjustDistribution('first')"
+            class="slider-value-input"
+          />
+          <span class="percentage-sign">%</span>
+        </div>
+      </div>
+
+      <div class="place-row">
+        <div class="place-label">2. Sija:</div>
+        <div class="slider-container">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            [(ngModel)]="prizeDistribution.second"
+            (input)="adjustDistribution('second')"
+            class="range-slider"
+          />
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            [(ngModel)]="prizeDistribution.second"
+            (change)="adjustDistribution('second')"
+            class="slider-value-input"
+          />
+          <span class="percentage-sign">%</span>
+        </div>
+      </div>
+
+      <div class="place-row">
+        <div class="place-label">3. Sija:</div>
+        <div class="slider-container">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            [(ngModel)]="prizeDistribution.third"
+            (input)="adjustDistribution('third')"
+            class="range-slider"
+          />
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            [(ngModel)]="prizeDistribution.third"
+            (change)="adjustDistribution('third')"
+            class="slider-value-input"
+          />
+          <span class="percentage-sign">%</span>
+        </div>
+      </div>
+
+      <div class="distribution-summary">
+        <div class="summary-row">
+          <div class="total-label">Yhteensä:</div>
+          <div class="total-value" [class.error]="totalDistribution !== 100">
+            {{ totalDistribution }}%
+          </div>
+        </div>
+        <div
+          class="example-calculation"
+          *ngIf="selectedEntryFee && totalDistribution === 100"
+        >
+          <h4>
+            Esimerkiksi {{ selectedEntryFee }}€ osallistumismaksulla ja ({{
+              getPlayers()
+            }}
+            pelaajalla)
+          </h4>
+          <div class="calculation-row">
+            <div>Palkintopotti yhteensä: {{ getPrizePool() }}€</div>
+          </div>
+          <div class="calculation-row">
+            <div>
+              1. sija: {{ calculatePrize("first") }}€ ({{
+                prizeDistribution.first
+              }}%)
+            </div>
+          </div>
+          <div class="calculation-row">
+            <div>
+              2. sija: {{ calculatePrize("second") }}€ ({{
+                prizeDistribution.second
+              }}%)
+            </div>
+          </div>
+          <div class="calculation-row">
+            <div>
+              3. sija: {{ calculatePrize("third") }}€ ({{
+                prizeDistribution.third
+              }}%)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Voting Stats -->
+  <div class="vote-section" *ngIf="showVotingStats">
+    <h3 class="vote-section-header">Tämänhetkinen äänestystilanne</h3>
+    <div class="voting-stats">
+      <div class="stats-column">
+        <h4>Osallistumismaksu</h4>
+        <div class="bar-chart">
+          <div *ngFor="let fee of entryFeeOptions" class="stat-row">
+            <div class="stat-label">{{ fee }}€</div>
+            <div class="stat-bar-container">
+              <div
+                class="stat-bar"
+                [style.width]="getVotePercentage(entryFeeVotes[fee]) + '%'"
+                [style.min-width]="entryFeeVotes[fee] > 0 ? '20px' : '0'"
+                [class.zero-percent]="
+                  getVotePercentage(entryFeeVotes[fee]) === 0
+                "
+              >
+                {{ getVotePercentage(entryFeeVotes[fee]) }}%
+              </div>
+            </div>
+            <div class="stat-count">{{ entryFeeVotes[fee] || 0 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-column">
+        <h4>Voitonjako (Keskiarvo)</h4>
+        <div class="pie-chart-container">
+          <!-- Updated pie chart using conic-gradient -->
+          <div class="pie-chart" [ngStyle]="getPieChartStyle()"></div>
+          <div class="pie-legend">
+            <div class="legend-item">
+              <div class="legend-color first"></div>
+              <div>1.: {{ averageDistribution.first }}%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color second"></div>
+              <div>2.: {{ averageDistribution.second }}%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color third"></div>
+              <div>3.: {{ averageDistribution.third }}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="vote-actions">
+    <p *ngIf="!votingDeadlinePassed" class="deadline-notice">
+      Äänestys päättyy {{ votingTimeRemaining }} kuluttua.
+    </p>
+    <p *ngIf="votingDeadlinePassed" class="deadline-notice deadline-passed">
+      {{ votingTimeRemaining }}
+    </p>
+    <button
+      class="vote-button"
+      [disabled]="!canSubmitVote() || hasUserVoted || votingDeadlinePassed"
+      (click)="submitVote()"
+    >
+      {{
+        hasUserVoted
+          ? "Olet jo äänestänyt"
+          : votingDeadlinePassed
+          ? "Äänestysaika on päättynyt"
+          : "Äänestä nyt!"
+      }}
+    </button>
+    <div class="voting-status" *ngIf="hasUserVoted">
+      <p>Olet jo äänestänyt. Tulokset vahvistetaan äänestysajan päätyttyä.</p>
+    </div>
+    <div class="voting-status" *ngIf="votingDeadlinePassed && !hasUserVoted">
+      <p>Äänestysaika on jo päättynyt. Lopulliset tulokset ilmoitetaan pian.</p>
+    </div>
+  </div>
+</div>

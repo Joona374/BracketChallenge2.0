@@ -11,6 +11,8 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
     registration_code = db.Column(db.String(80), db.ForeignKey('registration_codes.code'), nullable=False)
+    has_voted = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
     # Cloudinary logo URLs
     logo1_url = db.Column(db.String(255))
@@ -21,12 +23,11 @@ class User(db.Model):
     # Currently selected logo (default is placeholder)
     selected_logo_url = db.Column(
         db.String(255),
-        default="https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744022575/logo_cyjav5.png"
+        default="https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png"
     )
 
     picks = db.relationship("Pick", back_populates="user", uselist=True)
-
-
+    vote = db.relationship("Vote", back_populates="user", uselist=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -136,3 +137,19 @@ class Player(db.Model):
     
     def __repr__(self):
         return f'<Player {self.first_name} {self.last_name} ({self.team_abbr})>'
+
+class Vote(db.Model):
+    __tablename__ = 'votes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    entry_fee = db.Column(db.Integer, nullable=False)
+    first_place_percentage = db.Column(db.Integer, nullable=False)
+    second_place_percentage = db.Column(db.Integer, nullable=False)
+    third_place_percentage = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    
+    user = db.relationship("User", back_populates="vote")
+
+    def __repr__(self):
+        return f'<Vote by {self.user.username}: {self.entry_fee}€, {self.first_place_percentage}%/{self.second_place_percentage}%/{self.third_place_percentage}%>'

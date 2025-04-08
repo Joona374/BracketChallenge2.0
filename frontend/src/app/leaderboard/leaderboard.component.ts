@@ -8,6 +8,7 @@ interface LeaderboardEntry {
   rank: number;
   username: string;
   teamName: string;
+  logoUrl?: string; // Add optional logoUrl field
   totalPoints: number;
   bracketPoints: number;
   lineupPoints: number;
@@ -54,15 +55,12 @@ export class LeaderboardComponent implements OnInit {
         error: (err) => {
           console.error('Failed to load leaderboard data', err);
           this.error = 'Failed to load leaderboard data. Using mock data instead.';
-          // this.loadMockData(); // Fallback to mock data
+          this.loadMockData(); // Uncomment fallback to mock data
           this.loading = false;
           this.updateRanks();
         }
       });
-
   }
-
-
 
   loadMockData(): void {
     this.leaderboardEntries = [
@@ -71,6 +69,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 1,
         username: 'IceKing',
         teamName: 'joonanpojat',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/boston-bruins.svg',
         totalPoints: 87,
         bracketPoints: 45,
         lineupPoints: 32,
@@ -81,6 +80,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 2,
         username: 'PuckMaster',
         teamName: 'Toronto Titans',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/toronto-maple-leafs.svg',
         totalPoints: 76,
         bracketPoints: 30,
         lineupPoints: 36,
@@ -91,6 +91,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 3,
         username: 'HockeyFan99',
         teamName: 'Boston Bruisers',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/boston-bruins.svg',
         totalPoints: 70,
         bracketPoints: 40,
         lineupPoints: 20,
@@ -101,6 +102,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 4,
         username: 'StanleyCupDreams',
         teamName: 'Pittsburgh Power',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/pittsburgh-penguins.svg',
         totalPoints: 65,
         bracketPoints: 25,
         lineupPoints: 30,
@@ -111,6 +113,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 5,
         username: 'GoalieGuru',
         teamName: 'Montreal Magic',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/montreal-canadiens.svg',
         totalPoints: 60,
         bracketPoints: 25,
         lineupPoints: 20,
@@ -121,6 +124,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 6,
         username: 'DefenseFirst',
         teamName: 'New York Knights',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/new-york-rangers.svg',
         totalPoints: 55,
         bracketPoints: 20,
         lineupPoints: 25,
@@ -131,6 +135,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 7,
         username: 'LightTheLamp',
         teamName: 'Tampa Thunderbolts',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/tampa-bay-lightning.svg',
         totalPoints: 50,
         bracketPoints: 20,
         lineupPoints: 20,
@@ -141,6 +146,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 8,
         username: 'HatTrickHero',
         teamName: 'Vegas Victors',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/vegas-golden-knights.svg',
         totalPoints: 45,
         bracketPoints: 15,
         lineupPoints: 20,
@@ -151,6 +157,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 9,
         username: 'BlueLineDefender',
         teamName: 'Nashville Noise',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/nashville-predators.svg',
         totalPoints: 40,
         bracketPoints: 15,
         lineupPoints: 15,
@@ -161,6 +168,7 @@ export class LeaderboardComponent implements OnInit {
         rank: 10,
         username: 'TopShelf',
         teamName: 'Edmonton Express',
+        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/edmonton-oilers.svg',
         totalPoints: 35,
         bracketPoints: 10,
         lineupPoints: 15,
@@ -181,8 +189,17 @@ export class LeaderboardComponent implements OnInit {
 
     // Sort the array based on the key and direction
     this.leaderboardEntries.sort((a, b) => {
-      if (a[key] < b[key]) return this.sortAsc ? -1 : 1;
-      if (a[key] > b[key]) return this.sortAsc ? 1 : -1;
+      // Handle possible undefined values
+      const valA = a[key];
+      const valB = b[key];
+
+      // If either value is undefined, handle the comparison accordingly
+      if (valA === undefined && valB === undefined) return 0;
+      if (valA === undefined) return this.sortAsc ? -1 : 1;
+      if (valB === undefined) return this.sortAsc ? 1 : -1;
+
+      if (valA < valB) return this.sortAsc ? -1 : 1;
+      if (valA > valB) return this.sortAsc ? 1 : -1;
       return 0;
     });
 

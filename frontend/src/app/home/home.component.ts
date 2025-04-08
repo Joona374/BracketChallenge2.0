@@ -17,6 +17,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   loggedInUser: string | null = null;
   userLogo: string | null = null;
   private userSubscription: Subscription | null = null;
+  private logoUpdateListener: any;
 
   constructor(private authService: AuthService, private router: Router) { }
 
@@ -27,6 +28,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.userLogo = user?.logoUrl || null;
       console.log('HomeComponent Auth State Updated:', { loggedInUser: this.loggedInUser, userLogo: this.userLogo });
     });
+
+    // Add listener for logo updates
+    this.logoUpdateListener = this.handleLogoUpdate.bind(this);
+    window.addEventListener('user-logo-updated', this.logoUpdateListener);
   }
 
   ngOnDestroy(): void {
@@ -34,6 +39,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
+
+    // Remove event listener
+    window.removeEventListener('user-logo-updated', this.logoUpdateListener);
+  }
+
+  handleLogoUpdate(event: CustomEvent) {
+    this.userLogo = event.detail.logoUrl;
+    console.log('Logo updated in home component:', this.userLogo);
   }
 
   logout(): void {

@@ -1,0 +1,57 @@
+<div class="logo-selection-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Select Your Team Logo</h2>
+      <button class="close-button" (click)="cancel()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading logo options...</p>
+      </div>
+
+      <div *ngIf="error" class="error-container">
+        <p class="error-message">{{ error }}</p>
+        <button class="retry-button" (click)="fetchLogoOptions()">
+          Try Again
+        </button>
+      </div>
+
+      <div
+        *ngIf="!loading && !error && logoUrls.length === 0"
+        class="no-logos-container"
+      >
+        <div class="no-logos-icon">🖼️</div>
+        <h3>No Logos Available Yet</h3>
+        <p>Team logos will be available soon. Please check back later.</p>
+      </div>
+
+      <div *ngIf="!loading && !error && logoUrls.length > 0" class="logos-grid">
+        <div
+          *ngFor="let logo of logoUrls"
+          class="logo-option"
+          [class.selected]="selectedLogo === logo"
+          (click)="selectLogo(logo)"
+        >
+          <img [src]="logo" alt="Team Logo Option" class="logo-image" />
+          <div class="selection-indicator" *ngIf="selectedLogo === logo">
+            <div class="checkmark">✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-button" (click)="cancel()">Cancel</button>
+      <button
+        class="save-button"
+        [disabled]="!selectedLogo"
+        [class.disabled]="!selectedLogo"
+        (click)="saveSelection()"
+      >
+        Save Selection
+      </button>
+    </div>
+  </div>
+</div>

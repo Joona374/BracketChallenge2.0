@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 20px auto;
+  margin: 15px auto;
   width: 80%;
   max-width: 500px;
 }
@@ -88,8 +88,8 @@
 }
 
 .puck {
-  width: 90px;
-  height: 90px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   background: #000;
   border: 3px solid #ff3232;
@@ -112,7 +112,7 @@
   line-height: 1.5;
   font-size: 1.5rem;
   font-weight: 400;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   color: #e4e4e4;
 }
 
@@ -128,7 +128,7 @@
   border-radius: 10px;
   backdrop-filter: blur(10px);
   padding: 20px;
-  margin-top: 20px;
+  margin-top: 15px;
   box-shadow: 0 4px 20px rgba(255, 0, 0, 0.2);
   border: 1px solid rgba(255, 50, 50, 0.3);
 }
@@ -142,8 +142,8 @@
 }
 
 .avatar-circle {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background: linear-gradient(45deg, #ff3232, #990000);
   display: flex;

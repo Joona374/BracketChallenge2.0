@@ -1,12 +1,14 @@
 from flask import Flask, request, jsonify
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, UTC
 from flask_cors import CORS
 import json
+import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction
+from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote
 
 import os
 from openai import OpenAI
@@ -65,6 +67,7 @@ def generate_team_logos(team_name, user_id):
 
 
 app = Flask(__name__)
+migrate = Migrate(app, db)
 # Configure CORS with more explicit settings
 CORS(app, resources={
     r"/api/*": {
@@ -121,8 +124,8 @@ def register():
     db.session.commit()
 
     # Launch the image generation in a background thread so it doesn't delay the response
-    thread = Thread(target=generate_team_logos, args=(team_name, new_user.id))
-    thread.start()
+    # thread = Thread(target=generate_team_logos, args=(team_name, new_user.id))
+    # thread.start()
 
     return jsonify({"message": "User registered successfully"}), 201
 
@@ -379,6 +382,33 @@ def get_user_by_team_name():
         "teamName": user.team_name
     }), 200
 
+@app.route("/api/user/logo", methods=["POST"])
+def update_user_logo():
+    data = request.json
+    user_id = data.get("userId")
+    logo_url = data.get("logoUrl")
+    
+    if not user_id or not logo_url:
+        return jsonify({"error": "Missing userId or logoUrl"}), 400
+    
+    user = User.query.get(user_id)
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Update the selected logo URL
+    user.selected_logo_url = logo_url
+    
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "User logo updated successfully",
+            "logoUrl": logo_url
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update logo: {str(e)}"}), 500
+
 @app.route("/api/user/stats", methods=["GET"])
 def get_user_stats():
     # Get userId parameter but ignore it for now
@@ -409,22 +439,110 @@ def get_leaderboard():
     for i, user in enumerate(users):
         # Assuming you have a way to calculate the points for each user
         # For now, we will use mock data for points and ranks
+        bracket_points = random.randint(0, 100)  # Placeholder for actual points calculation
+        lineup_points = random.randint(0, 100)  # Placeholder for actual points calculation
+        predictions_points = random.randint(0, 100)  # Placeholder for actual points calculation
+        total_points = bracket_points + lineup_points + predictions_points
         leaderboard.append({
             "id": user.id,
             "rank": i + 1,  # Rank based on the order in the list
             "username": user.username,
             "teamName": user.team_name,
-            "totalPoints": 0,  # Placeholder total points
-            "bracketPoints": 0,  # Placeholder bracket points
-            "lineupPoints": 0,  # Placeholder lineup points
+            "logoUrl": user.selected_logo_url,
+            "totalPoints": total_points,  # Placeholder total points
+            "bracketPoints": bracket_points,  # Placeholder bracket points
+            "lineupPoints": lineup_points,  # Placeholder lineup points
             "predictionsPoints": 0  # Placeholder predictions points
         })
 
-
     return jsonify(leaderboard), 200
 
+@app.route('/api/votes', methods=['POST'])
+def submit_vote():
+    data = request.json
+    user_id = data.get('userId')
+    
+    if not user_id:
+        print("User ID is missing.")
+        return jsonify({'error': 'Missing user_id'}), 400
+    
+    user = User.query.get(user_id)
+    if not user:
+        print(f"User with ID {user_id} not found.")
+        return jsonify({'error': 'User not found'}), 404
+    
+    if user.has_voted:
+        print(f"User {user_id} has already voted.")
+        return jsonify({'error': 'User has already voted'}), 400
+        
+    if not all(key in data for key in ['entryFee', 'distribution']):
+        print("Missing required data in the request.")
+        return jsonify({'error': 'Missing required data'}), 400
+        
+    distribution = data['distribution']
+    if sum([distribution['first'], distribution['second'], distribution['third']]) != 100:
+        print("Distribution does not total 100%.")
+        return jsonify({'error': 'Distribution must total 100%'}), 400
+
+    vote = Vote(
+        user_id=user_id,
+        entry_fee=data['entryFee'],
+        first_place_percentage=distribution['first'],
+        second_place_percentage=distribution['second'],
+        third_place_percentage=distribution['third']
+    )
+    
+    user.has_voted = True
+    
+    db.session.add(vote)
+    db.session.commit()
+    
+    return jsonify({'message': 'Vote submitted successfully'}), 201
+
+@app.route('/api/votes/stats', methods=['GET'])
+def get_vote_stats():
+    # Get entry fee votes
+    entry_fee_votes = db.session.query(
+        Vote.entry_fee,
+        db.func.count(Vote.id).label('count')
+    ).group_by(Vote.entry_fee).all()
+    
+    # Get average distribution
+    avg_distribution = db.session.query(
+        db.func.avg(Vote.first_place_percentage).label('first'),
+        db.func.avg(Vote.second_place_percentage).label('second'),
+        db.func.avg(Vote.third_place_percentage).label('third')
+    ).first()
+    
+    return jsonify({
+        'entryFeeVotes': {fee: count for fee, count in entry_fee_votes},
+        'averageDistribution': {
+            'first': round(avg_distribution.first or 0),
+            'second': round(avg_distribution.second or 0),
+            'third': round(avg_distribution.third or 0)
+        }
+    }), 200
+
+@app.route('/api/votes/user/<int:user_id>', methods=['GET'])
+def get_user_vote(user_id):
+    if not user_id:
+        return jsonify({'error': 'Missing user_id'}), 400
+    
+    vote = Vote.query.filter_by(user_id=user_id).first()
+    
+    if not vote:
+        return jsonify({'message': 'User has not voted yet'}), 404
+    
+    return jsonify({
+        'vote': {
+            'entry_fee': vote.entry_fee,
+            'first_place_percentage': vote.first_place_percentage,
+            'second_place_percentage': vote.second_place_percentage,
+            'third_place_percentage': vote.third_place_percentage,
+            'created_at': vote.created_at.isoformat()
+        }
+    }), 200
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create database tables if they don't exist
     app.run(debug=True)
     print(f"Server running on http://localhost:5000")

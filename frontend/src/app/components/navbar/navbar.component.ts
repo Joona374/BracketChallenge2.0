@@ -23,7 +23,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isMobileView = false;
   menuOpen = false;
   isDropdownOpen = false;
-  user: any = null; // Add user property
+  user: any = null; // User property
+
+  // Reference to event listener for cleanup
+  private logoUpdateListener: any;
+
+  constructor() { }
 
   ngOnInit() {
     this.updateTimeLeft();
@@ -32,16 +37,48 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.checkViewport();
     window.addEventListener("resize", this.checkViewport.bind(this));
 
-    // Load user from localStorage
-    const storedUser = localStorage.getItem("loggedInUser");
-    if (storedUser) {
-      this.user = JSON.parse(storedUser);
-    }
+    // Update how we load the user object
+    this.loadUserFromStorage();
+
+    // Add event listener to update user when storage changes
+    window.addEventListener('storage', this.handleStorageChange.bind(this));
+
+    // Add listener for logo updates
+    this.logoUpdateListener = this.handleLogoUpdate.bind(this);
+    window.addEventListener('user-logo-updated', this.logoUpdateListener);
   }
 
   ngOnDestroy() {
     clearInterval(this.intervalId);
     window.removeEventListener("resize", this.checkViewport.bind(this));
+    window.removeEventListener('storage', this.handleStorageChange.bind(this));
+    window.removeEventListener('user-logo-updated', this.logoUpdateListener);
+  }
+
+  loadUserFromStorage() {
+    const storedUser = localStorage.getItem("loggedInUser");
+    if (storedUser) {
+      try {
+        this.user = JSON.parse(storedUser);
+        console.log('User loaded from storage:', this.user); // For debugging
+      } catch (error) {
+        console.error('Error parsing user from localStorage:', error);
+        this.user = null;
+      }
+    }
+  }
+
+  handleStorageChange(event: StorageEvent) {
+    if (event.key === 'loggedInUser') {
+      this.loadUserFromStorage();
+    }
+  }
+
+  handleLogoUpdate(event: CustomEvent) {
+    if (this.user) {
+      this.user.logoUrl = event.detail.logoUrl;
+      console.log('Logo updated in navbar:', this.user.logoUrl);
+    }
   }
 
   checkViewport() {
@@ -94,7 +131,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     localStorage.removeItem("loggedInUser");
-    this.user = null; // Clear user property when logging out
+    this.user = null;
     window.location.href = "/";
   }
 }

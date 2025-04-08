@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { LogoSelectionComponent } from '../logo-selection/logo-selection.component';
 
 interface User {
   id: number;
   username: string;
   teamName: string;
-  logoUrl?: string; // Add optional logoUrl property
+  logoUrl?: string;
 }
 
 interface BracketSummary {
@@ -33,7 +34,7 @@ interface PredictionsSummary {
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LogoSelectionComponent],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css'
 })
@@ -61,22 +62,30 @@ export class UserDashboardComponent implements OnInit {
     predictions: 0
   };
 
+  // Logo selection modal control
+  showLogoSelectionModal = false;
+
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-    const storedUser = localStorage.getItem("loggedInUser");
-
-    if (!storedUser) {
-      window.location.href = "/";
-      return;
-    }
-
-    this.user = JSON.parse(storedUser);
-
-    // Load user's data
+    this.loadUserFromStorage();
     this.loadBracketSummary();
     this.loadLineupSummary();
     this.loadPredictionsSummary();
+  }
+
+  loadUserFromStorage(): void {
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      try {
+        this.user = JSON.parse(storedUser);
+      } catch (e) {
+        console.error('Error parsing user from localStorage:', e);
+        this.user = null;
+      }
+    } else {
+      window.location.href = "/";
+    }
   }
 
   loadBracketSummary(): void {
@@ -169,5 +178,22 @@ export class UserDashboardComponent implements OnInit {
       .join("")
       .toUpperCase()
       .substring(0, 2);
+  }
+
+  // Logo selection handling
+  openLogoSelectionModal(): void {
+    this.showLogoSelectionModal = true;
+  }
+
+  closeLogoSelectionModal(): void {
+    this.showLogoSelectionModal = false;
+  }
+
+  handleLogoSelected(logoUrl: string): void {
+    if (this.user) {
+      this.user.logoUrl = logoUrl;
+      // Logo update is now handled by the event dispatch in the LogoSelectionComponent
+      // Other components will update automatically when they receive the event
+    }
   }
 }
