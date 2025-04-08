@@ -37,16 +37,32 @@ export class BracketComponent implements OnInit {
     finalGames: { [key: string]: number };
   } = {
       round1: {},
-      round1Games: {},
-
+      round1Games: {
+        'W1': 4,
+        'W2': 4,
+        'W3': 4,
+        'W4': 4,
+        'E1': 4,
+        'E2': 4,
+        'E3': 4,
+        'E4': 4
+      },
       round2: {},
-      round2Games: {},
-
+      round2Games: {
+        'w-semi': 4,
+        'w-semi2': 4,
+        'e-semi': 4,
+        'e-semi2': 4
+      },
       round3: {},
-      round3Games: {},
-
+      round3Games: {
+        'west-final': 4,
+        'east-final': 4
+      },
       final: {},
-      finalGames: {},
+      finalGames: {
+        'cup-winner': 4
+      }
     };
 
   constructor(private http: HttpClient) { }
@@ -199,6 +215,43 @@ export class BracketComponent implements OnInit {
     Object.assign(this.userPicks.round2, round2Winners);
     Object.assign(this.userPicks.round3, round3Winners);
     Object.assign(this.userPicks.final, finalWinners);
+
+    // Step 7: Clean up game counts - ensure they're associated with matchups, not winners
+    const cleanGameCounts = (roundName: string) => {
+      const gamesKey = `${roundName}Games` as keyof typeof this.userPicks;
+      const gamesObj = this.userPicks[gamesKey] as Record<string, number>;
+
+      if (gamesObj) {
+        // Find all keys that have game counts associated with winner entries
+        const keysToClean = Object.keys(gamesObj).filter(key =>
+          key.includes('-winner') || key === 'cup-winner'
+        );
+
+        keysToClean.forEach(key => {
+          let matchupKey: string;
+
+          // Handle special case for finals
+          if (key === 'cup-winner') {
+            matchupKey = 'cup';
+          } else {
+            // For other rounds, remove the "-winner" suffix
+            matchupKey = key.replace('-winner', '');
+          }
+
+          // Transfer the game count to the correct matchup key
+          gamesObj[matchupKey] = gamesObj[key];
+
+          // Delete the incorrect entry
+          delete gamesObj[key];
+        });
+      }
+    };
+
+    // Clean up game counts for each round
+    cleanGameCounts('round1');
+    cleanGameCounts('round2');
+    cleanGameCounts('round3');
+    cleanGameCounts('final');
   }
 
   savePicks() {
@@ -255,16 +308,32 @@ export class BracketComponent implements OnInit {
   resetBracket() {
     this.userPicks = {
       round1: {},
-      round1Games: {},
-
+      round1Games: {
+        'W1': 4,
+        'W2': 4,
+        'W3': 4,
+        'W4': 4,
+        'E1': 4,
+        'E2': 4,
+        'E3': 4,
+        'E4': 4
+      },
       round2: {},
-      round2Games: {},
-
+      round2Games: {
+        'w-semi': 4,
+        'w-semi2': 4,
+        'e-semi': 4,
+        'e-semi2': 4
+      },
       round3: {},
-      round3Games: {},
-
+      round3Games: {
+        'west-final': 4,
+        'east-final': 4
+      },
       final: {},
-      finalGames: {},
+      finalGames: {
+        'cup-winner': 4
+      }
     };
     this.computeNextRounds();
   }
@@ -280,52 +349,70 @@ export class BracketComponent implements OnInit {
   increaseGames(round: string, matchupId: string) {
     const gamesKey = `${round}Games` as keyof typeof this.userPicks;
 
+    // Convert any winner keys to their base matchup keys
+    let actualMatchupId = matchupId;
+    if (matchupId.includes('-winner')) {
+      actualMatchupId = matchupId.replace('-winner', '');
+    } else if (matchupId === 'cup-winner') {
+      actualMatchupId = 'cup';
+    }
+
     // ✅ Make sure the object exists
     if (!this.userPicks[gamesKey]) {
       this.userPicks[gamesKey] = {};
     }
 
-    const gamesObj = this.userPicks[gamesKey] as Record<
-      string | number,
-      number
-    >;
+    const gamesObj = this.userPicks[gamesKey] as Record<string | number, number>;
 
-    if (!(matchupId in gamesObj)) {
-      gamesObj[matchupId] = 4;
+    if (!(actualMatchupId in gamesObj)) {
+      gamesObj[actualMatchupId] = 4;
     }
 
-    if (gamesObj[matchupId] < 7) {
-      gamesObj[matchupId]++;
+    if (gamesObj[actualMatchupId] < 7) {
+      gamesObj[actualMatchupId]++;
     }
   }
 
   decreaseGames(round: string, matchupId: string) {
     const gamesKey = `${round}Games` as keyof typeof this.userPicks;
 
+    // Convert any winner keys to their base matchup keys
+    let actualMatchupId = matchupId;
+    if (matchupId.includes('-winner')) {
+      actualMatchupId = matchupId.replace('-winner', '');
+    } else if (matchupId === 'cup-winner') {
+      actualMatchupId = 'cup';
+    }
+
     // ✅ Make sure the object exists
     if (!this.userPicks[gamesKey]) {
       this.userPicks[gamesKey] = {};
     }
 
-    const gamesObj = this.userPicks[gamesKey] as Record<
-      string | number,
-      number
-    >;
+    const gamesObj = this.userPicks[gamesKey] as Record<string | number, number>;
 
-    if (!(matchupId in gamesObj)) {
-      gamesObj[matchupId] = 4;
+    if (!(actualMatchupId in gamesObj)) {
+      gamesObj[actualMatchupId] = 4;
     }
 
-    if (gamesObj[matchupId] > 4) {
-      gamesObj[matchupId]--;
+    if (gamesObj[actualMatchupId] > 4) {
+      gamesObj[actualMatchupId]--;
     }
   }
 
   getGames(round: string, matchupId: string): number {
-    const gamesObj = this.userPicks[
-      `${round}Games` as keyof typeof this.userPicks
-    ] as any;
-    return gamesObj?.[matchupId] ?? 4; // fallback to 4
+    const gamesKey = `${round}Games` as keyof typeof this.userPicks;
+    const gamesObj = this.userPicks[gamesKey] as Record<string, number>;
+
+    // Convert any winner keys to their base matchup keys
+    let actualMatchupId = matchupId;
+    if (matchupId.includes('-winner')) {
+      actualMatchupId = matchupId.replace('-winner', '');
+    } else if (matchupId === 'cup-winner') {
+      actualMatchupId = 'cup';
+    }
+
+    return gamesObj?.[actualMatchupId] ?? 4; // fallback to 4
   }
 
   getTeamArray(

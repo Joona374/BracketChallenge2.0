@@ -689,6 +689,8 @@ def save_round_results():
     
     round_num = data['round']
     results = data['results']
+
+    print(data)
     
     try:
         # Process each result

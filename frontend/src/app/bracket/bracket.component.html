@@ -50,18 +50,12 @@
       <div *ngFor="let key of ['w-semi', 'w-semi2']" class="matchup">
         <div class="teams-and-games west">
           <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
-            <button
-              class="plus-button"
-              (click)="increaseGames('round2', key + '-winner')"
-            >
+            <button class="plus-button" (click)="increaseGames('round2', key)">
               +
             </button>
-            <div>{{ getGames("round2", key + "-winner") }}</div>
+            <div>{{ getGames("round2", key) }}</div>
 
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round2', key + '-winner')"
-            >
+            <button class="minus-button" (click)="decreaseGames('round2', key)">
               –
             </button>
           </div>
@@ -93,15 +87,15 @@
           >
             <button
               class="plus-button"
-              (click)="increaseGames('round3', 'west-final-winner')"
+              (click)="increaseGames('round3', 'west-final')"
             >
               +
             </button>
-            <div>{{ getGames("round3", "west-final-winner") }}</div>
+            <div>{{ getGames("round3", "west-final") }}</div>
 
             <button
               class="minus-button"
-              (click)="decreaseGames('round3', 'west-final-winner')"
+              (click)="decreaseGames('round3', 'west-final')"
             >
               –
             </button>
@@ -155,15 +149,12 @@
           >
             <button
               class="minus-button"
-              (click)="decreaseGames('final', 'cup-winner')"
+              (click)="decreaseGames('final', 'cup')"
             >
               –
             </button>
-            <div>{{ getGames("final", "cup-winner") }}</div>
-            <button
-              class="plus-button"
-              (click)="increaseGames('final', 'cup-winner')"
-            >
+            <div>{{ getGames("final", "cup") }}</div>
+            <button class="plus-button" (click)="increaseGames('final', 'cup')">
               +
             </button>
           </div>
@@ -192,15 +183,15 @@
           >
             <button
               class="plus-button"
-              (click)="increaseGames('round3', 'east-final-winner')"
+              (click)="increaseGames('round3', 'east-final')"
             >
               +
             </button>
-            <div>{{ getGames("round3", "east-final-winner") }}</div>
+            <div>{{ getGames("round3", "east-final") }}</div>
 
             <button
               class="minus-button"
-              (click)="decreaseGames('round3', 'east-final-winner')"
+              (click)="decreaseGames('round3', 'east-final')"
             >
               –
             </button>
@@ -228,18 +219,12 @@
       <div *ngFor="let key of ['e-semi', 'e-semi2']" class="matchup">
         <div class="teams-and-games east">
           <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
-            <button
-              class="plus-button"
-              (click)="increaseGames('round2', key + '-winner')"
-            >
+            <button class="plus-button" (click)="increaseGames('round2', key)">
               +
             </button>
-            <div>{{ getGames("round2", key + "-winner") }}</div>
+            <div>{{ getGames("round2", key) }}</div>
 
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round2', key + '-winner')"
-            >
+            <button class="minus-button" (click)="decreaseGames('round2', key)">
               –
             </button>
           </div>
