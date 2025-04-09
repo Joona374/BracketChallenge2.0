@@ -59,6 +59,9 @@ class Matchup(db.Model):
     matchup_code = db.Column(db.String(80), unique=True, nullable=False)
     team1 = db.Column(db.String(80), nullable=False)
     team2 = db.Column(db.String(80), nullable=False)
+    
+    # Define relationship to MatchupResult
+    result = db.relationship('MatchupResult', back_populates='matchup', uselist=False)
 
     def __repr__(self):
         return f'<Matchup {self.conference} Round {self.round}: {self.team1} vs {self.team2}>'
@@ -67,11 +70,14 @@ class MatchupResult(db.Model):
     __tablename__ = 'matchup_results'
     
     id = db.Column(db.Integer, primary_key=True)
-    matchup_id = db.Column(db.Integer, db.ForeignKey('matchups.id'), nullable=False)
+    matchup_code = db.Column(db.String(80), unique=True, nullable=False)
+    # Add the foreign key to reference the matchup
+    matchup_id = db.Column(db.Integer, db.ForeignKey('matchups.id'), nullable=True)
     winner = db.Column(db.String(10), nullable=False)
     games = db.Column(db.Integer, nullable=False)
     
-    matchup = db.relationship('Matchup', backref=db.backref('result', lazy=True))
+    # Update relationship definition
+    matchup = db.relationship('Matchup', back_populates='result')
     
     def __repr__(self):
         return f'<Result for Matchup {self.matchup_id}: {self.winner} in {self.games} games>'
@@ -169,3 +175,58 @@ class Vote(db.Model):
 
     def __repr__(self):
         return f'<Vote by {self.user.username}: {self.entry_fee}€, {self.first_place_percentage}%/{self.second_place_percentage}%/{self.third_place_percentage}%>'
+
+class UserPoints(db.Model):
+    """
+    Store points for each user across all prediction games.
+    """
+    __tablename__ = 'user_points'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    
+    # Game 1: Bracket Predictions
+    bracket_round1_correct = db.Column(db.Integer, default=0)  # Number of correct series winners in Round 1
+    bracket_round1_points = db.Column(db.Integer, default=0)   # Points earned in Round 1
+    
+    bracket_round2_correct = db.Column(db.Integer, default=0)  # Number of correct series winners in Round 2
+    bracket_round2_points = db.Column(db.Integer, default=0)   # Points earned in Round 2
+    
+    bracket_round3_correct = db.Column(db.Integer, default=0)  # Number of correct series winners in Round 3
+    bracket_round3_points = db.Column(db.Integer, default=0)   # Points earned in Round 3
+    
+    bracket_final_correct = db.Column(db.Integer, default=0)   # Correct Stanley Cup champion (0 or 1)
+    bracket_final_points = db.Column(db.Integer, default=0)    # Points earned in Finals
+    
+    bracket_total_points = db.Column(db.Integer, default=0)    # Total points from bracket game
+    
+    # Game 2: All-Stars Line
+    lineup_total_points = db.Column(db.Integer, default=0)     # Total points from lineup game
+    
+    # Game 3: Category Predictions
+    predictions_total_points = db.Column(db.Integer, default=0) # Total points from predictions game
+    
+    # Overall total
+    total_points = db.Column(db.Integer, default=0)             # Sum of all game points
+    
+    # Last updated timestamp
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('points', uselist=False))
+    
+    def update_total_points(self):
+        """Update the total points by summing all game points"""
+        self.bracket_total_points = (self.bracket_round1_points + 
+                                     self.bracket_round2_points + 
+                                     self.bracket_round3_points + 
+                                     self.bracket_final_points)
+                                     
+        self.total_points = (self.bracket_total_points + 
+                            self.lineup_total_points + 
+                            self.predictions_total_points)
+        
+        self.updated_at = datetime.now(UTC)
+    
+    def __repr__(self):
+        return f'<UserPoints for User {self.user_id}: {self.total_points} total points>'

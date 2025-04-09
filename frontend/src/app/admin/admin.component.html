@@ -199,8 +199,10 @@
               *ngFor="let matchup of eastRoundMatchups; let i = index"
             >
               <div class="matchup-teams">
+                <div class="matchup-code">
+                  {{ getMatchupDisplayName(matchup) }}
+                </div>
                 <div class="team">{{ getTeamName(matchup.team1) }}</div>
-
                 <div class="team">{{ getTeamName(matchup.team2) }}</div>
               </div>
 
@@ -236,8 +238,10 @@
               *ngFor="let matchup of westRoundMatchups; let i = index"
             >
               <div class="matchup-teams">
+                <div class="matchup-code">
+                  {{ getMatchupDisplayName(matchup) }}
+                </div>
                 <div class="team">{{ getTeamName(matchup.team1) }}</div>
-
                 <div class="team">{{ getTeamName(matchup.team2) }}</div>
               </div>
 
@@ -270,8 +274,8 @@
           <div class="results-grid" *ngIf="finalMatchup">
             <div class="matchup-result">
               <div class="matchup-teams">
+                <div class="matchup-code">SCF</div>
                 <div class="team">{{ getTeamName(finalMatchup.team1) }}</div>
-
                 <div class="team">{{ getTeamName(finalMatchup.team2) }}</div>
               </div>
 
@@ -305,6 +309,12 @@
           <button class="admin-button save" (click)="saveRoundResults()">
             Save Round Results
           </button>
+        </div>
+
+        <!-- Debug format for bracket scoring -->
+        <div class="debug-section" *ngIf="false">
+          <h4>Debug: Formatted for bracket scoring</h4>
+          <pre>{{ formatResultsForScoring() | json }}</pre>
         </div>
       </div>
     </div>

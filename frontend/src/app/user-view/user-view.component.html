@@ -32,15 +32,15 @@
               <span class="points-label">TOTAL POINTS</span>
             </div>
             <div class="points-breakdown">
-              <div class="point-category" *ngIf="getBracketPoints()">
+              <div class="point-category" *ngIf="getBracketPoints() >= 0">
                 <span class="category-name">Bracket</span>
                 <span class="category-points">{{ getBracketPoints() }}</span>
               </div>
-              <div class="point-category" *ngIf="getLineupPoints()">
+              <div class="point-category" *ngIf="getLineupPoints() >= 0">
                 <span class="category-name">Lineup</span>
                 <span class="category-points">{{ getLineupPoints() }}</span>
               </div>
-              <div class="point-category" *ngIf="getPredictionsPoints()">
+              <div class="point-category" *ngIf="getPredictionsPoints() >= 0">
                 <span class="category-name">Predictions</span>
                 <span class="category-points">{{
                   getPredictionsPoints()
@@ -122,23 +122,13 @@
                     <div class="series-teams">
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                        [ngClass]="
-                          matchup.team1
-                            ? 'team-' + matchup.team1.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team1)"
                       >
                         {{ matchup.team1 || "TBD" }}
                       </div>
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                        [ngClass]="
-                          matchup.team2
-                            ? 'team-' + matchup.team2.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team2)"
                       >
                         {{ matchup.team2 || "TBD" }}
                       </div>
@@ -166,23 +156,13 @@
                     <div class="series-teams">
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                        [ngClass]="
-                          matchup.team1
-                            ? 'team-' + matchup.team1.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team1)"
                       >
                         {{ matchup.team1 || "TBD" }}
                       </div>
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                        [ngClass]="
-                          matchup.team2
-                            ? 'team-' + matchup.team2.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team2)"
                       >
                         {{ matchup.team2 || "TBD" }}
                       </div>
@@ -210,23 +190,13 @@
                     <div class="series-teams">
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                        [ngClass]="
-                          matchup.team1
-                            ? 'team-' + matchup.team1.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team1)"
                       >
                         {{ matchup.team1 || "TBD" }}
                       </div>
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                        [ngClass]="
-                          matchup.team2
-                            ? 'team-' + matchup.team2.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team2)"
                       >
                         {{ matchup.team2 || "TBD" }}
                       </div>
@@ -251,40 +221,19 @@
               <div class="series-teams">
                 <div
                   class="team"
-                  [class.winner]="isTeamWinner('cup', getFinalTeams()[0])"
-                  [ngClass]="
-                    getFinalTeams()[0]
-                      ? 'team-' + getFinalTeams()[0].toLowerCase()
-                      : ''
-                  "
+                  [ngClass]="getTeamClasses('cup', getFinalTeams()[0])"
                 >
                   {{ getFinalTeams()[0] || "TBD" }}
                 </div>
                 <div
                   class="team"
-                  [class.winner]="isTeamWinner('cup', getFinalTeams()[1])"
-                  [ngClass]="
-                    getFinalTeams()[1]
-                      ? 'team-' + getFinalTeams()[1].toLowerCase()
-                      : ''
-                  "
+                  [ngClass]="getTeamClasses('cup', getFinalTeams()[1])"
                 >
                   {{ getFinalTeams()[1] || "TBD" }}
                 </div>
               </div>
               <div class="series-games" *ngIf="getSeriesResult('cup-winner')">
                 Games: {{ getSeriesResult("cup-winner") }}
-              </div>
-              <div
-                class="champion"
-                *ngIf="getChampionPick()"
-                [ngClass]="
-                  getChampionPick()
-                    ? 'team-' + getChampionPick()!.toLowerCase()
-                    : ''
-                "
-              >
-                Champion: {{ getChampionPick() }}
               </div>
             </div>
           </div>
@@ -306,23 +255,13 @@
                     <div class="series-teams">
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                        [ngClass]="
-                          matchup.team1
-                            ? 'team-' + matchup.team1.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team1)"
                       >
                         {{ matchup.team1 || "TBD" }}
                       </div>
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                        [ngClass]="
-                          matchup.team2
-                            ? 'team-' + matchup.team2.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team2)"
                       >
                         {{ matchup.team2 || "TBD" }}
                       </div>
@@ -350,23 +289,13 @@
                     <div class="series-teams">
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                        [ngClass]="
-                          matchup.team1
-                            ? 'team-' + matchup.team1.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team1)"
                       >
                         {{ matchup.team1 || "TBD" }}
                       </div>
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                        [ngClass]="
-                          matchup.team2
-                            ? 'team-' + matchup.team2.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team2)"
                       >
                         {{ matchup.team2 || "TBD" }}
                       </div>
@@ -394,23 +323,13 @@
                     <div class="series-teams">
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team1)"
-                        [ngClass]="
-                          matchup.team1
-                            ? 'team-' + matchup.team1.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team1)"
                       >
                         {{ matchup.team1 || "TBD" }}
                       </div>
                       <div
                         class="team"
-                        [class.winner]="isTeamWinner(matchup.id, matchup.team2)"
-                        [ngClass]="
-                          matchup.team2
-                            ? 'team-' + matchup.team2.toLowerCase()
-                            : ''
-                        "
+                        [ngClass]="getTeamClasses(matchup.id, matchup.team2)"
                       >
                         {{ matchup.team2 || "TBD" }}
                       </div>

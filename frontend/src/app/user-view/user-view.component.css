@@ -1,5 +1,5 @@
 .user-view-container {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 20px;
   font-family: "Orbitron", sans-serif;
@@ -211,7 +211,7 @@
   min-height: 400px;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  padding: 20px;
+  padding: 10px;
 }
 
 .no-data {
@@ -227,7 +227,7 @@
 .predictions-view h3 {
   text-align: center;
   color: #ff4444;
-  margin-bottom: 20px;
+  margin: 10px;
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
 }
 
@@ -235,7 +235,7 @@
   display: flex;
   justify-content: center;
   gap: 40px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .bracket-stat {
@@ -288,7 +288,7 @@
 .rounds-container {
   display: flex;
   gap: 5px;
-  height: 400px; /* Fixed height to ensure proper alignment */
+  height: 500px; /* Fixed height to ensure proper alignment */
 }
 
 .rounds-container.east {
@@ -329,7 +329,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 400px;
+  height: 500px;
   padding: 0 10px;
 }
 
@@ -426,7 +426,7 @@
 .team.winner.team-tbl {
   background-color: #002868;
   color: #fff;
-  border-left: 4px solid #00a3e0;
+  border-left: 4px solid #fff;
 }
 
 /* Boston Bruins */
@@ -465,10 +465,64 @@
 }
 
 /* New York Islanders */
-.team.winner.team-nyi {
-  background-color: #00539b;
-  color: #f47d30;
-  border-left: 4px solid #f47d30;
+.team.winner.team-ott {
+  background-color: #da1a32;
+  color: #fff;
+  border-left: 4px solid #b79257;
+}
+
+/* New York Islanders */
+.team.winner.team-mtl {
+  background-color: #af1e2d;
+  color: #fff;
+  border-left: 4px solid #242e8f;
+}
+
+/* New York Islanders */
+.team.winner.team-cbj {
+  background-color: #002654;
+  color: #fff;
+  border-left: 4px solid #ce1126;
+}
+
+/* New York Islanders */
+.team.winner.team-pit {
+  background-color: #000;
+  color: #fff;
+  border-left: 4px solid #fcb514;
+}
+
+/* New York Islanders */
+.team.winner.team-det {
+  background-color: #ce1126;
+  color: #fff;
+  border-left: 4px solid #ce1126;
+}
+
+/* New York Islanders */
+.team.winner.team-buf {
+  background-color: #003087;
+  color: #ffb81c;
+  border-left: 4px solid #000;
+}
+
+/* New York Islanders */
+.team.winner.team-phi {
+  background-color: #f74902;
+  color: #fff;
+  border-left: 4px solid #000;
+}
+
+.team.winner.team-stl {
+  background-color: #002f87;
+  color: #fff;
+  border-left: 4px solid #fcb514;
+}
+
+.team.winner.team-cgy {
+  background-color: #d2001c;
+  color: #fff;
+  border-left: 4px solid #000;
 }
 
 /* For non-winners or unknown teams, use default styling */
@@ -477,18 +531,11 @@
   color: #ccc;
 }
 
-.team.winner {
-  background-color: #2a0000;
-  color: #fff;
-  font-weight: bold;
-  border-left: 4px solid #ff4444;
-}
-
 .series-games {
-  text-align: right;
+  text-align: center;
   font-size: 0.8rem;
   color: #ccc;
-  margin-top: 10px;
+  margin-top: 7px;
 }
 
 .final-matchup {
@@ -658,10 +705,10 @@
 }
 
 .matchup-card.small {
-  background-color: #333;
+  background-color: #444;
   border-radius: 6px;
   padding: 8px;
-  border: 1px solid #555;
+  border: 1px solid #666;
   margin-bottom: 5px;
 }
 
@@ -1267,3 +1314,39 @@
     max-width: 350px;
   }
 }
+
+/* Enhanced Matchup Cards */
+.matchup-card.small {
+  background: #2a2a2a;
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #333;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Team styling */
+.series-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background-color: #333;
+  color: #ccc;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Add more team-specific styles if needed */

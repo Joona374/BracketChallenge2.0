@@ -8,7 +8,7 @@ import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team
+from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints
 
 import os
 from openai import OpenAI
@@ -451,21 +451,52 @@ def assign_custom_logos():
 
 @app.route("/api/user/stats", methods=["GET"])
 def get_user_stats():
-    # Get userId parameter but ignore it for now
     user_id = request.args.get('userId')
     
-    # Return placeholder data without checking the database
-    stats = {
-        "rank": 4,
-        "points": {
-            "total": 65,
-            "bracket": 30,
-            "lineup": 25,
-            "predictions": 10
-        }
-    }
+    if not user_id:
+        return jsonify({"error": "Missing userId parameter"}), 400
     
-    return jsonify(stats), 200
+    try:
+        # Fetch the user's points record
+        user_points = UserPoints.query.filter_by(user_id=int(user_id)).first()
+        
+        if not user_points:
+            # Return default values if no points record exists
+            return jsonify({
+                "rank": None,
+                "points": {
+                    "total": 0,
+                    "bracket": 0,
+                    "lineup": 0,
+                    "predictions": 0
+                }
+            }), 200
+        
+        # Get all user points
+        all_points = UserPoints.query.all()
+        
+        # Get all unique point values in descending order
+        unique_points = sorted(set(p.total_points for p in all_points), reverse=True)
+        
+        # Create a mapping from points to rank
+        points_to_rank = {points: rank+1 for rank, points in enumerate(unique_points)}
+        
+        # Get user's rank
+        user_rank = points_to_rank.get(user_points.total_points)
+        
+        return jsonify({
+            "rank": user_rank,
+            "points": {
+                "total": user_points.total_points,
+                "bracket": user_points.bracket_total_points,
+                "lineup": user_points.lineup_total_points,
+                "predictions": user_points.predictions_total_points
+            }
+        }), 200
+    
+    except Exception as e:
+        print(f"Error getting user stats: {str(e)}")
+        return jsonify({"error": f"Failed to retrieve user stats: {str(e)}"}), 500
 
 @app.route("/api/leaderboard", methods=["GET"])
 def get_leaderboard():
@@ -687,105 +718,154 @@ def save_round_results():
     if not data or 'round' not in data or 'results' not in data:
         return jsonify({"error": "Invalid data format"}), 400
     
-    round_num = data['round']
+    round_num = int(data['round'])
     results = data['results']
-
-    print(data)
+    formatted_results = data.get('formattedResults', {})
     
     try:
-        # Process each result
-        next_round_matchups = []
-        
+        # Save the current round results
         for result in results:
-            # Update the matchup with the winner
             matchup_id = result.get('matchupId')
+            matchup_code = result.get('matchupCode')
             winner = result.get('winner')
             games = result.get('games')
             
+            # Add debug output
+            print(f"Processing result: id={matchup_id}, code={matchup_code}, winner={winner}, games={games}")
+            
             if not matchup_id or not winner:
-                continue
+                print("Invalid result data:", result)
+                return jsonify({"error": "Invalid result data"}), 400
                 
-            # Find the matchup and update it
-            matchup = Matchup.query.get(matchup_id)
-            if not matchup:
-                continue
-                
-            # Record the result
-            matchup_result = MatchupResult.query.filter_by(matchup_id=matchup_id).first()
-            if matchup_result:
-                matchup_result.winner = winner
-                matchup_result.games = games
+            # Ensure matchup_id is an integer
+            if isinstance(matchup_id, str):
+                try:
+                    matchup_id = int(matchup_id)
+                except ValueError:
+                    return jsonify({"error": f"Invalid matchup ID: {matchup_id}"}), 400
+            
+            # Check if result already exists and update it or create new
+            existing_result = MatchupResult.query.filter_by(matchup_code=matchup_code).first()
+            if existing_result:
+                existing_result.winner = winner
+                existing_result.games = games
+                existing_result.matchup_id = matchup_id
             else:
-                new_result = MatchupResult(
+                matchup_result = MatchupResult(
+                    matchup_code=matchup_code,
                     matchup_id=matchup_id,
                     winner=winner,
                     games=games
                 )
-                db.session.add(new_result)
-            
-            # Keep track of winners for next round matchups
-            if round_num < 4:
-                next_round_matchups.append({
-                    "winner": winner,
-                    "conference": matchup.conference,
-                    "matchup_code": matchup.matchup_code
-                })
+                db.session.add(matchup_result)
+
+        # Create matchups for the next round
+        next_round = round_num + 1
         
-        # Create next round matchups if not the final round
-        if round_num < 4:
-            # Group winners by conference
-            east_winners = [m for m in next_round_matchups if m["conference"] == "east"]
-            west_winners = [m for m in next_round_matchups if m["conference"] == "west"]
-            
-            # Create next round's matchups
-            next_round = round_num + 1
-            
-            # Clear existing matchups for the next round
+        # Only create next round matchups for rounds 1-3
+        if next_round <= 4:
+            # Delete any existing matchups for the next round
             Matchup.query.filter_by(round=next_round).delete()
             
-            # Create East Conference matchups
-            if len(east_winners) >= 2:
-                for i in range(0, len(east_winners), 2):
-                    if i + 1 < len(east_winners):
-                        new_matchup = Matchup(
-                            team1=east_winners[i]["winner"],
-                            team2=east_winners[i+1]["winner"],
-                            round=next_round,
-                            conference="east",
-                            matchup_code=f"E{(i//2)+1}"
-                        )
-                        db.session.add(new_matchup)
+            # Extract winners by matchup code
+            winners = {}
+            for result in results:
+                # Make sure matchupCode is treated as string
+                matchup_code = str(result.get('matchupCode'))
+                winners[matchup_code] = result.get('winner')
             
-            # Create West Conference matchups
-            if len(west_winners) >= 2:
-                for i in range(0, len(west_winners), 2):
-                    if i + 1 < len(west_winners):
-                        new_matchup = Matchup(
-                            team1=west_winners[i]["winner"],
-                            team2=west_winners[i+1]["winner"],
-                            round=next_round,
-                            conference="west",
-                            matchup_code=f"W{(i//2)+1}"
-                        )
-                        db.session.add(new_matchup)
+            print("Winner mapping:", winners)
             
-            # If this is round 3, also create the final (round 4)
-            if next_round == 4 and len(east_winners) == 1 and len(west_winners) == 1:
-                final_matchup = Matchup(
-                    team1=east_winners[0]["winner"],
-                    team2=west_winners[0]["winner"],
-                    round=4,
-                    conference="final",
-                    matchup_code="SCF"
-                )
-                db.session.add(final_matchup)
-        
+            # Create matchups for different rounds
+            if round_num == 1:
+                # Create round 2 matchups (Conference Semifinals)
+                # East Conference Semifinals
+                if all(code in winners for code in ['E1', 'E2']):
+                    e_semi_1 = Matchup(
+                        team1=winners['E1'],
+                        team2=winners['E2'],
+                        round=2,
+                        conference='east',
+                        matchup_code='e-semi'
+                    )
+                    db.session.add(e_semi_1)
+                
+                if all(code in winners for code in ['E3', 'E4']):
+                    e_semi_2 = Matchup(
+                        team1=winners['E3'],
+                        team2=winners['E4'],
+                        round=2,
+                        conference='east',
+                        matchup_code='e-semi2'
+                    )
+                    db.session.add(e_semi_2)
+                
+                # West Conference Semifinals
+                if all(code in winners for code in ['W1', 'W2']):
+                    w_semi_1 = Matchup(
+                        team1=winners['W1'],
+                        team2=winners['W2'],
+                        round=2,
+                        conference='west',
+                        matchup_code='w-semi'
+                    )
+                    db.session.add(w_semi_1)
+                
+                if all(code in winners for code in ['W3', 'W4']):
+                    w_semi_2 = Matchup(
+                        team1=winners['W3'],
+                        team2=winners['W4'],
+                        round=2,
+                        conference='west',
+                        matchup_code='w-semi2'
+                    )
+                    db.session.add(w_semi_2)
+                
+            elif round_num == 2:
+                # Create round 3 matchups (Conference Finals)
+                if all(code in winners for code in ['e-semi', 'e-semi2']):
+                    east_final = Matchup(
+                        team1=winners['e-semi'],
+                        team2=winners['e-semi2'],
+                        round=3,
+                        conference='east',
+                        matchup_code='east-final'
+                    )
+                    db.session.add(east_final)
+                
+                if all(code in winners for code in ['w-semi', 'w-semi2']):
+                    west_final = Matchup(
+                        team1=winners['w-semi'],
+                        team2=winners['w-semi2'],
+                        round=3,
+                        conference='west',
+                        matchup_code='west-final'
+                    )
+                    db.session.add(west_final)
+                
+            elif round_num == 3:
+                # Create round 4 matchup (Stanley Cup Final)
+                if all(code in winners for code in ['east-final', 'west-final']):
+                    cup_final = Matchup(
+                        team1=winners['east-final'],
+                        team2=winners['west-final'],
+                        round=4,
+                        conference='final',
+                        matchup_code='cup'
+                    )
+                    db.session.add(cup_final)
+
         db.session.commit()
-        return jsonify({"message": "Results saved successfully"}), 200
+        return jsonify({
+            "message": "Results saved successfully and next round matchups created",
+            "nextRound": next_round if next_round <= 4 else None
+        }), 200
         
     except Exception as e:
         db.session.rollback()
-        print("Error saving results:", e)
+        import traceback
+        print("Error saving results:", str(e))
+        print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/teams", methods=["GET"])

@@ -210,10 +210,12 @@ export class UserViewComponent implements OnInit {
   }
 
   getLineupPoints(): number {
+    console.log("User points: ", this.userPoints.lineup);
     return this.userPoints.lineup;
   }
 
   getPredictionsPoints(): number {
+    console.log("Prediction points: ", this.userPoints.predictions);
     return this.userPoints.predictions;
   }
 
@@ -263,23 +265,48 @@ export class UserViewComponent implements OnInit {
     const matchups = [];
 
     if (round === 'round1') {
-      const westMatchups = [...this.initialMatchups.west];
-      const eastMatchups = [...this.initialMatchups.east];
+      // Define the first round matchups based on the E1, E2, W1, W2, etc. format
+      // This is a mapping of the codes to the actual team matchups
+      const firstRoundTeams = {
+        // Western Conference (first 4 matchups)
+        'W1': { team1: 'OTT', team2: 'FLA' },
+        'W2': { team1: 'PIT', team2: 'NYR' },
+        'W3': { team1: 'BUF', team2: 'TBL' },
+        'W4': { team1: 'PHI', team2: 'CAR' },
+        // Eastern Conference (second 4 matchups)
+        'E1': { team1: 'STL', team2: 'COL' },
+        'E2': { team1: 'TBL', team2: 'VGK' },
+        'E3': { team1: 'CAR', team2: 'EDM' },
+        'E4': { team1: 'NYR', team2: 'VAN' }
+      };
 
-      const allMatchups = [...westMatchups, ...eastMatchups];
+      // Process Western Conference matchups (first 4)
+      const westCodes = ['W1', 'W2', 'W3', 'W4'];
+      westCodes.forEach(code => {
+        if (this.userData.bracket.round1[code]) {
+          matchups.push({
+            id: code,
+            team1: firstRoundTeams[code as keyof typeof firstRoundTeams].team1,
+            team2: firstRoundTeams[code as keyof typeof firstRoundTeams].team2,
+            winner: this.userData.bracket.round1[code]
+          });
+        }
+      });
 
-      for (const matchup of allMatchups) {
-        const id = matchup.id;
-        const winner = this.userData.bracket.round1[id];
-
-        matchups.push({
-          id: id,
-          team1: matchup.team1,
-          team2: matchup.team2,
-          winner: winner
-        });
-      }
+      // Process Eastern Conference matchups (second 4)
+      const eastCodes = ['E1', 'E2', 'E3', 'E4'];
+      eastCodes.forEach(code => {
+        if (this.userData.bracket.round1[code]) {
+          matchups.push({
+            id: code,
+            team1: firstRoundTeams[code as keyof typeof firstRoundTeams].team1,
+            team2: firstRoundTeams[code as keyof typeof firstRoundTeams].team2,
+            winner: this.userData.bracket.round1[code]
+          });
+        }
+      });
     } else if (round === 'round2') {
+      // Existing code for round2
       const keys = ['w-semi', 'w-semi2', 'e-semi', 'e-semi2'];
 
       for (const key of keys) {
@@ -296,6 +323,7 @@ export class UserViewComponent implements OnInit {
         }
       }
     } else if (round === 'round3') {
+      // Existing code for round3
       const keys = ['west-final', 'east-final'];
 
       for (const key of keys) {
@@ -327,7 +355,9 @@ export class UserViewComponent implements OnInit {
 
     let result = false;
 
-    if (typeof matchupId === 'number' || (!isNaN(Number(matchupId)) && Number(matchupId) <= 8)) {
+    if (typeof matchupId === 'string' && (matchupId.startsWith('E') || matchupId.startsWith('W')) &&
+      !matchupId.includes('semi') && !matchupId.includes('final')) {
+      // Handle new round 1 format with codes like E1, W1, etc.
       result = this.userData.bracket.round1[matchupId] === team;
     } else if (typeof matchupId === 'string') {
       if (matchupId.includes('semi')) {
@@ -348,19 +378,26 @@ export class UserViewComponent implements OnInit {
 
     let games: number | undefined;
 
-    if (typeof matchupId === 'number' || (!isNaN(Number(matchupId)) && Number(matchupId) <= 8)) {
+
+    if (typeof matchupId === 'string' && (matchupId.startsWith('E') || matchupId.startsWith('W')) &&
+      !matchupId.includes('semi') && !matchupId.includes('final')) {
+      // Handle new round 1 format with codes like E1, W1, etc.
       games = this.userData.bracket.round1Games?.[matchupId];
     } else if (typeof matchupId === 'string') {
       if (matchupId.includes('semi')) {
-        games = this.userData.bracket.round2Games?.[`${matchupId}-winner`];
+        // Access round2Games directly with the matchup ID (no "-winner" suffix)
+        games = this.userData.bracket.round2Games?.[matchupId];
       } else if (matchupId.includes('final') && !matchupId.includes('cup')) {
-        games = this.userData.bracket.round3Games?.[`${matchupId}-winner`];
-      } else if (matchupId === 'cup-winner') {
-        games = this.userData.bracket.finalGames?.['cup-winner'];
+        // Access round3Games directly with the matchup ID (no "-winner" suffix)
+        games = this.userData.bracket.round3Games?.[matchupId];
+      } else if (matchupId === 'cup-winner' || matchupId === 'cup') {
+        // Use 'cup' key for finalGames
+        games = this.userData.bracket.finalGames?.['cup'];
       }
     }
-
-    return games ? games.toString() : null;
+    games = games || 0; // Default to 0 if undefined
+    const games_string = games.toString();
+    return games_string.length > 0 ? games_string : null;
   }
 
   getFinalTeams(): string[] {
@@ -460,5 +497,22 @@ export class UserViewComponent implements OnInit {
 
   getGoalieClass(): string {
     return 'default-goalie-class';
+  }
+
+  getTeamClasses(matchupId: string | number, team: string): { [key: string]: boolean } {
+    const isWinner = this.isTeamWinner(matchupId, team);
+    const teamCode = team.toLowerCase();
+
+    // Base classes
+    const classes: { [key: string]: boolean } = {
+      'winner': isWinner,
+    };
+
+    // Add team-specific class
+    if (team) {
+      classes[`team-${teamCode}`] = true;
+    }
+
+    return classes;
   }
 }

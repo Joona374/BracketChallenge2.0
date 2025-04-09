@@ -16,12 +16,14 @@ interface Matchup {
   team2: string;
   round: number;
   conference: string;
+  matchup_code?: string; // Added matchup_code to align with bracket data
 }
 
 interface MatchupResult {
   matchupId: number;
   winner: string;
   games: number;
+  matchupCode?: string; // Added to help with bracket scoring
 }
 
 @Component({
@@ -150,17 +152,20 @@ export class AdminComponent implements OnInit {
           this.eastRoundMatchups = data.east || [];
           this.westRoundMatchups = data.west || [];
 
-          // Initialize results arrays with the right size
+          console.log(this.selectedRound)
+          // Initialize results arrays with the right size and include matchup codes
           this.eastRoundResults = this.eastRoundMatchups.map(m => ({
             matchupId: m.id || 0,
             winner: '',
-            games: 4
+            games: 4,
+            matchupCode: m.matchup_code || ''
           }));
 
           this.westRoundResults = this.westRoundMatchups.map(m => ({
             matchupId: m.id || 0,
             winner: '',
-            games: 4
+            games: 4,
+            matchupCode: m.matchup_code || ''
           }));
         } else {
           this.finalMatchup = data.final;
@@ -168,8 +173,15 @@ export class AdminComponent implements OnInit {
             this.finalResult = {
               matchupId: this.finalMatchup.id,
               winner: '',
-              games: 4
+              games: 4,
+              matchupCode: this.finalMatchup.matchup_code || 'cup'
+
             };
+            console.log('Final matchup loaded:', this.finalMatchup)
+            this.selectedRound = 4; // Set to final round
+            console.log()
+          } else {
+            console.warn('Final matchup not found or invalid.');
           }
         }
       },
@@ -177,6 +189,111 @@ export class AdminComponent implements OnInit {
         console.error(`Error loading round ${this.selectedRound} matchups:`, err);
       }
     });
+  }
+
+  // Get the bracket-compatible key based on round and matchup code
+  getBracketKey(round: number, matchupCode: string): string {
+    if (round === 1) {
+      return matchupCode; // Round 1 uses direct codes like W1, E3
+    } else if (round === 2) {
+      // Convert from matchup codes to bracket keys
+      if (matchupCode.startsWith('W')) {
+        return matchupCode === 'W1' ? 'w-semi' : 'w-semi2';
+      } else {
+        return matchupCode === 'E1' ? 'e-semi' : 'e-semi2';
+      }
+    } else if (round === 3) {
+      // Conference finals
+      return matchupCode.startsWith('W') ? 'west-final' : 'east-final';
+    } else {
+      // Stanley Cup final
+      return 'cup';
+    }
+  }
+
+  // Format results for easy scoring against user brackets
+  formatResultsForScoring(): any {
+    const results: any = {
+      round1: {}, round1Games: {},
+      round2: {}, round2Games: {},
+      round3: {}, round3Games: {},
+      final: {}, finalGames: {}
+    };
+
+    // Process results based on round
+    if (this.selectedRound === 1) {
+      [...this.eastRoundResults, ...this.westRoundResults].forEach(r => {
+        if (r.matchupCode && r.winner) {
+          // Find corresponding matchup to get both teams
+          const matchup = [...this.eastRoundMatchups, ...this.westRoundMatchups]
+            .find(m => m.matchup_code === r.matchupCode);
+
+          results.round1[r.matchupCode] = r.winner;
+          results.round1Games[r.matchupCode] = r.games;
+        }
+      });
+    } else if (this.selectedRound === 2) {
+      // Group matchups by bracket key
+      const bracketMatchups: Record<string, string[]> = {
+        'w-semi': [], 'w-semi2': [], 'e-semi': [], 'e-semi2': []
+      };
+
+      [...this.eastRoundMatchups, ...this.westRoundMatchups].forEach(m => {
+        const bracketKey = this.getBracketKey(2, m.matchup_code || '');
+        if (bracketKey && bracketKey in bracketMatchups) {
+          bracketMatchups[bracketKey] = [m.team1, m.team2];
+        }
+      });
+
+      // Add teams to results
+      for (const key in bracketMatchups) {
+        if (bracketMatchups[key].length === 2) {
+          results.round2[key] = bracketMatchups[key];
+        }
+      }
+
+      // Add winners and game counts
+      [...this.eastRoundResults, ...this.westRoundResults].forEach(r => {
+        if (r.matchupCode && r.winner) {
+          const bracketKey = this.getBracketKey(2, r.matchupCode);
+          results.round2[`${bracketKey}-winner`] = r.winner;
+          results.round2Games[bracketKey] = r.games;
+        }
+      });
+    } else if (this.selectedRound === 3) {
+      // Add west and east final matchups with teams array
+      const westFinals = this.westRoundMatchups.find(m => m.round === 3);
+      const eastFinals = this.eastRoundMatchups.find(m => m.round === 3);
+
+      if (westFinals) {
+        results.round3['west-final'] = [westFinals.team1, westFinals.team2];
+      }
+
+      if (eastFinals) {
+        results.round3['east-final'] = [eastFinals.team1, eastFinals.team2];
+      }
+
+      // Add winners and game counts
+      [...this.eastRoundResults, ...this.westRoundResults].forEach(r => {
+        if (r.matchupCode && r.winner) {
+          const bracketKey = this.getBracketKey(3, r.matchupCode);
+          results.round3[`${bracketKey}-winner`] = r.winner;
+          results.round3Games[bracketKey] = r.games;
+        }
+      });
+    } else if (this.selectedRound === 4 && this.finalResult.winner && this.finalMatchup) {
+      // Add cup final teams array
+      results.final['cup'] = [this.finalMatchup.team1, this.finalMatchup.team2];
+
+
+      // Add cup winner and game count
+      results.final['cup-winner'] = this.finalResult.winner;
+      results.finalGames['cup'] = this.finalResult.games;
+    }
+
+
+
+    return results;
   }
 
   // Save round results
@@ -199,10 +316,15 @@ export class AdminComponent implements OnInit {
       return;
     }
 
-    // Send results to API
+    // Format results in the user-friendly structure for scoring
+    const formattedResults = this.formatResultsForScoring();
+    console.log('Formatted for bracket scoring:', formattedResults);
+
+    // Send both the raw results and formatted results to API
     this.http.post(`${this.apiUrl}/bracket/save-results`, {
       round: this.selectedRound,
-      results: results
+      results: results,
+      formattedResults: formattedResults
     }).subscribe({
       next: () => {
         alert(`Round ${this.selectedRound} results saved successfully!`);
@@ -230,6 +352,11 @@ export class AdminComponent implements OnInit {
   getTeamName(code: string): string {
     const team = this.teams.find(t => t.code === code);
     return team ? team.name : code;
+  }
+
+  // Helper to get matchup display name
+  getMatchupDisplayName(matchup: Matchup): string {
+    return matchup.matchup_code || `${matchup.conference.substring(0, 1).toUpperCase()}?`;
   }
 
   // Validation functions
