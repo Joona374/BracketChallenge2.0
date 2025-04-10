@@ -10,7 +10,7 @@ from config import Config
 from db import db_engine as db
 from models import Team, Player
 
-MIN_PRICE = 200000
+MIN_PRICE = 180000
 MAX_PRICE = 500000
 
 def fetch_and_store_teams():
@@ -156,11 +156,9 @@ def calculate_prices():
             performance = 0
         else:
             # Calculate performance using the formula
-            performance = (
-                (2 * player.reg_goals + player.reg_assists + 
-                 (abs(player.reg_plus_minus) if player.reg_plus_minus < 0 else player.reg_plus_minus))
-                / player.reg_gp
-            )
+            performance = ((2 * player.reg_goals + player.reg_assists + player.reg_plus_minus) / player.reg_gp)
+                
+    
         
         player_scores.append((player, performance))
     
@@ -184,14 +182,17 @@ def calculate_prices():
             # Scale the price between MIN_PRICE and MAX_PRICE
             normalized_score = (score - min_score) / score_range
             player.price = int(MIN_PRICE + (normalized_score * price_range))
+            # ROUNDING THE PRICE TO THE NEAREST 1000
+            player.price = round(player.price, -3)
             
-            # Handle special cases
-            if player.is_U23:
-                # U23 players get a discount
-                player.price = int(player.price * 0.9)
+            # Handle special cases for players with fewer than 10 or 20 games played
+            if player.reg_gp < 10:
+                player.price = int(player.price * 0.8)
+            elif player.reg_gp < 20:
+                player.price = int(player.price * 0.85)
             
             # Ensure price stays within bounds
-            player.price = max(MIN_PRICE, min(MAX_PRICE, player.price))
+            player.price = max(MIN_PRICE, min(MAX_PRICE, player.price))*1.1
     
     # Commit the changes to the database
     db.session.commit()

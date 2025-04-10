@@ -2,7 +2,13 @@
 <div class="lineup-top-container">
   <!-- Left side: player slots -->
   <div class="lineup-wrapper">
-    <h2 class="section-header">Select Your Starting Lineup</h2>
+    <h2 class="section-header">
+      {{
+        lineupLocked
+          ? "Tee muutoksia kokoonpanoon"
+          : "Valitse Aloituskokoonpano"
+      }}
+    </h2>
 
     <div class="slot-container">
       <!-- Forwards -->
@@ -12,7 +18,7 @@
           class="slot"
           [ngClass]="getPlayerClass(slot)"
           [class.active]="selectedSlot === slot"
-          (click)="selectedSlot = slot"
+          (click)="onSlotClick(slot)"
         >
           <span>{{ formatPlayer(slot) }}</span>
         </div>
@@ -26,7 +32,7 @@
           class="slot"
           [ngClass]="getPlayerClass(slot)"
           [class.active]="selectedSlot === slot"
-          (click)="selectedSlot = slot"
+          (click)="onSlotClick(slot)"
         >
           <span>{{ formatPlayer(slot) }}</span>
         </div>
@@ -40,7 +46,7 @@
           class="slot"
           [ngClass]="getPlayerClass(goalieSlot)"
           [class.active]="selectedSlot === goalieSlot"
-          (click)="selectedSlot = goalieSlot"
+          (click)="onSlotClick(goalieSlot)"
         >
           <span>{{ formatPlayer(goalieSlot) }}</span>
         </div>
@@ -52,26 +58,48 @@
   <div class="lineup-side-panel">
     <!-- Budget display -->
     <div class="budget-display">
-      <span class="budget-label">Remaining Budget:</span>
+      <span class="budget-label">Budjettia Jäljellä:</span>
       <span
         class="budget-value"
-        [ngClass]="{ 'budget-warning': remainingBudget < 100000 }"
+        [ngClass]="{ 'budget-warning': remainingBudget < 500000 }"
       >
         {{ formatPrice(remainingBudget) }}
+      </span>
+    </div>
+
+    <!-- Trade counter display -->
+    <div class="trades-display" *ngIf="lineupLocked">
+      <span class="trades-label">Vaihtoja Jäljellä:</span>
+      <span
+        class="trades-value"
+        [ngClass]="{ 'trades-warning': effectiveRemainingTrades < 3 }"
+      >
+        {{ effectiveRemainingTrades }}/{{ maxTrades }}
       </span>
     </div>
 
     <!-- Controls (fixed typo in class name) -->
     <div class="controls">
       <button class="lineup-button save" (click)="saveLineup()">
-        💾 Save Lineup
+        💾 Tallenna Kokoonpano
       </button>
-      <button class="lineup-button clear" (click)="clearLineup()">
-        🧹 Clear Lineup
+      <button
+        *ngIf="!lineupLocked"
+        class="lineup-button clear"
+        (click)="clearLineup()"
+      >
+        🧹 Tyhennä Kokoonpano
+      </button>
+      <button
+        *ngIf="lineupLocked"
+        class="lineup-button reset"
+        (click)="resetLineup()"
+      >
+        ↺ Palauta Kokoonpano
       </button>
       <input
         type="text"
-        placeholder="Search by name or team..."
+        placeholder="Hae pelaajan tai joukkueen nimellä..."
         [(ngModel)]="searchTerm"
         class="search-box"
       />
@@ -93,25 +121,26 @@
           (click)="sortBy('position')"
           [class.sorted]="sortKey === 'position'"
         >
-          Position
+          Pelipaikka
           <span *ngIf="sortKey === 'position'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th
           (click)="sortBy('firstName')"
           [class.sorted]="sortKey === 'firstName'"
         >
-          First
+          Etunimi
           <span *ngIf="sortKey === 'firstName'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th
           (click)="sortBy('lastName')"
           [class.sorted]="sortKey === 'lastName'"
         >
-          Last
+          Sukunimi
           <span *ngIf="sortKey === 'lastName'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th (click)="sortBy('team')" [class.sorted]="sortKey === 'team'">
-          Team <span *ngIf="sortKey === 'team'">{{ sortAsc ? "▲" : "▼" }}</span>
+          Joukkue
+          <span *ngIf="sortKey === 'team'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th (click)="sortBy('isU23')" [class.sorted]="sortKey === 'isU23'">
           U23
@@ -122,7 +151,7 @@
           [class.sorted]="sortKey === 'reg_gp'"
           class="stat-column"
         >
-          GP
+          Pelattu
           <span *ngIf="sortKey === 'reg_gp'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th
@@ -130,7 +159,7 @@
           [class.sorted]="sortKey === 'reg_goals'"
           class="stat-column"
         >
-          G
+          Maalit
           <span *ngIf="sortKey === 'reg_goals'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th
@@ -138,7 +167,7 @@
           [class.sorted]="sortKey === 'reg_assists'"
           class="stat-column"
         >
-          A
+          Syötöt
           <span *ngIf="sortKey === 'reg_assists'">{{
             sortAsc ? "▲" : "▼"
           }}</span>
@@ -148,7 +177,7 @@
           [class.sorted]="sortKey === 'reg_points'"
           class="stat-column"
         >
-          P
+          Pisteet
           <span *ngIf="sortKey === 'reg_points'">{{
             sortAsc ? "▲" : "▼"
           }}</span>
@@ -164,7 +193,7 @@
           }}</span>
         </th>
         <th (click)="sortBy('price')" [class.sorted]="sortKey === 'price'">
-          Price
+          Hinta
           <span *ngIf="sortKey === 'price'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
       </tr>

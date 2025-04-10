@@ -8,7 +8,7 @@ import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints
+from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory
 
 import os
 from openai import OpenAI
@@ -278,26 +278,73 @@ def save_lineup():
 
     user_id = data.get("user_id")
     lineup = data.get("lineup")
+    trades_used = data.get("tradesUsed", 0)
 
     if not user_id or not lineup:
         return jsonify({"error": "Missing user_id or lineup"}), 400
 
-    existing = LineupPick.query.filter_by(user_id=user_id).first()
-    if existing:
-        db.session.delete(existing)
-
     try:
-        new_lineup = LineupPick(
-            user_id=user_id,
-            lineup_json=json.dumps(lineup),
-            created_at=datetime.now(UTC)
-        )
-        db.session.add(new_lineup)
-        db.session.commit()
-        return jsonify({"message": "Lineup saved successfully"}), 200
+        with db.session.begin():
+            # Get existing lineup if any
+            existing = LineupPick.query.filter_by(user_id=user_id).first()
+            old_lineup = json.loads(existing.lineup_json) if existing else {}
+            
+            # Calculate current value of lineup
+            total_value = 0
+            current_time = datetime.now(UTC)
+            
+            # Process each slot in the new lineup
+            for slot, player_id in lineup.items():
+                if player_id:
+                    player = Player.query.get(player_id)
+                    if player:
+                        total_value += player.price
+                        
+                        # If this is a new player in this slot
+                        if not old_lineup.get(slot) == player_id:
+                            # Close out old player's history
+                            if old_lineup.get(slot):
+                                db.session.query(LineupHistory)\
+                                    .filter_by(user_id=user_id, slot=slot, removed_at=None)\
+                                    .update({"removed_at": current_time})
+                            
+                            # Add new player history
+                            history = LineupHistory(
+                                user_id=user_id,
+                                player_id=player_id,
+                                slot=slot,
+                                added_at=current_time,
+                                price_at_time=player.price
+                            )
+                            db.session.add(history)
+
+            if existing:
+                # Update existing lineup
+                existing.lineup_json = json.dumps(lineup)
+                existing.remaining_trades -= trades_used
+                existing.unused_budget = data.get("unusedBudget", 0)
+                existing.total_value = total_value
+                existing.updated_at = current_time
+            else:
+                # Create new lineup
+                new_lineup = LineupPick(
+                    user_id=user_id,
+                    lineup_json=json.dumps(lineup),
+                    remaining_trades=9 - trades_used,
+                    unused_budget=data.get("unusedBudget", 0),
+                    total_value=total_value,
+                    created_at=current_time
+                )
+                db.session.add(new_lineup)
+
+        return jsonify({
+            "message": "Lineup saved successfully",
+            "totalValue": total_value
+        }), 200
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "Failed to save lineup", "details": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/lineup/get", methods=["GET"])
 def get_lineup():
@@ -306,15 +353,33 @@ def get_lineup():
     if not user_id:
         return jsonify({"error": "Missing user_id"}), 400
 
-    lineup_pick = LineupPick.query.filter_by(user_id=user_id).first()
-
-    if not lineup_pick:
-        return jsonify({"error": "No lineup found for this user"}), 404
-
     try:
+        lineup_pick = LineupPick.query.filter_by(user_id=user_id).first()
+
+        if not lineup_pick:
+            return jsonify({"error": "No lineup found for this user"}), 404
+
         lineup_data = json.loads(lineup_pick.lineup_json)
-        return jsonify({"lineup": lineup_data}), 200
+        
+        # Calculate current total value
+        total_value = 0
+        for player_id in lineup_data.values():
+            if player_id:
+                player = Player.query.get(player_id)
+                if player:
+                    total_value += player.price
+
+        return jsonify({
+            "lineup": lineup_data,
+            "remainingTrades": lineup_pick.remaining_trades,
+            "unusedBudget": lineup_pick.unused_budget,
+            "totalValue": total_value,
+            "effectiveBudget": total_value + lineup_pick.unused_budget
+        }), 200
+
     except Exception as e:
+        print("Error getting lineup:", e)  # Add logging
+        # Handle JSON parsing errors
         return jsonify({"error": "Failed to parse lineup", "details": str(e)}), 500
 
 @app.route('/api/predictions/save', methods=['POST'])

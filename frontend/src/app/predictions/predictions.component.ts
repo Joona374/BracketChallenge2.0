@@ -9,7 +9,6 @@ type PredictionCategory =
   | "connSmythe"
   | "penaltyMinutes"
   | "goals"
-  | "points"
   | "defensePoints"
   | "U23Points"
   | "goalieGaa"
@@ -27,14 +26,13 @@ export class PredictionsComponent implements OnInit {
   searchTerm: string = "";
 
   // Current category being viewed
-  selectedCategory: PredictionCategory = "points";
+  selectedCategory: PredictionCategory = "U23Points";
 
   // Store picks for each category (up to 3 players per category)
   predictions: Record<PredictionCategory, Player[]> = {
     connSmythe: [],
     penaltyMinutes: [],
     goals: [],
-    points: [],
     defensePoints: [],
     U23Points: [],
     goalieGaa: [],
@@ -46,15 +44,15 @@ export class PredictionsComponent implements OnInit {
     connSmythe: "Conn Smythe voittaja",
     penaltyMinutes: "Jäähypörssi",
     goals: "Maalipörssi",
-    points: "Pistepörssi",
     defensePoints: "Puolustajien pistepörssi",
     U23Points: "U23 pistepörssi",
     goalieGaa: "Paras GAA Maalivahti",
     finnishPoints: "Suomalaisten pisepörssi"
   };
 
-  sortKey: keyof Player | null = null;
-  sortAsc: boolean = true;
+  // Update these initial values at the class level
+  sortKey: keyof Player | null = 'reg_points';  // Allow null for reset functionality
+  sortAsc: boolean = false;  // Keep false for descending order
 
   constructor(private playerService: PlayerService, private http: HttpClient) { }
 

@@ -1,7 +1,7 @@
 <h2>Login</h2>
 
 <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-  <label for="username">Username:</label><br />
+  <label for="username">Käyttäjätunnus / sähköposti:</label><br />
   <input
     type="text"
     id="username"
@@ -10,7 +10,7 @@
     [(ngModel)]="formData.username"
   /><br /><br />
 
-  <label for="password">Password:</label><br />
+  <label for="password">Salasana:</label><br />
   <input
     type="password"
     id="password"
@@ -19,7 +19,7 @@
     [(ngModel)]="formData.password"
   /><br /><br />
 
-  <button type="submit" [disabled]="!loginForm.form.valid">Login</button>
+  <button type="submit" [disabled]="!loginForm.form.valid">Kirjaudu</button>
 </form>
 
 <div *ngIf="message" style="color: green">{{ message }}</div>

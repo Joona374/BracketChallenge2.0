@@ -288,8 +288,8 @@
 }
 
 .lineup-button {
-  padding: 8px 20px;
-  font-size: 14px;
+  padding: 6px 16px;
+  font-size: 13px;
   font-family: "Orbitron", monospace;
   font-weight: bold;
   border-radius: 8px;
@@ -322,6 +322,17 @@
   color: white;
 }
 
+.lineup-button.reset {
+  background-color: #22223c;
+  color: #4444ff;
+  border-color: #4444ff;
+}
+
+.lineup-button.reset:hover {
+  background-color: #2a2a40;
+  color: white;
+}
+
 .slot-container {
   display: flex;
   flex-direction: column;
@@ -331,7 +342,7 @@
 
 .budget-display {
   margin: 0 0 15px 0;
-  padding: 10px 15px;
+  padding: 6px 6px;
   background-color: #333;
   border-radius: 8px;
   width: 100%;
@@ -355,6 +366,37 @@
 }
 
 .budget-warning {
+  color: #ff4444;
+  animation: pulse 1.5s infinite;
+}
+
+/* Trades Display */
+.trades-display {
+  margin: 0 0 15px 0;
+  padding: 6px 6px;
+  background-color: #333;
+  border-radius: 8px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  border: 1px solid #555;
+}
+
+.trades-label {
+  font-family: "Orbitron", monospace;
+  font-size: 1em;
+  color: #ccc;
+  margin-right: 10px;
+}
+
+.trades-value {
+  font-family: "Orbitron", monospace;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.trades-warning {
   color: #ff4444;
   animation: pulse 1.5s infinite;
 }

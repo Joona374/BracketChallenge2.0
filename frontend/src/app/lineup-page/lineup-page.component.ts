@@ -15,13 +15,11 @@ type SlotKey = "L" | "C" | "R" | "LD" | "RD" | "G";
   styleUrls: ["./lineup-page.component.css"],
 })
 export class LineupPageComponent implements OnInit {
-  // Instead of saying SlotKey[] = [...]
   readonly forwardSlots = ["L", "C", "R"] as const;
   readonly defenderSlots = ["LD", "RD"] as const;
   readonly goalieSlot = "G" as const;
 
   players: Player[] = [];
-
   slotKeys: SlotKey[] = ["L", "C", "R", "LD", "RD", "G"];
 
   slotMap: Record<SlotKey, Player | null> = {
@@ -34,8 +32,25 @@ export class LineupPageComponent implements OnInit {
   };
 
   selectedSlot: SlotKey | null = null;
-
   searchTerm: string = "";
+  totalsBudget: number = 2000000;
+
+  // Trade and lineup lock properties
+  lineupLocked: boolean = false;
+  remainingTrades: number = 9;
+  maxTrades: number = 9;
+
+  // Add this helper method to track unsaved changes
+  private hasUnsavedChanges = false;
+
+  // Add these new properties
+  private originalLineup: Record<SlotKey, Player | null> = {
+    L: null, C: null, R: null, LD: null, RD: null, G: null
+  };
+  private pendingTradeSlots: Set<SlotKey> = new Set();
+
+  // Add confirmed trades counter
+  private confirmedTradesUsed: number = 0;
 
   constructor(private playerService: PlayerService, private http: HttpClient) { }
 
@@ -49,7 +64,6 @@ export class LineupPageComponent implements OnInit {
 
   loadSavedLineup(): void {
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-
     if (!user?.id) {
       console.log("User not logged in, not loading lineup");
       return;
@@ -59,7 +73,6 @@ export class LineupPageComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           if (res.lineup) {
-            // The lineup data is directly the slot map of player IDs
             const savedLineup = res.lineup;
 
             // Create a map of player IDs to player objects for quick lookup
@@ -74,6 +87,22 @@ export class LineupPageComponent implements OnInit {
               }
             });
 
+            // Store the original lineup state
+            Object.keys(this.slotMap).forEach(slot => {
+              this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
+            });
+
+            this.pendingTradeSlots.clear();
+
+            // Update budget and trades info
+            this.totalsBudget = res.effectiveBudget;
+            this.remainingTrades = res.remainingTrades;
+
+            // Check if all slots are filled to determine if lineup is locked
+            const filledSlots = Object.values(this.slotMap).filter(player => player !== null).length;
+            if (filledSlots === this.slotKeys.length) {
+              this.lineupLocked = true;
+            }
             console.log("Lineup loaded successfully");
           }
         },
@@ -88,7 +117,17 @@ export class LineupPageComponent implements OnInit {
   }
 
   get availablePlayers(): Player[] {
+    // Start with all players
     let result = this.players;
+
+    // Create a set of player IDs that are already assigned to slots
+    const assignedPlayerIds = new Set<number>();
+    Object.values(this.slotMap).forEach(player => {
+      if (player) assignedPlayerIds.add(player.id);
+    });
+
+    // Filter out players already assigned to any slot
+    result = result.filter(p => !assignedPlayerIds.has(p.id));
 
     if (this.selectedSlot) {
       const positionMap: Record<SlotKey, "L" | "C" | "R" | "D" | "G"> = {
@@ -101,12 +140,8 @@ export class LineupPageComponent implements OnInit {
       };
 
       const required = positionMap[this.selectedSlot];
-
-      result = result.filter(
-        (p) =>
-          p.position === required &&
-          !Object.values(this.slotMap).some((assigned) => assigned?.id === p.id)
-      );
+      // Now we only need to filter by position since assigned players are already excluded
+      result = result.filter(p => p.position === required);
     }
 
     if (this.searchTerm.trim()) {
@@ -121,8 +156,6 @@ export class LineupPageComponent implements OnInit {
 
     return this.sortedPlayers(result);
   }
-
-  totalsBudget: number = 2000000;
 
   get remainingBudget(): number {
     const usedBudget = Object.values(this.slotMap)
@@ -158,10 +191,42 @@ export class LineupPageComponent implements OnInit {
     });
   }
 
+  // Add getter for actual remaining trades
+  get effectiveRemainingTrades(): number {
+    const pendingTrades = this.slotKeys.reduce((count, slot) => {
+      const originalPlayer = this.originalLineup[slot];
+      const currentPlayer = this.slotMap[slot];
+      return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
+    }, 0);
+    return this.maxTrades - (this.confirmedTradesUsed + pendingTrades);
+  }
+
+  onSlotClick(slot: SlotKey): void {
+    if (this.lineupLocked) {
+      // Check if removing this player would exceed trade limit
+      if (this.slotMap[slot] &&
+        this.slotMap[slot] !== this.originalLineup[slot] &&
+        this.effectiveRemainingTrades <= 0) {
+        alert('You have no trades remaining for this playoff season.');
+        return;
+      }
+      if (this.slotMap[slot]) {
+        this.slotMap[slot] = null;
+      }
+      this.selectedSlot = slot;
+    } else {
+      this.selectedSlot = this.selectedSlot === slot ? null : slot;
+    }
+  }
+
   assignPlayerToSlot(player: Player): void {
+    if (this.lineupLocked && this.effectiveRemainingTrades < 0) {
+      alert('You have no trades remaining for this playoff season.');
+      return;
+    }
+
     // Check if adding this player would exceed the budget
     let currentPrice = 0;
-
     if (this.selectedSlot) {
       const currentlyAssigned = this.slotMap[this.selectedSlot];
       currentPrice = currentlyAssigned?.price || 0;
@@ -169,16 +234,17 @@ export class LineupPageComponent implements OnInit {
 
     if (this.remainingBudget + currentPrice < player.price) {
       alert(
-        `Cannot afford ${player.firstName} ${player.lastName
-        } (${this.formatPrice(
-          player.price
-        )}). Remaining budget: ${this.formatPrice(this.remainingBudget)}`
+        `Cannot afford ${player.firstName} ${player.lastName} (${this.formatPrice(player.price)}). Remaining budget: ${this.formatPrice(this.remainingBudget)}`
       );
       return;
     }
 
     if (this.selectedSlot) {
-      // If a slot is selected, assign to that one
+      // Mark slot for pending trade if the new player is different from original
+      if (this.lineupLocked && player !== this.originalLineup[this.selectedSlot]) {
+        this.pendingTradeSlots.add(this.selectedSlot);
+      }
+
       this.slotMap[this.selectedSlot] = player;
       this.selectedSlot = null;
       return;
@@ -193,9 +259,7 @@ export class LineupPageComponent implements OnInit {
       G: ["G"],
     };
 
-    const matchingSlots =
-      positionToSlots[player.position as keyof typeof positionToSlots];
-
+    const matchingSlots = positionToSlots[player.position as keyof typeof positionToSlots];
     for (const slot of matchingSlots) {
       if (!this.slotMap[slot]) {
         this.slotMap[slot] = player;
@@ -209,8 +273,16 @@ export class LineupPageComponent implements OnInit {
 
   formatPlayer(slot: SlotKey): string {
     const player = this.slotMap[slot];
-    if (!player) return slot;
-    return `${player.firstName[0]}. ${player.lastName} (${player.team})`;
+    if (!player) {
+      if (slot === "L") return "VL";
+      else if (slot === "C") return "KH";
+      else if (slot === "R") return "OL";
+      else if (slot === "LD") return "VP";
+      else if (slot === "RD") return "OP";
+      else return "MV";
+
+    };
+    return `${player.firstName[0]}. ${player.lastName} (${this.formatPrice(player.price)})`;
   }
 
   // Helper method to format price as currency
@@ -218,8 +290,8 @@ export class LineupPageComponent implements OnInit {
     return "$" + price.toLocaleString();
   }
 
-  sortKey: keyof Player | null = null;
-  sortAsc: boolean = true;
+  sortKey: keyof Player | null = 'price';  // Changed from null to 'price'
+  sortAsc: boolean = false;  // Changed from true to false for descending order
 
   sortBy(key: keyof Player): void {
     if (this.sortKey === key) {
@@ -242,15 +314,35 @@ export class LineupPageComponent implements OnInit {
   }
 
   clearLineup(): void {
+    // Don't allow clearing lineup after it's locked
+    if (this.lineupLocked) {
+      alert("Your lineup is locked. You can only make trades by replacing individual players.");
+      return;
+    }
     this.slotKeys.forEach((key) => (this.slotMap[key] = null));
+    this.selectedSlot = null;
+  }
+
+  resetLineup(): void {
+    // Restore original lineup
+    Object.keys(this.originalLineup).forEach(slot => {
+      this.slotMap[slot as SlotKey] = this.originalLineup[slot as SlotKey];
+    });
+    this.pendingTradeSlots.clear();
     this.selectedSlot = null;
   }
 
   saveLineup(): void {
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-
     if (!user?.id) {
       alert("You must be logged in to save your lineup.");
+      return;
+    }
+
+    // Check if all positions are filled
+    const emptySlots = this.slotKeys.filter(key => this.slotMap[key] === null);
+    if (emptySlots.length > 0) {
+      alert(`Please fill all positions before saving. Empty positions: ${emptySlots.join(', ')}`);
       return;
     }
 
@@ -262,17 +354,49 @@ export class LineupPageComponent implements OnInit {
       {} as Record<SlotKey, number | null>
     );
 
-    this.http
-      .post("http://localhost:5000/api/lineup/save", {
-        user_id: user.id, // ✅ this was missing!
-        lineup: lineupPayload,
-      })
-      .subscribe({
-        next: () => alert("✅ Lineup saved!"),
-        error: (err) => {
-          console.error("Lineup save error:", err);
-          alert("❌ Failed to save lineup.");
-        },
-      });
+    // Calculate trades used if lineup is locked
+    const tradesUsed = this.lineupLocked ? this.slotKeys.reduce((count, slot) => {
+      const originalPlayer = this.originalLineup[slot];
+      const currentPlayer = this.slotMap[slot];
+      return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
+    }, 0) : 0;
+
+    this.http.post("http://localhost:5000/api/lineup/save", {
+      user_id: user.id,
+      lineup: lineupPayload,
+      tradesUsed: tradesUsed,
+      unusedBudget: this.remainingBudget
+    }).subscribe({
+      next: () => {
+        if (!this.lineupLocked) {
+          this.lineupLocked = true;
+          // Store the newly saved lineup as original
+          Object.keys(this.slotMap).forEach(slot => {
+            this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
+          });
+          alert("✅ Lineup saved! Your lineup is now locked for the playoffs. You have 9 trades available.");
+        } else {
+          // Count trades used in this save
+          const tradesUsed = this.slotKeys.reduce((count, slot) => {
+            const originalPlayer = this.originalLineup[slot];
+            const currentPlayer = this.slotMap[slot];
+            return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
+          }, 0);
+
+          this.confirmedTradesUsed += tradesUsed;
+
+          // Update original lineup
+          Object.keys(this.slotMap).forEach(slot => {
+            this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
+          });
+
+          alert(`✅ ${tradesUsed} trade${tradesUsed > 1 ? 's' : ''} completed! You have ${this.effectiveRemainingTrades} trades remaining.`);
+        }
+      },
+      error: (err) => {
+        console.error("Lineup save error:", err);
+        alert("❌ Failed to save lineup.");
+      },
+    });
   }
 }

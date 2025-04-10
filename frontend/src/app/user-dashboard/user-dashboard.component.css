@@ -112,7 +112,7 @@
   flex-direction: column;
   align-items: center;
   background: rgba(30, 0, 0, 0.5);
-  padding: 15px 25px;
+  padding: 5px 25px 15px;
   gap: 10px;
   border-radius: 8px;
   border: 1px solid rgba(255, 50, 50, 0.3);
@@ -128,6 +128,27 @@
   letter-spacing: 1px;
 }
 
+.rank-indicator {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ff6666;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+  margin-bottom: -5px;
+}
+
+.points-value {
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 50, 50, 0.7);
+  background: linear-gradient(45deg, #ff3232, #ff6666);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+  font-family: "Orbitron", monospace;
+}
+
 .points-breakdown {
   display: flex;
   gap: 15px;
@@ -137,7 +158,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 12px;
+  padding: 5px 7px;
+  min-width: 100px;
   border-radius: 5px;
   background: #2a0000;
   border: 1px solid #ff3232;
@@ -152,6 +174,31 @@
   font-size: 1.2rem;
   font-weight: 700;
   color: #ff6666;
+}
+
+/* Rank display */
+.rank-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #ff3232;
+}
+
+.rank-label {
+  font-size: 0.9rem;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rank-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #ff6666;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
 }
 
 /* Dashboard content */
@@ -269,6 +316,7 @@
   background: rgba(255, 50, 50, 0.1);
   border-radius: 8px;
   border: 1px solid rgba(255, 50, 50, 0.3);
+  width: 100%;
 }
 
 .stat-value {
@@ -313,6 +361,29 @@
   border-radius: 5px;
 }
 
+.lineup-details {
+  margin: 20px 0;
+}
+
+.lineup-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lineup-details .budget-detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  margin: 0px 0;
+}
+
+.lineup-details .budget-detail .detail-value {
+  font-family: "Orbitron", monospace;
+}
+
 /* Summary details */
 .summary-detail {
   display: flex;
@@ -330,7 +401,7 @@
 
 .detail-value {
   font-weight: 700;
-  color: #ff6666;
+  color: #ff3232;
 }
 
 /* Predictions specific */
@@ -377,4 +448,58 @@
   .points-summary {
     width: 100%;
   }
+}
+
+/* Player grid */
+.player-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+
+.player-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.position-label {
+  font-weight: bold;
+  color: #66ff66;
+  width: 30px;
+}
+
+.player-name {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-price {
+  color: #66ff66;
+  font-family: "Orbitron", monospace;
+  font-size: 0.9em;
+}
+
+.empty-slot {
+  color: #666;
+  font-style: italic;
+}
+
+.value-high {
+  color: #66ff66 !important; /* Green color for high values */
+}
+
+.value-low {
+  color: #ff3232 !important; /* Red color for low/warning values */
+}
+
+.detail-value {
+  color: #eee; /* Default color for normal values */
 }
