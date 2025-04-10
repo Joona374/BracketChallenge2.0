@@ -63,7 +63,12 @@
 
   <!-- Entry Fee Voting Section -->
   <div class="vote-section" [class.user-already-voted]="hasUserVoted">
-    <h3 class="vote-section-header">Osallistumismaksu Äänestys</h3>
+    <div class="header-with-tooltip">
+      <h3 class="vote-section-header">Osallistumismaksu Äänestys</h3>
+      <app-tooltip
+        text="Äänestä mieluisinta osallistumismaksua. Eniten ääniä saanut summa valitaan lopulliseksi osallistumismaksuksi."
+      ></app-tooltip>
+    </div>
     <p class="vote-description">
       Valitse mieluisin osallstumismaksu vuoden 2025 Bracket Challengeen.
     </p>
@@ -88,7 +93,12 @@
 
   <!-- Prize Distribution Voting Section -->
   <div class="vote-section" [class.user-already-voted]="hasUserVoted">
-    <h3 class="vote-section-header">Voitonjako Äänestys</h3>
+    <div class="header-with-tooltip">
+      <h3 class="vote-section-header">Voitonjako Äänestys</h3>
+      <app-tooltip
+        text="Äänestä miten osallistumismaksut tulisi jakaa sijoitusten kesken. Eniten ääniä saanut jakauma valitaan."
+      ></app-tooltip>
+    </div>
     <p class="vote-description">
       Kuinka tahdot että voitot jaetaan? Valitse prosentit 1., 2. ja 3. sijalle.
       <span class="total-note" [class.error]="totalDistribution !== 100"
@@ -219,8 +229,13 @@
   </div>
 
   <!-- Current Voting Stats -->
-  <div class="vote-section" *ngIf="showVotingStats">
-    <h3 class="vote-section-header">Tämänhetkinen äänestystilanne</h3>
+  <div class="vote-section">
+    <div class="header-with-tooltip">
+      <h3 class="vote-section-header">Tämänhetkinen Äänestystilanne</h3>
+      <app-tooltip
+        text="Näet tästä reaaliaikaisen tilanteen äänestyksestä. Tulokset päivittyvät automaattisesti kun uusia ääniä annetaan."
+      ></app-tooltip>
+    </div>
     <div class="voting-stats">
       <div class="stats-column">
         <h4>Osallistumismaksu</h4>

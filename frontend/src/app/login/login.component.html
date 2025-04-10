@@ -1,4 +1,4 @@
-<h2>Login</h2>
+<h2>Kirjautuminen</h2>
 
 <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
   <label for="username">Käyttäjätunnus / sähköposti:</label><br />
@@ -30,5 +30,9 @@
   <p>
     Eikö sinulla ole vielä käyttäjää?
     <a routerLink="/register">Rekisteröidy täältä</a>
+  </p>
+  <p>
+    Unohditko salasanasi?
+    <a routerLink="/reset-password">Nollaa salasana</a>
   </p>
 </div>

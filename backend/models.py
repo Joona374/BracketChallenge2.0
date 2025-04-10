@@ -37,7 +37,21 @@ class User(db.Model):
     
     def __repr__(self):
         return f'<User {self.username}>'
-    
+
+class ResetCode(db.Model):
+    __tablename__ = 'reset_codes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(80), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    is_used = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', backref=db.backref('reset_codes', lazy=True))
+
+    def __repr__(self):
+        return f'<ResetCode {self.code} for User {self.user_id}>'
+
 class RegistrationCode(db.Model):
     __tablename__ = 'registration_codes'
 

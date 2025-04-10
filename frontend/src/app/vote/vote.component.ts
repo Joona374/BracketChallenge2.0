@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Subscription, interval } from 'rxjs';
 import { RouterModule } from '@angular/router';
+import { TooltipComponent } from '../tooltip/tooltip.component';
+
 
 interface PrizeDistribution {
   first: number;
@@ -14,7 +16,7 @@ interface PrizeDistribution {
 @Component({
   selector: 'app-vote',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TooltipComponent],
   templateUrl: './vote.component.html',
   styleUrl: './vote.component.css'
 })

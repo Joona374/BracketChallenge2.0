@@ -70,6 +70,19 @@
   font-style: italic;
 }
 
+.header-with-tooltip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 15px;
+}
+
+.header-with-tooltip h3 {
+  margin: 0;
+}
+
 /* Alert messages */
 .alert {
   padding: 12px 20px;
@@ -142,12 +155,11 @@
   display: none;
 }
 
+/* Update existing vote-section-header to remove border */
 .vote-section-header {
   color: #ff4444;
   font-family: "Orbitron", monospace;
-  margin: 0 0 15px 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #333;
+  margin: 0;
 }
 
 .vote-description {

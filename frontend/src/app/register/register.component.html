@@ -37,7 +37,12 @@
     [(ngModel)]="formData.confirmPassword"
   /><br /><br />
 
-  <label for="registrationCode">Rekisteröinti koodi:</label><br />
+  <label for="registrationCode">
+    Rekisteröinti koodi:
+    <app-tooltip
+      text="Jos sinulla ei ole rekisteröintikoodia, ota yhteyttä pelin järjestäjään."
+    ></app-tooltip> </label
+  ><br />
   <input
     type="text"
     id="registrationCode"

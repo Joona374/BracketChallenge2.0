@@ -35,6 +35,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: transform 0.2s ease;
+}
+
+.brand-link:hover {
+  transform: scale(1.02);
 }
 
 .brand-logo {
@@ -42,6 +47,11 @@
   width: auto;
   object-fit: contain;
   margin-right: 10px;
+  transition: transform 0.1s ease;
+}
+
+.brand-link:hover .brand-logo {
+  transform: rotate(-15deg);
 }
 
 .brand {
@@ -53,6 +63,12 @@
   text-decoration: none;
   font-weight: bold;
   font-family: "Orbitron", monospace;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.brand:hover {
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
 }
 
 /* Hamburger icon */

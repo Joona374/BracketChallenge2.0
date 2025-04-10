@@ -28,13 +28,6 @@
   </div>
 
   <div class="navbar-right" [class.open]="menuOpen || !isMobileView">
-    <a
-      routerLink="/"
-      routerLinkActive="active-link"
-      [routerLinkActiveOptions]="{ exact: true }"
-      >Etusivu</a
-    >
-
     <ng-container *ngIf="isLoggedIn; else guestLinks">
       <!-- Dropdown menu for gameplay options -->
       <div class="dropdown" (clickOutside)="isDropdownOpen = false">
@@ -54,6 +47,7 @@
         >Sarjataulukko</a
       >
       <a routerLink="/rules" routerLinkActive="active-link">Säännöt & Ohjeet</a>
+      <a routerLink="/vote" routerLinkActive="active-link">Äänestys</a>
 
       <!-- Admin link - only shown for admin users -->
       <a
@@ -90,8 +84,8 @@
     <ng-template #guestLinks>
       <a routerLink="/rules" routerLinkActive="active-link">Säänöt & Ohjeet</a>
       <a routerLink="/vote" routerLinkActive="active-link">Äänestys</a>
-
       <a routerLink="/login" routerLinkActive="active-link">Kirjautuminen</a>
+      <a routerLink="/register" routerLinkActive="active-link">Rekisteröidy</a>
     </ng-template>
   </div>
 </nav>

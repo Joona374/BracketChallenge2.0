@@ -17,6 +17,7 @@ import { UserViewComponent } from "./app/user-view/user-view.component";
 import { RulesComponent } from "./app/rules/rules.component";
 import { VoteComponent } from "./app/vote/vote.component";
 import { AdminComponent } from "./app/admin/admin.component";
+import { ResetPasswordComponent } from "./app/reset-password/reset-password.component";
 
 const routes: Routes = [
   { path: "", component: HomeComponent },
@@ -31,6 +32,7 @@ const routes: Routes = [
   { path: "rules", component: RulesComponent },
   { path: "vote", component: VoteComponent },
   { path: "admin", component: AdminComponent },
+  { path: "reset-password", component: ResetPasswordComponent },
 ];
 
 bootstrapApplication(AppComponent, {

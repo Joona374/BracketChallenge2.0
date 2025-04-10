@@ -3,11 +3,12 @@ import { HttpClient } from "@angular/common/http";
 import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
+import { TooltipComponent } from "../tooltip/tooltip.component";
 
 @Component({
   selector: "app-register",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TooltipComponent],
   templateUrl: "./register.component.html",
   styleUrl: "./register.component.css",
 })

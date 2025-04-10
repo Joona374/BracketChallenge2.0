@@ -8,7 +8,7 @@ import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory
+from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode
 
 import os
 from openai import OpenAI
@@ -151,6 +151,37 @@ def login():
         "isAdmin": user.is_admin,
         "hasVoted": user.has_voted
     }), 200
+
+@app.route("/api/reset-password", methods=["POST"])
+def reset_password():
+    data = request.json
+
+    if not data or not all(k in data for k in ["username", "resetCode", "newPassword"]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    user = User.query.filter_by(username=data["username"]).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    reset_code = ResetCode.query.filter_by(
+        code=data["resetCode"],
+        user_id=user.id,
+        is_used=False
+    ).first()
+
+    if not reset_code:
+        return jsonify({"error": "Invalid or expired reset code"}), 400
+
+    try:
+        # Update password
+        user.password_hash = generate_password_hash(data["newPassword"])
+        # Mark reset code as used
+        reset_code.is_used = True
+        db.session.commit()
+        return jsonify({"message": "Password reset successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/user-logos", methods=["GET"])
 def get_user_logos():
