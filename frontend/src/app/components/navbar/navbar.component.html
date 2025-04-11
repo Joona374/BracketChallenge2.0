@@ -35,9 +35,22 @@
           Veikkaukset <i class="fas fa-caret-down"></i>
         </button>
         <div class="dropdown-menu" [class.show]="isDropdownOpen">
-          <a routerLink="/bracket" routerLinkActive="active-link">Bracket</a>
-          <a routerLink="/lineup" routerLinkActive="active-link">Kokoonpano</a>
-          <a routerLink="/predictions" routerLinkActive="active-link"
+          <a
+            routerLink="/bracket"
+            routerLinkActive="active-link"
+            (click)="closeDropdown()"
+            >Bracket</a
+          >
+          <a
+            routerLink="/lineup"
+            routerLinkActive="active-link"
+            (click)="closeDropdown()"
+            >Kokoonpano</a
+          >
+          <a
+            routerLink="/predictions"
+            routerLinkActive="active-link"
+            (click)="closeDropdown()"
             >Top 3 Pelaajat</a
           >
         </div>

@@ -159,6 +159,7 @@ class Player(db.Model):
     headshot = db.Column(db.String(255), nullable=True)
     is_U23 = db.Column(db.Boolean, default=False)
     price = db.Column(db.Integer, default=1)
+    initial_price = db.Column(db.Integer, default=1)
     
     # Regular season stats
     reg_gp = db.Column(db.Integer, default=0)
@@ -177,6 +178,42 @@ class Player(db.Model):
     
     def __repr__(self):
         return f'<Player {self.first_name} {self.last_name} ({self.team_abbr})>'
+
+class Goalie(db.Model):
+    __tablename__ = 'goalies'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    api_id = db.Column(db.Integer, unique=True, nullable=False)  # NHL API playerId
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+    team_abbr = db.Column(db.String(10), db.ForeignKey('teams.abbr'), nullable=False)
+    position = db.Column(db.String(2), nullable=False)  # Will be 'G'
+    jersey_number = db.Column(db.String(10), nullable=True)
+    birth_country = db.Column(db.String(10), nullable=True)
+    birth_year = db.Column(db.Integer, nullable=True)
+    headshot = db.Column(db.String(255), nullable=True)
+    is_U23 = db.Column(db.Boolean, default=False)
+    price = db.Column(db.Integer, default=1)
+    initial_price = db.Column(db.Integer, default=1)
+    
+    # Regular season goalie stats
+    reg_gp = db.Column(db.Integer, default=0)  # Games played
+    reg_gaa = db.Column(db.Float, default=0.0)  # Goals against average
+    reg_save_pct = db.Column(db.Float, default=0.0)  # Save percentage
+    reg_shutouts = db.Column(db.Integer, default=0)  # Shutouts
+    reg_wins = db.Column(db.Integer, default=0)  # Wins
+    
+    # Playoff goalie stats
+    playoff_gp = db.Column(db.Integer, default=0)
+    playoff_gaa = db.Column(db.Float, default=0.0)
+    playoff_save_pct = db.Column(db.Float, default=0.0)
+    playoff_shutouts = db.Column(db.Integer, default=0)
+    playoff_wins = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    
+    def __repr__(self):
+        return f'<Goalie {self.first_name} {self.last_name} ({self.team_abbr})>'
 
 class Vote(db.Model):
     __tablename__ = 'votes'

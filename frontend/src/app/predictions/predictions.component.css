@@ -271,7 +271,7 @@
   z-index: 1;
   text-align: left;
   padding: 7px;
-  font-size: 14px;
+  font-size: 13px; /* Reduced font size */
   cursor: pointer;
 }
 
@@ -286,13 +286,12 @@
 }
 
 .player-table thead th.stat-column {
-  width: 50px;
   text-align: center;
 }
 
 .player-table td {
-  padding: 6px;
-  font-size: 14px;
+  padding: 4px; /* Reduced padding */
+  font-size: 13px; /* Reduced font size */
   border-top: 1px solid #444;
 }
 
@@ -300,7 +299,7 @@
   text-align: center;
   font-family: monospace;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 12px; /* Reduced font size */
 }
 
 .player-table td.positive {
@@ -492,6 +491,118 @@
     color: #f47d30;
   }
 }
+.team-min {
+  border-left-color: #154734;
+  .pick-rank {
+    background-color: #154734;
+    color: #ddcba4;
+  }
+}
+.team-njd {
+  border-left-color: #ce1126;
+  .pick-rank {
+    background-color: #ce1126;
+    color: #fff;
+  }
+}
+.team-buf {
+  border-left-color: #003087;
+  .pick-rank {
+    background-color: #003087;
+    color: #ffffff;
+  }
+}
+.team-stl {
+  border-left-color: #002f87;
+  .pick-rank {
+    background-color: #002f87;
+    color: #ffffff;
+  }
+}
+.team-mtl {
+  border-left-color: #af1e2d;
+  .pick-rank {
+    background-color: #af1e2d;
+    color: #ffffff;
+  }
+}
+.team-sjs {
+  border-left-color: #006d75;
+  .pick-rank {
+    background-color: #006d75;
+    color: #ffffff;
+  }
+}
+.team-ana {
+  border-left-color: #f47a38;
+  .pick-rank {
+    background-color: #f47a38;
+    color: #ffffff;
+  }
+}
+.team-cbj {
+  border-left-color: #002654;
+  .pick-rank {
+    background-color: #002654;
+    color: #ffffff;
+  }
+}
+.team-cgy {
+  border-left-color: #d2001c;
+  .pick-rank {
+    background-color: #d2001c;
+    color: #ffffff;
+  }
+}
+.team-chi {
+  border-left-color: #cf0a2c;
+  .pick-rank {
+    background-color: #cf0a2c;
+    color: #ffffff;
+  }
+}
+.team-det {
+  border-left-color: #ce1126;
+  .pick-rank {
+    background-color: #ce1126;
+    color: #ffffff;
+  }
+}
+.team-ott {
+  border-left-color: #000;
+  .pick-rank {
+    background-color: #000;
+    color: #ffffff;
+  }
+}
+.team-phi {
+  border-left-color: #f74902;
+  .pick-rank {
+    background-color: #f74902;
+    color: #000000;
+  }
+}
+.team-uta {
+  border-left-color: #4aa2d9;
+  .pick-rank {
+    background-color: #4aa2d9;
+    color: #000;
+  }
+}
+.team-pit {
+  border-left-color: #000;
+  .pick-rank {
+    background-color: #000;
+    color: #ffffff;
+  }
+}
+.team-sea {
+  border-left-color: #000;
+  .pick-rank {
+    background-color: #000;
+    color: #99d9d9;
+  }
+}
 
 /* Scrollbar styling */
 .player-table-container::-webkit-scrollbar {
@@ -523,6 +634,12 @@
     max-width: none;
     margin-bottom: 20px;
   }
+
+  .action-buttons-container {
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center; /* Center the buttons horizontally */
+    gap: 10px; /* Adjust gap between buttons */
+  }
 }
 
 @media (max-width: 600px) {
@@ -533,7 +650,7 @@
 
   .player-table th,
   .player-table td {
-    padding: 8px 5px;
+    padding: 8px 3px;
     font-size: 14px;
   }
 }

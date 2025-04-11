@@ -1,11 +1,15 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Player } from "../models/player.model";
+import { Goalie } from "../models/goalie.model";
 import { PlayerService } from "../services/player.service";
+import { GoalieService } from "../services/goalie.service";
 import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
 
 type SlotKey = "L" | "C" | "R" | "LD" | "RD" | "G";
+type PlayerPosition = "L" | "C" | "R" | "D" | "G";
+type SortableEntity = Player | Goalie;
 
 @Component({
   selector: "app-lineup-page",
@@ -20,9 +24,10 @@ export class LineupPageComponent implements OnInit {
   readonly goalieSlot = "G" as const;
 
   players: Player[] = [];
+  goalies: Goalie[] = [];
   slotKeys: SlotKey[] = ["L", "C", "R", "LD", "RD", "G"];
 
-  slotMap: Record<SlotKey, Player | null> = {
+  slotMap: Record<SlotKey, Player | Goalie | null> = {
     L: null,
     C: null,
     R: null,
@@ -40,26 +45,80 @@ export class LineupPageComponent implements OnInit {
   remainingTrades: number = 9;
   maxTrades: number = 9;
 
-  // Add this helper method to track unsaved changes
+  // Helper method to track unsaved changes
   private hasUnsavedChanges = false;
 
-  // Add these new properties
-  private originalLineup: Record<SlotKey, Player | null> = {
+  // Properties for the original lineup
+  private originalLineup: Record<SlotKey, Player | Goalie | null> = {
     L: null, C: null, R: null, LD: null, RD: null, G: null
   };
   private pendingTradeSlots: Set<SlotKey> = new Set();
 
-  // Add confirmed trades counter
+  // Confirmed trades counter
   private confirmedTradesUsed: number = 0;
 
-  constructor(private playerService: PlayerService, private http: HttpClient) { }
+  // Sorting properties
+  sortKey: string | null = 'price';
+  sortAsc: boolean = false;
+
+  constructor(
+    private playerService: PlayerService,
+    private goalieService: GoalieService,
+    private http: HttpClient
+  ) { }
 
   ngOnInit(): void {
+    // Load both players and goalies
     this.playerService.getPlayers().subscribe((data) => {
       this.players = data;
-      // After players are loaded, load saved lineup if it exists
-      this.loadSavedLineup();
+
+      // After players are loaded, also load goalies
+      this.goalieService.getGoalies().subscribe((goalieData) => {
+        this.goalies = goalieData;
+
+        // After both are loaded, load saved lineup
+        this.loadSavedLineup();
+      });
     });
+  }
+
+  // Helper methods to handle player and goalie stats safely
+  getPlayerStats(entity: Player | Goalie, stat: string): number {
+    if (this.isPlayer(entity)) {
+      return (entity as any)[stat] || 0;
+    }
+    return 0;
+  }
+
+  getGoalieStats(entity: Player | Goalie, stat: string): number {
+    if (this.isGoalie(entity)) {
+      return (entity as any)[stat] || 0;
+    }
+    return 0;
+  }
+
+  isPlayer(entity: Player | Goalie): boolean {
+    return entity && entity.position !== 'G';
+  }
+
+  isGoalie(entity: Player | Goalie): boolean {
+    return entity && entity.position === 'G';
+  }
+
+  formatSavePercentage(entity: Player | Goalie): string {
+    if (this.isGoalie(entity)) {
+      const goalie = entity as Goalie;
+      return (goalie.reg_save_pct || 0).toFixed(3);
+    }
+    return '0.000';
+  }
+
+  formatGAA(entity: Player | Goalie): string {
+    if (this.isGoalie(entity)) {
+      const goalie = entity as Goalie;
+      return (goalie.reg_gaa || 0).toFixed(2);
+    }
+    return '0.00';
   }
 
   loadSavedLineup(): void {
@@ -75,15 +134,22 @@ export class LineupPageComponent implements OnInit {
           if (res.lineup) {
             const savedLineup = res.lineup;
 
-            // Create a map of player IDs to player objects for quick lookup
+            // Create maps for both players and goalies for quick lookup
             const playerMap = new Map<number, Player>();
+            const goalieMap = new Map<number, Goalie>();
+
             this.players.forEach(player => playerMap.set(player.id, player));
+            this.goalies.forEach(goalie => goalieMap.set(goalie.id, goalie));
 
             // For each slot, find the player by ID and assign it
             Object.keys(savedLineup).forEach(slot => {
               const playerId = savedLineup[slot];
               if (playerId !== null) {
-                this.slotMap[slot as SlotKey] = playerMap.get(playerId) || null;
+                if (slot === 'G') {
+                  this.slotMap[slot as SlotKey] = goalieMap.get(playerId) || null;
+                } else {
+                  this.slotMap[slot as SlotKey] = playerMap.get(playerId) || null;
+                }
               }
             });
 
@@ -116,21 +182,36 @@ export class LineupPageComponent implements OnInit {
       });
   }
 
-  get availablePlayers(): Player[] {
-    // Start with all players
+  isGoalieSlotSelected(): boolean {
+    return this.selectedSlot === 'G';
+  }
+
+  get availablePlayers(): Array<Player | Goalie> {
+    // Show either players or goalies based on the selected slot
+    if (this.isGoalieSlotSelected()) {
+      return this.availableGoalies;
+    } else {
+      return this.availableSkaters;
+    }
+  }
+
+  private get availableSkaters(): Player[] {
+    // Only show skaters (non-goalie players)
     let result = this.players;
 
     // Create a set of player IDs that are already assigned to slots
     const assignedPlayerIds = new Set<number>();
-    Object.values(this.slotMap).forEach(player => {
-      if (player) assignedPlayerIds.add(player.id);
+    Object.entries(this.slotMap).forEach(([slot, entity]) => {
+      if (entity && slot !== 'G') {
+        assignedPlayerIds.add(entity.id);
+      }
     });
 
     // Filter out players already assigned to any slot
     result = result.filter(p => !assignedPlayerIds.has(p.id));
 
-    if (this.selectedSlot) {
-      const positionMap: Record<SlotKey, "L" | "C" | "R" | "D" | "G"> = {
+    if (this.selectedSlot && this.selectedSlot !== 'G') {
+      const positionMap: Record<SlotKey, PlayerPosition> = {
         L: "L",
         C: "C",
         R: "R",
@@ -140,7 +221,7 @@ export class LineupPageComponent implements OnInit {
       };
 
       const required = positionMap[this.selectedSlot];
-      // Now we only need to filter by position since assigned players are already excluded
+      // Filter by position
       result = result.filter(p => p.position === required);
     }
 
@@ -154,7 +235,31 @@ export class LineupPageComponent implements OnInit {
       );
     }
 
-    return this.sortedPlayers(result);
+    return this.sortedEntities(result) as Player[];
+  }
+
+  private get availableGoalies(): Goalie[] {
+    let result = this.goalies;
+
+    // Create a set of goalie IDs that are already assigned
+    const assignedGoalieId = this.slotMap.G?.id;
+
+    // Filter out goalies already assigned
+    if (assignedGoalieId) {
+      result = result.filter(g => g.id !== assignedGoalieId);
+    }
+
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.trim().toLowerCase();
+      result = result.filter(
+        (g) =>
+          g.firstName.toLowerCase().includes(term) ||
+          g.lastName.toLowerCase().includes(term) ||
+          g.team.toLowerCase().includes(term)
+      );
+    }
+
+    return this.sortedEntities(result) as Goalie[];
   }
 
   get remainingBudget(): number {
@@ -164,12 +269,12 @@ export class LineupPageComponent implements OnInit {
     return this.totalsBudget - usedBudget;
   }
 
-  private sortedPlayers(players: Player[]): Player[] {
-    if (!this.sortKey) return players;
+  private sortedEntities<T extends SortableEntity>(entities: T[]): T[] {
+    if (!this.sortKey) return entities;
 
-    return players.slice().sort((a, b) => {
-      const aValue = a[this.sortKey!];
-      const bValue = b[this.sortKey!];
+    return entities.slice().sort((a, b) => {
+      const aValue = a[this.sortKey as keyof T];
+      const bValue = b[this.sortKey as keyof T];
 
       if (typeof aValue === "string" && typeof bValue === "string") {
         return this.sortAsc
@@ -191,7 +296,7 @@ export class LineupPageComponent implements OnInit {
     });
   }
 
-  // Add getter for actual remaining trades
+  // Get actual remaining trades
   get effectiveRemainingTrades(): number {
     const pendingTrades = this.slotKeys.reduce((count, slot) => {
       const originalPlayer = this.originalLineup[slot];
@@ -219,7 +324,7 @@ export class LineupPageComponent implements OnInit {
     }
   }
 
-  assignPlayerToSlot(player: Player): void {
+  assignPlayerToSlot(entity: Player | Goalie): void {
     if (this.lineupLocked && this.effectiveRemainingTrades < 0) {
       alert('You have no trades remaining for this playoff season.');
       return;
@@ -232,26 +337,27 @@ export class LineupPageComponent implements OnInit {
       currentPrice = currentlyAssigned?.price || 0;
     }
 
-    if (this.remainingBudget + currentPrice < player.price) {
+    if (this.remainingBudget + currentPrice < entity.price) {
+      let fundsToUse = this.remainingBudget + currentPrice;
       alert(
-        `Cannot afford ${player.firstName} ${player.lastName} (${this.formatPrice(player.price)}). Remaining budget: ${this.formatPrice(this.remainingBudget)}`
+        `${entity.firstName} ${entity.lastName} on liian kallis (${this.formatPrice(entity.price)}). Rahaa käytettävissä: ${this.formatPrice(fundsToUse)}`
       );
       return;
     }
 
     if (this.selectedSlot) {
       // Mark slot for pending trade if the new player is different from original
-      if (this.lineupLocked && player !== this.originalLineup[this.selectedSlot]) {
+      if (this.lineupLocked && entity !== this.originalLineup[this.selectedSlot]) {
         this.pendingTradeSlots.add(this.selectedSlot);
       }
 
-      this.slotMap[this.selectedSlot] = player;
+      this.slotMap[this.selectedSlot] = entity;
       this.selectedSlot = null;
       return;
     }
 
     // No slot selected — find the first empty matching slot
-    const positionToSlots: Record<"L" | "C" | "R" | "D" | "G", SlotKey[]> = {
+    const positionToSlots: Record<PlayerPosition, SlotKey[]> = {
       L: ["L"],
       C: ["C"],
       R: ["R"],
@@ -259,16 +365,16 @@ export class LineupPageComponent implements OnInit {
       G: ["G"],
     };
 
-    const matchingSlots = positionToSlots[player.position as keyof typeof positionToSlots];
+    const matchingSlots = positionToSlots[entity.position as PlayerPosition];
     for (const slot of matchingSlots) {
       if (!this.slotMap[slot]) {
-        this.slotMap[slot] = player;
+        this.slotMap[slot] = entity;
         return;
       }
     }
 
     // Optional: alert user if no matching slot is available
-    alert(`No empty slot available for position ${player.position}`);
+    alert(`No empty slot available for position ${entity.position}`);
   }
 
   formatPlayer(slot: SlotKey): string {
@@ -280,7 +386,6 @@ export class LineupPageComponent implements OnInit {
       else if (slot === "LD") return "VP";
       else if (slot === "RD") return "OP";
       else return "MV";
-
     };
     return `${player.firstName[0]}. ${player.lastName} (${this.formatPrice(player.price)})`;
   }
@@ -290,10 +395,7 @@ export class LineupPageComponent implements OnInit {
     return "$" + price.toLocaleString();
   }
 
-  sortKey: keyof Player | null = 'price';  // Changed from null to 'price'
-  sortAsc: boolean = false;  // Changed from true to false for descending order
-
-  sortBy(key: keyof Player): void {
+  sortBy(key: string): void {
     if (this.sortKey === key) {
       if (this.sortAsc) {
         this.sortAsc = false; // 2nd click → descending

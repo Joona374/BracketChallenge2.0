@@ -78,7 +78,7 @@
       </span>
     </div>
 
-    <!-- Controls (fixed typo in class name) -->
+    <!-- Controls -->
     <div class="controls">
       <button class="lineup-button save" (click)="saveLineup()">
         💾 Tallenna Kokoonpano
@@ -109,19 +109,16 @@
 
 <!-- Scrollable Player Table -->
 <div class="player-table-container">
-  <!-- Table content remains unchanged -->
-</div>
-
-<!-- Scrollable Player Table -->
-<div class="player-table-container">
   <table class="player-table">
     <thead>
       <tr>
+        <!-- Common headers -->
         <th
           (click)="sortBy('position')"
           [class.sorted]="sortKey === 'position'"
+          style="width: 110px"
         >
-          Pelipaikka
+          Pelip.
           <span *ngIf="sortKey === 'position'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th
@@ -154,44 +151,94 @@
           Pelattu
           <span *ngIf="sortKey === 'reg_gp'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
-        <th
-          (click)="sortBy('reg_goals')"
-          [class.sorted]="sortKey === 'reg_goals'"
-          class="stat-column"
-        >
-          Maalit
-          <span *ngIf="sortKey === 'reg_goals'">{{ sortAsc ? "▲" : "▼" }}</span>
-        </th>
-        <th
-          (click)="sortBy('reg_assists')"
-          [class.sorted]="sortKey === 'reg_assists'"
-          class="stat-column"
-        >
-          Syötöt
-          <span *ngIf="sortKey === 'reg_assists'">{{
-            sortAsc ? "▲" : "▼"
-          }}</span>
-        </th>
-        <th
-          (click)="sortBy('reg_points')"
-          [class.sorted]="sortKey === 'reg_points'"
-          class="stat-column"
-        >
-          Pisteet
-          <span *ngIf="sortKey === 'reg_points'">{{
-            sortAsc ? "▲" : "▼"
-          }}</span>
-        </th>
-        <th
-          (click)="sortBy('reg_plus_minus')"
-          [class.sorted]="sortKey === 'reg_plus_minus'"
-          class="stat-column"
-        >
-          +/-
-          <span *ngIf="sortKey === 'reg_plus_minus'">{{
-            sortAsc ? "▲" : "▼"
-          }}</span>
-        </th>
+
+        <!-- Skater-specific headers (show when not in goalie mode) -->
+        <ng-container *ngIf="!isGoalieSlotSelected()">
+          <th
+            (click)="sortBy('reg_goals')"
+            [class.sorted]="sortKey === 'reg_goals'"
+            class="stat-column"
+          >
+            Maalit
+            <span *ngIf="sortKey === 'reg_goals'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            (click)="sortBy('reg_assists')"
+            [class.sorted]="sortKey === 'reg_assists'"
+            class="stat-column"
+          >
+            Syötöt
+            <span *ngIf="sortKey === 'reg_assists'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            (click)="sortBy('reg_points')"
+            [class.sorted]="sortKey === 'reg_points'"
+            class="stat-column"
+          >
+            Pisteet
+            <span *ngIf="sortKey === 'reg_points'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            (click)="sortBy('reg_plus_minus')"
+            [class.sorted]="sortKey === 'reg_plus_minus'"
+            class="stat-column"
+          >
+            +/-
+            <span *ngIf="sortKey === 'reg_plus_minus'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+        </ng-container>
+
+        <!-- Goalie-specific headers (show when in goalie mode) -->
+        <ng-container *ngIf="isGoalieSlotSelected()">
+          <th
+            (click)="sortBy('reg_wins')"
+            [class.sorted]="sortKey === 'reg_wins'"
+            class="stat-column"
+          >
+            Voitot
+            <span *ngIf="sortKey === 'reg_wins'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            (click)="sortBy('reg_shutouts')"
+            [class.sorted]="sortKey === 'reg_shutouts'"
+            class="stat-column"
+          >
+            Nollapelit
+            <span *ngIf="sortKey === 'reg_shutouts'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            (click)="sortBy('reg_save_pct')"
+            [class.sorted]="sortKey === 'reg_save_pct'"
+            class="stat-column"
+          >
+            T%
+            <span *ngIf="sortKey === 'reg_save_pct'">{{
+              sortAsc ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            (click)="sortBy('reg_gaa')"
+            [class.sorted]="sortKey === 'reg_gaa'"
+            class="stat-column"
+          >
+            PMK
+            <span *ngIf="sortKey === 'reg_gaa'">{{ sortAsc ? "▲" : "▼" }}</span>
+          </th>
+        </ng-container>
+
+        <!-- Common footer headers -->
         <th (click)="sortBy('price')" [class.sorted]="sortKey === 'price'">
           Hinta
           <span *ngIf="sortKey === 'price'">{{ sortAsc ? "▲" : "▼" }}</span>
@@ -201,27 +248,58 @@
 
     <tbody>
       <tr
-        *ngFor="let player of availablePlayers"
-        (click)="assignPlayerToSlot(player)"
+        *ngFor="let entity of availablePlayers"
+        (click)="assignPlayerToSlot(entity)"
       >
-        <td>{{ player?.position || "" }}</td>
-        <td>{{ player?.firstName || "" }}</td>
-        <td>{{ player?.lastName || "" }}</td>
-        <td>{{ player?.team || "" }}</td>
-        <td>{{ player?.isU23 ? "✓" : "❌" }}</td>
-        <td class="stat-column">{{ player?.reg_gp || 0 }}</td>
-        <td class="stat-column">{{ player?.reg_goals || 0 }}</td>
-        <td class="stat-column">{{ player?.reg_assists || 0 }}</td>
-        <td class="stat-column">{{ player?.reg_points || 0 }}</td>
-        <td
-          class="stat-column"
-          [class.positive]="(player?.reg_plus_minus || 0) > 0"
-          [class.negative]="(player?.reg_plus_minus || 0) < 0"
-        >
-          {{ (player?.reg_plus_minus || 0) > 0 ? "+" : ""
-          }}{{ player?.reg_plus_minus || 0 }}
-        </td>
-        <td>{{ formatPrice(player?.price || 0) }}</td>
+        <td>{{ entity?.position || "" }}</td>
+        <td>{{ entity?.firstName || "" }}</td>
+        <td>{{ entity?.lastName || "" }}</td>
+        <td>{{ entity?.team || "" }}</td>
+        <td>{{ entity?.isU23 ? "✓" : "❌" }}</td>
+        <td class="stat-column">{{ entity?.reg_gp || 0 }}</td>
+
+        <!-- Player-specific stats -->
+        <ng-container *ngIf="!isGoalieSlotSelected()">
+          <td class="stat-column">{{ getPlayerStats(entity, "reg_goals") }}</td>
+          <td class="stat-column">
+            {{ getPlayerStats(entity, "reg_assists") }}
+          </td>
+          <td class="stat-column">
+            {{ getPlayerStats(entity, "reg_points") }}
+          </td>
+          <td
+            class="stat-column"
+            [class.positive]="getPlayerStats(entity, 'reg_plus_minus') > 0"
+            [class.negative]="getPlayerStats(entity, 'reg_plus_minus') < 0"
+          >
+            {{ getPlayerStats(entity, "reg_plus_minus") > 0 ? "+" : ""
+            }}{{ getPlayerStats(entity, "reg_plus_minus") }}
+          </td>
+        </ng-container>
+
+        <!-- Goalie-specific stats -->
+        <ng-container *ngIf="isGoalieSlotSelected()">
+          <td class="stat-column">{{ getGoalieStats(entity, "reg_wins") }}</td>
+          <td class="stat-column">
+            {{ getGoalieStats(entity, "reg_shutouts") }}
+          </td>
+          <td
+            class="stat-column"
+            [class.positive]="getGoalieStats(entity, 'reg_save_pct') > 0.915"
+            [class.negative]="getGoalieStats(entity, 'reg_save_pct') < 0.9"
+          >
+            {{ formatSavePercentage(entity) }}
+          </td>
+          <td
+            class="stat-column"
+            [class.positive]="getGoalieStats(entity, 'reg_gaa') < 2.5"
+            [class.negative]="getGoalieStats(entity, 'reg_gaa') >= 3.0"
+          >
+            {{ formatGAA(entity) }}
+          </td>
+        </ng-container>
+
+        <td>{{ formatPrice(entity?.price || 0) }}</td>
       </tr>
     </tbody>
   </table>

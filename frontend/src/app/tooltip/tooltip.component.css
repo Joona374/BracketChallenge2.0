@@ -25,22 +25,35 @@
 
 .tooltip-text {
   visibility: hidden;
-  width: 300px;
+  width: 400px;
+  font-size: 15px;
   background-color: #555;
   color: #fff;
   text-align: center;
-  border-radius: 6px;
+  border-radius: 9px;
   padding: 7px;
   position: absolute;
-  z-index: 1;
-  bottom: 125%;
+  z-index: 2000;
+  top: 125%; /* Changed from bottom to top */
   left: 50%;
-  margin-left: -100px;
+  margin-left: -150px; /* Adjusted margin to center based on new width */
   opacity: 0;
   transition: opacity 0.3s;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .tooltip-container:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .tooltip-text {
+    width: 90%; /* Adjust width to 90% of the screen */
+    left: 5%; /* Align to the left with a 5% margin */
+    transform: translateX(0); /* Remove translateX */
+    margin-left: 0; /* Remove the negative margin */
+    font-size: 14px; /* Reduce font size for better readability */
+  }
 }

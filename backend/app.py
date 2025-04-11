@@ -8,7 +8,7 @@ import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode
+from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode
 
 import os
 from openai import OpenAI
@@ -303,6 +303,38 @@ def get_players():
         print(f"Error in get_players: {str(e)}")  # Add logging
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
+@app.route("/api/goalies", methods=["GET"])
+def get_goalies():
+    try:
+        goalies = Goalie.query.all()
+        return jsonify([{
+            'id': g.id,
+            'api_id': g.api_id,
+            'first_name': g.first_name,
+            'last_name': g.last_name,
+            'team_abbr': g.team_abbr,
+            'position': g.position,
+            'jersey_number': g.jersey_number,
+            'birth_country': g.birth_country,
+            'birth_year': g.birth_year,
+            'headshot': g.headshot,
+            'is_U23': g.is_U23,
+            'price': g.price,
+            'reg_gp': g.reg_gp,
+            'reg_gaa': g.reg_gaa,
+            'reg_save_pct': g.reg_save_pct,
+            'reg_shutouts': g.reg_shutouts,
+            'reg_wins': g.reg_wins,
+            'playoff_gp': g.playoff_gp,
+            'playoff_gaa': g.playoff_gaa,
+            'playoff_save_pct': g.playoff_save_pct,
+            'playoff_shutouts': g.playoff_shutouts,
+            'playoff_wins': g.playoff_wins
+        } for g in goalies]), 200
+    except Exception as e:
+        print(f"Error in get_goalies: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
 @app.route("/api/lineup/save", methods=["POST"])
 def save_lineup():
     data = request.json
@@ -327,27 +359,53 @@ def save_lineup():
             # Process each slot in the new lineup
             for slot, player_id in lineup.items():
                 if player_id:
-                    player = Player.query.get(player_id)
-                    if player:
-                        total_value += player.price
-                        
-                        # If this is a new player in this slot
-                        if not old_lineup.get(slot) == player_id:
-                            # Close out old player's history
-                            if old_lineup.get(slot):
-                                db.session.query(LineupHistory)\
-                                    .filter_by(user_id=user_id, slot=slot, removed_at=None)\
-                                    .update({"removed_at": current_time})
+                    # Determine if it's a goalie slot
+                    if slot == 'G':
+                        goalie = Goalie.query.get(player_id)
+                        if goalie:
+                            print(f"Processing goalie: {goalie.first_name} {goalie.last_name}, Slot: {slot}, ID: {player_id}, Price: {goalie.price}")
+                            total_value += goalie.price
+
+                            # If this is a new goalie in this slot
+                            if not old_lineup.get(slot) == player_id:
+                                # Close out old goalie's history
+                                if old_lineup.get(slot):
+                                    db.session.query(LineupHistory)\
+                                        .filter_by(user_id=user_id, slot=slot, removed_at=None)\
+                                        .update({"removed_at": current_time})
+                                
+                                # Add new goalie history
+                                history = LineupHistory(
+                                    user_id=user_id,
+                                    player_id=player_id,
+                                    slot=slot,
+                                    added_at=current_time,
+                                    price_at_time=goalie.price
+                                )
+                                db.session.add(history)
+                    else:
+                        player = Player.query.get(player_id)
+                        if player:
+                            print(f"Processing player: {player.first_name} {player.last_name}, Slot: {slot}, ID: {player_id}, Price: {player.price}")
+                            total_value += player.price
                             
-                            # Add new player history
-                            history = LineupHistory(
-                                user_id=user_id,
-                                player_id=player_id,
-                                slot=slot,
-                                added_at=current_time,
-                                price_at_time=player.price
-                            )
-                            db.session.add(history)
+                            # If this is a new player in this slot
+                            if not old_lineup.get(slot) == player_id:
+                                # Close out old player's history
+                                if old_lineup.get(slot):
+                                    db.session.query(LineupHistory)\
+                                        .filter_by(user_id=user_id, slot=slot, removed_at=None)\
+                                        .update({"removed_at": current_time})
+                                
+                                # Add new player history
+                                history = LineupHistory(
+                                    user_id=user_id,
+                                    player_id=player_id,
+                                    slot=slot,
+                                    added_at=current_time,
+                                    price_at_time=player.price
+                                )
+                                db.session.add(history)
 
             if existing:
                 # Update existing lineup
@@ -394,11 +452,16 @@ def get_lineup():
         
         # Calculate current total value
         total_value = 0
-        for player_id in lineup_data.values():
+        for slot, player_id in lineup_data.items():
             if player_id:
-                player = Player.query.get(player_id)
-                if player:
-                    total_value += player.price
+                if slot == 'G':
+                    goalie = Goalie.query.get(player_id)
+                    if goalie:
+                        total_value += goalie.price
+                else:
+                    player = Player.query.get(player_id)
+                    if player:
+                        total_value += player.price
 
         return jsonify({
             "lineup": lineup_data,

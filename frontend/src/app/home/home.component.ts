@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { RouterModule } from "@angular/router";
-import { Router } from "@angular/router";
+import { RouterModule, Router, NavigationEnd } from "@angular/router";
 import { DatePipe } from "@angular/common";
 import { AuthService, User } from "../../app/services/auth.service";
 import { Subscription } from "rxjs";
+import { ViewportScroller } from '@angular/common';
 
 @Component({
   selector: "app-home",
@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private userSubscription: Subscription | null = null;
   private logoUpdateListener: any;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router, private viewportScroller: ViewportScroller) { }
 
   ngOnInit(): void {
     // Subscribe to auth changes
@@ -32,6 +32,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Add listener for logo updates
     this.logoUpdateListener = this.handleLogoUpdate.bind(this);
     window.addEventListener('user-logo-updated', this.logoUpdateListener);
+
+    // Scroll to top on navigation to /rules or /vote
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        if (event.url === '/rules' || event.url === '/vote') {
+          this.viewportScroller.scrollToPosition([0, 0]);
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {

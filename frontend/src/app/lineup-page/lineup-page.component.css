@@ -101,7 +101,6 @@
 }
 
 .player-table thead th.stat-column {
-  width: 50px;
   text-align: center;
 }
 
@@ -156,7 +155,7 @@
 .team.selected.dal {
   background-color: #006847;
   color: #8f8f8c;
-  border: 2px solid #111;
+  border: 3px solid #111;
   font-weight: bold;
 }
 
@@ -164,7 +163,7 @@
 .team.selected.vgk {
   background-color: #b4975a;
   color: #333f42;
-  border: 2px solid #c8102e;
+  border: 3px solid #c8102e;
   font-weight: bold;
 }
 
@@ -172,7 +171,7 @@
 .team.selected.wpg {
   background-color: #004c97;
   color: #fff;
-  border: 2px solid #ac162c;
+  border: 3px solid #ac162c;
   font-weight: bold;
 }
 
@@ -180,7 +179,7 @@
 .team.selected.col {
   background-color: #6f263d;
   color: #a2aaad;
-  border: 2px solid #236192;
+  border: 3px solid #236192;
   font-weight: bold;
 }
 
@@ -188,7 +187,7 @@
 .team.selected.van {
   background-color: #00205b;
   color: #99999a;
-  border: 2px solid #00843d;
+  border: 3px solid #00843d;
   font-weight: bold;
 }
 
@@ -196,7 +195,7 @@
 .team.selected.nsh {
   background-color: #ffb81c;
   color: #041e42;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   font-weight: bold;
 }
 
@@ -204,7 +203,7 @@
 .team.selected.edm {
   background-color: #e44500;
   color: #041e42;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   font-weight: bold;
 }
 
@@ -212,7 +211,7 @@
 .team.selected.lak {
   background-color: #111111;
   color: #a2aaad;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   font-weight: bold;
 }
 
@@ -220,7 +219,7 @@
 .team.selected.fla {
   background-color: #c8102e;
   color: #fff;
-  border: 2px solid #041e42;
+  border: 3px solid #041e42;
   font-weight: bold;
 }
 
@@ -228,7 +227,7 @@
 .team.selected.tbl {
   background-color: #002868;
   color: #fff;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   font-weight: bold;
 }
 
@@ -236,7 +235,7 @@
 .team.selected.bos {
   background-color: #000c; /* Gold */
   color: #ffb81c;
-  border: 2px solid #ffb81c;
+  border: 3px solid #ffb81c;
   font-weight: bold;
 }
 
@@ -244,7 +243,7 @@
 .team.selected.tor {
   background-color: #00205b;
   color: white;
-  border: 2px solid #ffffff;
+  border: 3px solid #ffffff;
   font-weight: bold;
 }
 
@@ -252,7 +251,7 @@
 .team.selected.nyr {
   background-color: #0038a8;
   color: #ffffff;
-  border: 2px solid #c8102e; /* Accent red */
+  border: 3px solid #c8102e; /* Accent red */
   font-weight: bold;
 }
 
@@ -260,7 +259,7 @@
 .team.selected.wsh {
   background-color: #041e42;
   color: #c8102e;
-  border: 2px solid #fff; /* Accent red */
+  border: 3px solid #fff; /* Accent red */
   font-weight: bold;
 }
 
@@ -268,7 +267,7 @@
 .team.selected.car {
   background-color: #ce1126;
   color: #ffffff;
-  border: 2px solid #000; /* Accent red */
+  border: 3px solid #000; /* Accent red */
   font-weight: bold;
 }
 
@@ -276,7 +275,122 @@
 .team.selected.nyi {
   background-color: #00539b;
   color: #f47d30;
-  border: 2px solid #fff; /* Accent red */
+  border: 3px solid #fff; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.min {
+  background-color: #154734;
+  color: #ddcba4;
+  border: 3px solid #a6192e; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.njd {
+  background-color: #ce1126;
+  color: #fff;
+  border: 3px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+/* New York Islanders */
+.team.selected.buf {
+  background-color: #003087;
+  color: #ffffff;
+  border: 3px solid #ffb81c; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.stl {
+  background-color: #002f87;
+  color: #ffffff;
+  border: 3px solid #fcb514; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.mtl {
+  background-color: #af1e2d;
+  color: #ffffff;
+  border: 3px solid #192168; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.sjs {
+  background-color: #006d75;
+  color: #ffffff;
+  border: 3px solid #ea7200; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.ana {
+  background-color: #f47a38;
+  color: #ffffff;
+  border: 3px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.cbj {
+  background-color: #002654;
+  color: #ffffff;
+  border: 3px solid #ce1126; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.cgy {
+  background-color: #d2001c;
+  color: #ffffff;
+  border: 3px solid #faaf19; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.chi {
+  background-color: #cf0a2c;
+  color: #ffffff;
+  border: 3px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.det {
+  background-color: #ce1126;
+  color: #ffffff;
+  border: 3px solid #ffffff; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.ott {
+  background-color: #000;
+  color: #ffffff;
+  border: 3px solid #da1a32; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.phi {
+  background-color: #f74902;
+  color: #000000;
+  border: 3px solid #000; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.uta {
+  background-color: #4aa2d9;
+  color: #000;
+  border: 3px solid #fff; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.pit {
+  background-color: #000;
+  color: #ffffff;
+  border: 3px solid #fcb514; /* Accent red */
+  font-weight: bold;
+}
+
+.team.selected.sea {
+  background-color: #000;
+  color: #99d9d9;
+  border: 3px solid #e9072b; /* Accent red */
   font-weight: bold;
 }
 
