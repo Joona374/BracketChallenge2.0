@@ -40,3 +40,6 @@ Thumbs.db
 # 🧪 Test outputs (optional)
 coverage/
 pytest_cache/
+
+# Just personal notes
+kehveli.txt

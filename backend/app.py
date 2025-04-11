@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from flask_cors import CORS
 import json
 import random
@@ -114,7 +114,7 @@ def register():
         team_name=team_name,
         password_hash=hashed_password,
         registration_code=registration_code,
-        created_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc)
     )
 
     db.session.add(new_user)
@@ -243,7 +243,7 @@ def save_picks():
         new_pick = Pick(
             user_id=user_id,
             picks_json=json.dumps(picks),
-            created_at=datetime.now(UTC)
+            created_at=datetime.now(timezone.utc)
         )
         db.session.add(new_pick)
         db.session.commit()
@@ -354,7 +354,7 @@ def save_lineup():
             
             # Calculate current value of lineup
             total_value = 0
-            current_time = datetime.now(UTC)
+            current_time = datetime.now(timezone.utc)
             
             # Process each slot in the new lineup
             for slot, player_id in lineup.items():
@@ -494,13 +494,13 @@ def save_predictions():
     if existing_prediction:
         # Update existing prediction
         existing_prediction.predictions_json = predictions_json
-        existing_prediction.created_at = datetime.now(UTC)
+        existing_prediction.created_at = datetime.now(timezone.utc)
     else:
         # Create new prediction
         new_prediction = Prediction(
             user_id=user_id,
             predictions_json=predictions_json,
-            created_at=datetime.now(UTC)
+            created_at=datetime.now(timezone.utc)
         )
         db.session.add(new_prediction)
     

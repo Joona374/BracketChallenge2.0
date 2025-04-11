@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from flask import Flask
 
 from config import Config
@@ -25,7 +25,7 @@ def create_registration_codes(ammount: int):
     with app.app_context():
         for _ in range(ammount):
             code = generate_random_code()
-            new_code = RegistrationCode(code=code, created_at=datetime.now(UTC), is_used=False)
+            new_code = RegistrationCode(code=code, created_at=datetime.now(timezone.utc), is_used=False)
             db.session.add(new_code)
             print(f"Code {code} added to the database.")
 

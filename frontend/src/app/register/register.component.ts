@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { TooltipComponent } from "../tooltip/tooltip.component";
-
+import { environment } from "../../environments/environment";
 @Component({
   selector: "app-register",
   standalone: true,
@@ -42,7 +42,7 @@ export class RegisterComponent {
       registrationCode: this.formData.registrationCode,
     };
 
-    this.http.post("http://localhost:5000/api/register", payload).subscribe({
+    this.http.post(`${environment.apiUrl}/register`, payload).subscribe({
       next: (response: any) => {
         this.message = response.message;
 
@@ -52,7 +52,7 @@ export class RegisterComponent {
           password: this.formData.password
         };
 
-        this.http.post("http://localhost:5000/api/login", loginPayload).subscribe({
+        this.http.post(`${environment.apiUrl}/login`, loginPayload).subscribe({
           next: (loginResponse: any) => {
             // Save user data to localStorage
             localStorage.setItem("loggedInUser", JSON.stringify(loginResponse));

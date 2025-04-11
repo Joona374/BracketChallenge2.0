@@ -1,5 +1,5 @@
 from db import db_engine as db
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
@@ -9,7 +9,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     team_name = db.Column(db.String(80), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     registration_code = db.Column(db.String(80), db.ForeignKey('registration_codes.code'), nullable=False)
     has_voted = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
@@ -44,7 +44,7 @@ class ResetCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(80), unique=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     is_used = db.Column(db.Boolean, default=False)
 
     user = db.relationship('User', backref=db.backref('reset_codes', lazy=True))
@@ -57,7 +57,7 @@ class RegistrationCode(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(80), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     is_used = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
@@ -102,7 +102,7 @@ class Pick(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     picks_json = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = db.relationship('User', back_populates="picks")
 
@@ -116,8 +116,8 @@ class LineupPick(db.Model):
     remaining_trades = db.Column(db.Integer, default=9)
     unused_budget = db.Column(db.Integer, default=2000000)  # Initial budget
     total_value = db.Column(db.Integer, default=0)  # Sum of player prices
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
-    updated_at = db.Column(db.DateTime, onupdate=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, onupdate=lambda: datetime.now(timezone.utc))
     
     user = db.relationship("User", backref="lineup_pick", uselist=False)
 
@@ -140,7 +140,7 @@ class Team(db.Model):
     name = db.Column(db.String(80), nullable=False)
     abbr = db.Column(db.String(10), nullable=False, unique=True)
     logo_url = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def __repr__(self):
         return f'<Team {self.name} ({self.abbr})>'
@@ -174,7 +174,7 @@ class Player(db.Model):
     playoff_points = db.Column(db.Integer, default=0)
     playoff_plus_minus = db.Column(db.Integer, default=0)
     
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def __repr__(self):
         return f'<Player {self.first_name} {self.last_name} ({self.team_abbr})>'
@@ -210,7 +210,7 @@ class Goalie(db.Model):
     playoff_shutouts = db.Column(db.Integer, default=0)
     playoff_wins = db.Column(db.Integer, default=0)
     
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def __repr__(self):
         return f'<Goalie {self.first_name} {self.last_name} ({self.team_abbr})>'
@@ -224,7 +224,7 @@ class Vote(db.Model):
     first_place_percentage = db.Column(db.Integer, nullable=False)
     second_place_percentage = db.Column(db.Integer, nullable=False)
     third_place_percentage = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     user = db.relationship("User", back_populates="vote")
 
@@ -265,7 +265,7 @@ class UserPoints(db.Model):
     total_points = db.Column(db.Integer, default=0)             # Sum of all game points
     
     # Last updated timestamp
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Relationship
     user = db.relationship('User', backref=db.backref('points', uselist=False))
@@ -281,7 +281,7 @@ class UserPoints(db.Model):
                             self.lineup_total_points + 
                             self.predictions_total_points)
         
-        self.updated_at = datetime.now(UTC)
+        self.updated_at = datetime.now(timezone.utc)
     
     def __repr__(self):
         return f'<UserPoints for User {self.user_id}: {self.total_points} total points>'
