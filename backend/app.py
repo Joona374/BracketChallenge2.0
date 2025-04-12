@@ -66,14 +66,19 @@ def generate_team_logos(team_name, user_id):
 
 app = Flask(__name__)
 migrate = Migrate(app, db)
+
 # Configure CORS with more explicit settings
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:4200"],  # Angular dev server
+        "origins": [
+            "http://localhost:4200",
+            "https://bracket-challenge2-0.vercel.app"
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
 })
+
 app.config.from_object(Config)
 
 db.init_app(app)
