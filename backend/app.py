@@ -78,7 +78,7 @@ app.config.from_object(Config)
 
 db.init_app(app)
 
-@app.route('/')
+@app.route('/api')
 def home():
     return "Welcome to the NHL Bracket App!"
 
