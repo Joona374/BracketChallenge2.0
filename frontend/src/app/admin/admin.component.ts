@@ -69,7 +69,7 @@ export class AdminComponent implements OnInit {
   finalResult: MatchupResult = { matchupId: 0, winner: '', games: 4 };
 
   // API URL
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = '${environment.apiUrl}';
 
   constructor(private http: HttpClient) { }
 

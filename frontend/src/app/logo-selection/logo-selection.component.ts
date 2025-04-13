@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from "../../environments/environment";
+
 
 @Component({
   selector: 'app-logo-selection',
@@ -35,7 +37,7 @@ export class LogoSelectionComponent implements OnInit {
       return;
     }
 
-    this.http.get<any>(`http://localhost:5000/api/user-logos?userId=${userId}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/user-logos?userId=${userId}`).subscribe({
       next: (logos) => {
         // Convert the object of logo URLs to an array and filter out null values
         const allLogos = Object.values(logos);
@@ -64,7 +66,7 @@ export class LogoSelectionComponent implements OnInit {
       return;
     }
 
-    this.http.post('http://localhost:5000/api/user/logo', {
+    this.http.post(`${environment.apiUrl}/user/logo`, {
       userId: userId,
       logoUrl: this.selectedLogo
     }).subscribe({

@@ -2,12 +2,14 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Player } from "../models/player.model";
 import { Observable, map } from "rxjs";
+import { environment } from "../../environments/environment";
+
 
 @Injectable({ providedIn: "root" })
 export class PlayerService {
-  private apiUrl = "http://localhost:5000/api/players";
+  private apiUrl = `${environment.apiUrl}/players`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getPlayers(): Observable<Player[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
@@ -31,7 +33,7 @@ export class PlayerService {
       price: player.price,
       reg_gp: player.reg_gp,
       reg_goals: player.reg_goals,
-      reg_assists: player.reg_assists, 
+      reg_assists: player.reg_assists,
       reg_points: player.reg_points,
       reg_plus_minus: player.reg_plus_minus,
       playoff_goals: player.playoff_goals,

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { environment } from "../../environments/environment";
+
 
 @Component({
   selector: 'app-reset-password',
@@ -43,7 +45,7 @@ export class ResetPasswordComponent {
       newPassword: this.formData.newPassword
     };
 
-    this.http.post('http://localhost:5000/api/reset-password', payload).subscribe({
+    this.http.post(`${environment.apiUrl}/reset-password`, payload).subscribe({
       next: (response: any) => {
         this.message = response.message;
         setTimeout(() => {

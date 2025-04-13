@@ -5,6 +5,8 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { TooltipComponent } from "../tooltip/tooltip.component";
 import { environment } from "../../environments/environment";
+
+
 @Component({
   selector: "app-register",
   standalone: true,

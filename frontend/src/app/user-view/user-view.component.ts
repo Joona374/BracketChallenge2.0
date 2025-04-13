@@ -2,6 +2,8 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from "../../environments/environment";
+
 
 interface Matchups {
   west: any[];
@@ -52,7 +54,7 @@ export class UserViewComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.teamName = params.get('teamName');
       if (this.teamName) {
-        this.http.get<Matchups>('http://localhost:5000/api/bracket/matchups').subscribe({
+        this.http.get<Matchups>(`${environment.apiUrl}/bracket/matchups`).subscribe({
           next: (matchups) => {
             this.initialMatchups = matchups;
             if (this.teamName) {
@@ -74,7 +76,7 @@ export class UserViewComponent implements OnInit {
 
     const encodedTeamName = encodeURIComponent(teamName);
 
-    this.http.get(`http://localhost:5000/api/user/by-team-name?teamName=${encodedTeamName}`).subscribe({
+    this.http.get(`${environment.apiUrl}/user/by-team-name?teamName=${encodedTeamName}`).subscribe({
       next: (response: any) => {
         const userId = response.userId;
         this.logoUrl = response.logoUrl; // Store the logo URL
@@ -121,7 +123,7 @@ export class UserViewComponent implements OnInit {
   }
 
   loadBracket(userId: number, onComplete: () => void): void {
-    this.http.get(`http://localhost:5000/api/bracket/get-picks?user_id=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/bracket/get-picks?user_id=${userId}`).subscribe({
       next: (res: any) => {
         this.userData.bracket = res.picks;
       },
@@ -137,7 +139,7 @@ export class UserViewComponent implements OnInit {
   }
 
   loadLineup(userId: number, onComplete: () => void): void {
-    this.http.get(`http://localhost:5000/api/lineup/get?user_id=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
       next: (res: any) => {
         this.userData.lineup = res.lineup;
       },
@@ -153,7 +155,7 @@ export class UserViewComponent implements OnInit {
   }
 
   loadPredictions(userId: number, onComplete: () => void): void {
-    this.http.get(`http://localhost:5000/api/predictions/get?user_id=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/predictions/get?user_id=${userId}`).subscribe({
       next: (res: any) => {
         this.userData.predictions = res.predictions;
       },
@@ -169,7 +171,7 @@ export class UserViewComponent implements OnInit {
   }
 
   loadUserStats(userId: number): void {
-    this.http.get(`http://localhost:5000/api/user/stats?userId=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/user/stats?userId=${userId}`).subscribe({
       next: (res: any) => {
         if (res && res.rank) {
           this.userRank = res.rank;

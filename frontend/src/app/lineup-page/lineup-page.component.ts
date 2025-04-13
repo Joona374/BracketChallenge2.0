@@ -6,6 +6,8 @@ import { PlayerService } from "../services/player.service";
 import { GoalieService } from "../services/goalie.service";
 import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
+import { environment } from "../../environments/environment";
+
 
 type SlotKey = "L" | "C" | "R" | "LD" | "RD" | "G";
 type PlayerPosition = "L" | "C" | "R" | "D" | "G";
@@ -128,7 +130,7 @@ export class LineupPageComponent implements OnInit {
       return;
     }
 
-    this.http.get(`http://localhost:5000/api/lineup/get?user_id=${user.id}`)
+    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${user.id}`)
       .subscribe({
         next: (res: any) => {
           if (res.lineup) {
@@ -463,7 +465,7 @@ export class LineupPageComponent implements OnInit {
       return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
     }, 0) : 0;
 
-    this.http.post("http://localhost:5000/api/lineup/save", {
+    this.http.post(`${environment.apiUrl}/lineup/save`, {
       user_id: user.id,
       lineup: lineupPayload,
       tradesUsed: tradesUsed,

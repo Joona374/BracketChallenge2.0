@@ -3,6 +3,8 @@ import { Component, OnInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { environment } from "../../environments/environment";
+
 
 interface Matchups {
   west: any[];
@@ -76,7 +78,7 @@ export class BracketComponent implements OnInit {
     }
 
     // Single HTTP GET request
-    this.http.get("http://localhost:5000/api/bracket/matchups").subscribe({
+    this.http.get(`${environment.apiUrl}/bracket/matchups`).subscribe({
       next: (data: any) => {
         this.matchups = data;
 
@@ -263,7 +265,7 @@ export class BracketComponent implements OnInit {
     };
 
     this.http
-      .post("http://localhost:5000/api/bracket/save-picks", payload)
+      .post(`${environment.apiUrl}/bracket/save-picks`, payload)
       .subscribe({
         next: () => {
           alert("Picks saved successfully!");
@@ -289,7 +291,7 @@ export class BracketComponent implements OnInit {
 
   loadPreviousPicks(userId: number) {
     this.http
-      .get(`http://localhost:5000/api/bracket/get-picks?user_id=${userId}`)
+      .get(`${environment.apiUrl}/bracket/get-picks?user_id=${userId}`)
       .subscribe({
         next: (res: any) => {
           this.userPicks = res.picks;

@@ -7,6 +7,8 @@ import { PlayerService } from "../services/player.service";
 import { GoalieService } from "../services/goalie.service";
 import { HttpClient } from "@angular/common/http";
 import { TooltipComponent } from "../tooltip/tooltip.component";
+import { environment } from "../../environments/environment";
+
 
 type PredictionCategory =
   | "connSmythe"
@@ -203,7 +205,7 @@ export class PredictionsComponent implements OnInit {
     };
 
     // Send HTTP POST request to save predictions
-    this.http.post("http://localhost:5000/api/predictions/save", payload)
+    this.http.post(`${environment.apiUrl}/predictions/save`, payload)
       .subscribe({
         next: (response: any) => {
           alert("✅ Veikkaukset tallennettu onnistuneesti!");
@@ -233,7 +235,7 @@ export class PredictionsComponent implements OnInit {
       return;
     }
 
-    this.http.get(`http://localhost:5000/api/predictions/get?user_id=${user.id}`)
+    this.http.get(`${environment.apiUrl}/predictions/get?user_id=${user.id}`)
       .subscribe({
         next: (response: any) => {
           if (response && response.predictions) {

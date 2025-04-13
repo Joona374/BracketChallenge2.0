@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { LogoSelectionComponent } from '../logo-selection/logo-selection.component';
 import { Player } from '../models/player.model';
+import { environment } from "../../environments/environment";
+
 
 interface User {
   id: number;
@@ -105,7 +107,7 @@ export class UserDashboardComponent implements OnInit {
     const userId = this.user?.id;
     if (!userId) return;
 
-    this.http.get(`http://localhost:5000/api/user/stats?userId=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/user/stats?userId=${userId}`).subscribe({
       next: (data: any) => {
         if (data) {
           this.userRank = data.rank;
@@ -136,7 +138,7 @@ export class UserDashboardComponent implements OnInit {
     const userId = this.user?.id;
     if (!userId) return;
 
-    this.http.get(`http://localhost:5000/api/bracket/summary?userId=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/bracket/summary?userId=${userId}`).subscribe({
       next: (data: any) => {
         if (data) {
           this.bracketSummary = data;
@@ -158,7 +160,7 @@ export class UserDashboardComponent implements OnInit {
     const userId = this.user?.id;
     if (!userId) return;
 
-    this.http.get(`http://localhost:5000/api/lineup/get?user_id=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
       next: (data: any) => {
         if (data) {
           this.lineupSummary = {
@@ -182,7 +184,7 @@ export class UserDashboardComponent implements OnInit {
   }
 
   loadPlayers(): void {
-    this.http.get<any[]>('http://localhost:5000/api/players').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/players`).subscribe({
       next: (data) => {
         this.allPlayers = data.map(player => ({
           id: player.id,
@@ -206,7 +208,7 @@ export class UserDashboardComponent implements OnInit {
     const userId = this.user?.id;
     if (!userId) return;
 
-    this.http.get(`http://localhost:5000/api/predictions/summary?userId=${userId}`).subscribe({
+    this.http.get(`${environment.apiUrl}/predictions/summary?userId=${userId}`).subscribe({
       next: (data: any) => {
         if (data) {
           this.predictionsSummary = data;

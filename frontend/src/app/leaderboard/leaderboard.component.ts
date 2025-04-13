@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from "../../environments/environment";
+
 
 interface LeaderboardEntry {
   id: number;
@@ -45,7 +47,7 @@ export class LeaderboardComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.http.get<LeaderboardEntry[]>('http://localhost:5000/api/leaderboard')
+    this.http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboard`)
       .subscribe({
         next: (data) => {
           this.leaderboardEntries = data;

@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Subscription, interval } from 'rxjs';
 import { RouterModule } from '@angular/router';
 import { TooltipComponent } from '../tooltip/tooltip.component';
+import { environment } from "../../environments/environment";
+
 
 
 interface PrizeDistribution {
@@ -135,7 +137,7 @@ export class VoteComponent implements OnInit, OnDestroy {
   }
 
   loadVotingData(): void {
-    this.http.get<any>('http://localhost:5000/api/votes/stats').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/votes/stats`).subscribe({
       next: (response) => {
         this.entryFeeVotes = response.entryFeeVotes;
         this.averageDistribution = response.averageDistribution;
@@ -153,7 +155,7 @@ export class VoteComponent implements OnInit, OnDestroy {
 
     try {
       const user = JSON.parse(storedUser);
-      this.http.get<any>(`http://localhost:5000/api/votes/user/${user.id}`).subscribe({
+      this.http.get<any>(`${environment.apiUrl}/votes/user/${user.id}`).subscribe({
         next: (response) => {
           if (response && response.vote) {
             this.hasUserVoted = true;
@@ -291,7 +293,7 @@ export class VoteComponent implements OnInit, OnDestroy {
         distribution: this.prizeDistribution
       };
 
-      this.http.post('http://localhost:5000/api/votes', voteData).subscribe({
+      this.http.post(`${environment.apiUrl}/votes`, voteData).subscribe({
         next: () => {
           this.voteSuccess = true;
           this.hasUserVoted = true;
