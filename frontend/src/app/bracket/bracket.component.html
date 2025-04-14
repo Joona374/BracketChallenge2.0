@@ -1,5 +1,11 @@
 <h2>NHL Bracket Challenge 2025</h2>
 
+<!-- Deadline status indicator -->
+<div *ngIf="deadlinePassed" class="deadline-notice">
+  <span class="lock-icon">🔒</span> Veikkaukset ovat lukittu - aikaraja on
+  umpeutunut (20.4.2025 00:00)
+</div>
+
 <div class="bracket-grid-7">
   <!-- Column 1: West R1 -->
   <div class="column-container">
@@ -11,6 +17,7 @@
             <button
               class="plus-button"
               (click)="increaseGames('round1', m.matchupCode)"
+              [disabled]="deadlinePassed"
             >
               +
             </button>
@@ -18,6 +25,7 @@
             <button
               class="minus-button"
               (click)="decreaseGames('round1', m.matchupCode)"
+              [disabled]="deadlinePassed"
             >
               –
             </button>
@@ -26,6 +34,7 @@
             <div
               class="team"
               [class]="getTeamClass(m.matchupCode, m.team1)"
+              [class.disabled]="!isTeamSelectable(m.team1) || deadlinePassed"
               (click)="pickWinner(m.matchupCode, m.team1)"
             >
               {{ m.team1 || "\u00A0" }}
@@ -33,6 +42,7 @@
             <div
               class="team"
               [class]="getTeamClass(m.matchupCode, m.team2)"
+              [class.disabled]="!isTeamSelectable(m.team2) || deadlinePassed"
               (click)="pickWinner(m.matchupCode, m.team2)"
             >
               {{ m.team2 || "\u00A0" }}
@@ -50,12 +60,20 @@
       <div *ngFor="let key of ['w-semi', 'w-semi2']" class="matchup">
         <div class="teams-and-games west">
           <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
-            <button class="plus-button" (click)="increaseGames('round2', key)">
+            <button
+              class="plus-button"
+              (click)="increaseGames('round2', key)"
+              [disabled]="deadlinePassed"
+            >
               +
             </button>
             <div>{{ getGames("round2", key) }}</div>
 
-            <button class="minus-button" (click)="decreaseGames('round2', key)">
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round2', key)"
+              [disabled]="deadlinePassed"
+            >
               –
             </button>
           </div>
@@ -64,7 +82,7 @@
               class="team"
               *ngFor="let team of getTeamArray('round2', key)"
               [class]="getTeamClass(key, team)"
-              [class.disabled]="!isTeamSelectable(team)"
+              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
               (click)="isTeamSelectable(team) && pickWinner(key, team)"
             >
               {{ team || "\u00A0" }}
@@ -88,6 +106,7 @@
             <button
               class="plus-button"
               (click)="increaseGames('round3', 'west-final')"
+              [disabled]="deadlinePassed"
             >
               +
             </button>
@@ -96,6 +115,7 @@
             <button
               class="minus-button"
               (click)="decreaseGames('round3', 'west-final')"
+              [disabled]="deadlinePassed"
             >
               –
             </button>
@@ -105,7 +125,7 @@
               class="team"
               *ngFor="let team of getTeamArray('round3', 'west-final')"
               [class]="getTeamClass('west-final', team)"
-              [class.disabled]="!isTeamSelectable(team)"
+              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
               (click)="isTeamSelectable(team) && pickWinner('west-final', team)"
             >
               {{ team || "\u00A0" }}
@@ -135,7 +155,7 @@
               class="team"
               *ngFor="let team of getTeamArray('final', 'cup')"
               [class]="getTeamClass('cup', team)"
-              [class.disabled]="!isTeamSelectable(team)"
+              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
               (click)="isTeamSelectable(team) && pickWinner('cup', team)"
             >
               {{ team || "\u00A0" }}
@@ -150,11 +170,16 @@
             <button
               class="minus-button"
               (click)="decreaseGames('final', 'cup')"
+              [disabled]="deadlinePassed"
             >
               –
             </button>
             <div>{{ getGames("final", "cup") }}</div>
-            <button class="plus-button" (click)="increaseGames('final', 'cup')">
+            <button
+              class="plus-button"
+              (click)="increaseGames('final', 'cup')"
+              [disabled]="deadlinePassed"
+            >
               +
             </button>
           </div>
@@ -184,6 +209,7 @@
             <button
               class="plus-button"
               (click)="increaseGames('round3', 'east-final')"
+              [disabled]="deadlinePassed"
             >
               +
             </button>
@@ -192,6 +218,7 @@
             <button
               class="minus-button"
               (click)="decreaseGames('round3', 'east-final')"
+              [disabled]="deadlinePassed"
             >
               –
             </button>
@@ -201,7 +228,7 @@
               class="team"
               *ngFor="let team of getTeamArray('round3', 'east-final')"
               [class]="getTeamClass('east-final', team)"
-              [class.disabled]="!isTeamSelectable(team)"
+              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
               (click)="isTeamSelectable(team) && pickWinner('east-final', team)"
             >
               {{ team || "\u00A0" }}
@@ -219,12 +246,20 @@
       <div *ngFor="let key of ['e-semi', 'e-semi2']" class="matchup">
         <div class="teams-and-games east">
           <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
-            <button class="plus-button" (click)="increaseGames('round2', key)">
+            <button
+              class="plus-button"
+              (click)="increaseGames('round2', key)"
+              [disabled]="deadlinePassed"
+            >
               +
             </button>
             <div>{{ getGames("round2", key) }}</div>
 
-            <button class="minus-button" (click)="decreaseGames('round2', key)">
+            <button
+              class="minus-button"
+              (click)="decreaseGames('round2', key)"
+              [disabled]="deadlinePassed"
+            >
               –
             </button>
           </div>
@@ -233,7 +268,7 @@
               class="team"
               *ngFor="let team of getTeamArray('round2', key)"
               [class]="getTeamClass(key, team)"
-              [class.disabled]="!isTeamSelectable(team)"
+              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
               (click)="isTeamSelectable(team) && pickWinner(key, team)"
             >
               {{ team || "\u00A0" }}
@@ -254,6 +289,7 @@
             <button
               class="plus-button"
               (click)="increaseGames('round1', m.matchupCode)"
+              [disabled]="deadlinePassed"
             >
               +
             </button>
@@ -261,6 +297,7 @@
             <button
               class="minus-button"
               (click)="decreaseGames('round1', m.matchupCode)"
+              [disabled]="deadlinePassed"
             >
               –
             </button>
@@ -269,6 +306,7 @@
             <div
               class="team"
               [class]="getTeamClass(m.matchupCode, m.team1)"
+              [class.disabled]="!isTeamSelectable(m.team1) || deadlinePassed"
               (click)="pickWinner(m.matchupCode, m.team1)"
             >
               {{ m.team1 || "\u00A0" }}
@@ -276,6 +314,7 @@
             <div
               class="team"
               [class]="getTeamClass(m.matchupCode, m.team2)"
+              [class.disabled]="!isTeamSelectable(m.team2) || deadlinePassed"
               (click)="pickWinner(m.matchupCode, m.team2)"
             >
               {{ m.team2 || "\u00A0" }}
@@ -289,13 +328,28 @@
 
 <!-- Buttons -->
 <div class="button-row">
-  <button class="bracket-button" (click)="savePicks()">
-    💾 Tallenna Valinnat
+  <button
+    class="bracket-button"
+    (click)="savePicks()"
+    [disabled]="deadlinePassed"
+  >
+    <span *ngIf="!deadlinePassed">💾 Tallenna Valinnat</span>
+    <span *ngIf="deadlinePassed">🔒 Bracket Lukittu</span>
   </button>
-  <button class="bracket-button" (click)="resetBracket()">
-    🔄 Tyhjennä Bracket
+  <button
+    class="bracket-button"
+    (click)="resetBracket()"
+    [disabled]="deadlinePassed"
+  >
+    <span *ngIf="!deadlinePassed">🔄 Tyhjennä Bracket</span>
+    <span *ngIf="deadlinePassed">🔒 Bracket Lukittu</span>
   </button>
-  <button class="bracket-button" (click)="loadSavedPicks()">
-    📂 Lataa Tallennetut Valinnat
+  <button
+    class="bracket-button"
+    (click)="loadSavedPicks()"
+    [disabled]="deadlinePassed"
+  >
+    <span *ngIf="!deadlinePassed">📂 Lataa Tallennetut Valinnat</span>
+    <span *ngIf="deadlinePassed">🔒 Bracket Lukittu</span>
   </button>
 </div>

@@ -56,11 +56,24 @@
         </div>
       </div>
 
-      <a routerLink="/leaderboard" routerLinkActive="active-link"
+      <a
+        routerLink="/leaderboard"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
         >Sarjataulukko</a
       >
-      <a routerLink="/rules" routerLinkActive="active-link">Säännöt & Ohjeet</a>
-      <a routerLink="/vote" routerLinkActive="active-link">Äänestys</a>
+      <a
+        routerLink="/rules"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
+        >Säännöt & Ohjeet</a
+      >
+      <a
+        routerLink="/vote"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
+        >Äänestys</a
+      >
 
       <!-- Admin link - only shown for admin users -->
       <a
@@ -68,37 +81,62 @@
         routerLink="/admin"
         routerLinkActive="active-link"
         class="admin-link"
+        (click)="closeDropdown()"
       >
         Hallintapaneeli
       </a>
+
+      <a (click)="logout()" routerLink="/">Kirjaudu Ulos</a>
 
       <a
         routerLink="/dashboard"
         routerLinkActive="active-link"
         class="avatar-nav-link"
       >
-        <div class="avatar-circle-nav">
-          <!-- Use ngIf with proper null check and error handling for the logo -->
-          <img
-            *ngIf="user && user.logoUrl"
-            [src]="user.logoUrl"
-            class="team-logo-nav"
-            alt="Team Logo"
-            (error)="user.logoUrl = null"
-          />
-          <span *ngIf="!user?.logoUrl" class="initials">{{
-            getUserInitials()
-          }}</span>
+        <div class="avatar-circle-nav-wrapper">
+          <span class="profile-text">Profiili</span>
+          <div class="avatar-circle-nav">
+            <!-- Use ngIf with proper null check and error handling for the logo -->
+            <img
+              *ngIf="user && user.logoUrl"
+              [src]="user.logoUrl"
+              class="team-logo-nav"
+              alt="Team Logo"
+              (error)="user.logoUrl = null"
+            />
+            <span *ngIf="!user?.logoUrl" class="initials">{{
+              getUserInitials()
+            }}</span>
+          </div>
         </div>
       </a>
-      <button (click)="logout()">Kirjaudu Ulos</button>
     </ng-container>
 
     <ng-template #guestLinks>
-      <a routerLink="/rules" routerLinkActive="active-link">Säänöt & Ohjeet</a>
-      <a routerLink="/vote" routerLinkActive="active-link">Äänestys</a>
-      <a routerLink="/login" routerLinkActive="active-link">Kirjautuminen</a>
-      <a routerLink="/register" routerLinkActive="active-link">Rekisteröidy</a>
+      <a
+        routerLink="/rules"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
+        >Säänöt & Ohjeet</a
+      >
+      <a
+        routerLink="/vote"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
+        >Äänestys</a
+      >
+      <a
+        routerLink="/login"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
+        >Kirjautuminen</a
+      >
+      <a
+        routerLink="/register"
+        routerLinkActive="active-link"
+        (click)="closeDropdown()"
+        >Rekisteröidy</a
+      >
     </ng-template>
   </div>
 </nav>

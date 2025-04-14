@@ -6,6 +6,7 @@ from db import db_engine as db
 from flask import Flask
 from config import Config
 from dotenv import load_dotenv
+import base64
 
 load_dotenv()
 
@@ -23,6 +24,80 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+
+def upload_image_data(image_data, folder="nhl_bracket_logos"):
+    """
+    Upload image data directly to Cloudinary
+    
+    Args:
+        image_data (str): Base64-encoded image data
+        folder (str): Cloudinary folder to upload to
+    
+    Returns:
+        str: Cloudinary URL if successful, None otherwise
+    """
+    try:
+        # Upload the image to Cloudinary, explicitly telling it this is base64 data
+        result = cloudinary.uploader.upload(
+            f"data:image/png;base64,{image_data}",  # Properly format as data URL
+            folder=folder
+        )
+        
+        # Return the secure URL of the uploaded image
+        return result.get("secure_url")
+    except Exception as e:
+        print(f"Error uploading image to Cloudinary: {e}")
+        return None
+
+def upload_file_for_user(user_id, file_data, position=None):
+    """
+    Upload a file to Cloudinary and assign the URL to the specified position
+    for the user. If position is not specified, only return the URL.
+    
+    Args:
+        user_id (int): User ID to assign the URL to
+        file_data (str): Base64 encoded image data
+        position (int, optional): Position of logo (1-4, or None)
+    
+    Returns:
+        dict: Result with status and URL
+    """
+    try:
+        # Upload the image
+        url = upload_image_data(file_data)
+        
+        if not url:
+            return {"success": False, "message": "Upload failed", "url": None}
+        
+        # If position is specified, update the user record
+        if position and user_id:
+            app = Flask(__name__)
+            app.config.from_object(Config)
+            db.init_app(app)
+            
+            with app.app_context():
+                user = User.query.get(user_id)
+                if not user:
+                    return {"success": False, "message": f"No user found with ID {user_id}", "url": url}
+                
+                # Update the appropriate logo URL based on position
+                if position == 1:
+                    user.logo1_url = url
+                elif position == 2:
+                    user.logo2_url = url
+                elif position == 3:
+                    user.logo3_url = url
+                elif position == 4:
+                    user.logo4_url = url
+                elif position == 0:  # For selected logo
+                    user.selected_logo_url = url
+                
+                db.session.commit()
+        
+        return {"success": True, "message": "Upload successful", "url": url}
+    except Exception as e:
+        print(f"Error in upload_file_for_user: {e}")
+        return {"success": False, "message": str(e), "url": None}
 
 def upload_logos_for_user(user_id, filenames):
     """

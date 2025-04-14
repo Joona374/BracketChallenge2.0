@@ -48,6 +48,14 @@ export class RegisterComponent {
       next: (response: any) => {
         this.message = response.message;
 
+        // Generate funny news headline in Finnish
+        this.http.post(`${environment.apiUrl}/generate-headline`, {
+          teamName: this.formData.teamName,
+          language: "fi"
+        }).subscribe({
+          error: (err) => console.error("Failed to generate headline:", err)
+        });
+
         // After successful registration, log the user in
         const loginPayload = {
           username: this.formData.username,

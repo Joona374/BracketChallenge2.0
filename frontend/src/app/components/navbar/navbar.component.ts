@@ -11,6 +11,9 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
   templateUrl: "./navbar.component.html",
   styleUrls: ["./navbar.component.css"],
 })
+
+
+
 export class NavbarComponent implements OnInit, OnDestroy {
   get isLoggedIn(): boolean {
     return !!localStorage.getItem("loggedInUser");
@@ -46,6 +49,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // Add listener for logo updates
     this.logoUpdateListener = this.handleLogoUpdate.bind(this);
     window.addEventListener('user-logo-updated', this.logoUpdateListener);
+
+    // Add listener for user data updates
+    window.addEventListener('user-data-updated', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      this.user = customEvent.detail;
+      this.user = (event as CustomEvent).detail;
+      // Validate the logo URL exists and is not empty
+      if (this.user && (!this.user.logoUrl || this.user.logoUrl === "null" || this.user.logoUrl === "undefined")) {
+        this.user.logoUrl = null;
+      }
+      console.log('User updated in navbar:', this.user);
+    });
   }
 
   ngOnDestroy() {
@@ -53,6 +68,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     window.removeEventListener("resize", this.checkViewport.bind(this));
     window.removeEventListener('storage', this.handleStorageChange.bind(this));
     window.removeEventListener('user-logo-updated', this.logoUpdateListener);
+
   }
 
   loadUserFromStorage() {
@@ -66,12 +82,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.user.logoUrl = null;
         }
 
-        console.log("User is admin:", this.user.isAdmin);
-        console.log("User ID:", this.user.id);
 
-        console.log('User loaded from storage in navbar:', this.user);
       } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
         this.user = null;
       }
     }
@@ -151,5 +163,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   closeDropdown() {
     this.isDropdownOpen = false;
+    this.menuOpen = false; // Also close the mobile menu
   }
 }

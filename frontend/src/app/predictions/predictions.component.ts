@@ -8,6 +8,7 @@ import { GoalieService } from "../services/goalie.service";
 import { HttpClient } from "@angular/common/http";
 import { TooltipComponent } from "../tooltip/tooltip.component";
 import { environment } from "../../environments/environment";
+import { DeadlineService } from "../services/deadline.service";
 
 
 type PredictionCategory =
@@ -39,6 +40,7 @@ export class PredictionsComponent implements OnInit {
   players: Player[] = [];
   goalies: Goalie[] = [];
   searchTerm: string = "";
+  deadlinePassed: boolean = false;
 
   // Current category being viewed
   selectedCategory: PredictionCategory = "U23Points";
@@ -69,9 +71,26 @@ export class PredictionsComponent implements OnInit {
   sortKey: keyof Player | keyof Goalie | null = 'reg_points';  // Allow null for reset functionality
   sortAsc: boolean = false;  // Keep false for descending order
 
-  constructor(private playerService: PlayerService, private goalieService: GoalieService, private http: HttpClient) { }
+  constructor(
+    private playerService: PlayerService,
+    private goalieService: GoalieService,
+    private http: HttpClient,
+    private deadlineService: DeadlineService
+  ) { }
 
   ngOnInit(): void {
+    // Check if the deadline has passed
+    this.deadlineService.isDeadlinePassed().subscribe({
+      next: (passed) => {
+        this.deadlinePassed = passed;
+      },
+      error: (err) => {
+        console.error('Error checking deadline status:', err);
+        // Default to false to allow operations if we can't check the deadline
+        this.deadlinePassed = false;
+      }
+    });
+
     this.playerService.getPlayers().subscribe((data) => {
       this.players = data;
       this.loadPredictions();
@@ -163,6 +182,12 @@ export class PredictionsComponent implements OnInit {
   }
 
   selectPlayer(player: Player | Goalie): void {
+    // Check if the deadline has passed
+    if (this.deadlinePassed) {
+      alert("Veikkausten muokkaaminen ei ole enää mahdollista, koska aikaraja on umpeutunut (20.4.2025 00:00).");
+      return;
+    }
+
     const currentPicks = this.predictions[this.selectedCategory];
 
     if (currentPicks.length < 3) {
@@ -173,6 +198,12 @@ export class PredictionsComponent implements OnInit {
   }
 
   removePlayer(category: PredictionCategory, index: number): void {
+    // Check if the deadline has passed
+    if (this.deadlinePassed) {
+      alert("Veikkausten muokkaaminen ei ole enää mahdollista, koska aikaraja on umpeutunut (20.4.2025 00:00).");
+      return;
+    }
+
     this.predictions[category].splice(index, 1);
   }
 
@@ -181,6 +212,12 @@ export class PredictionsComponent implements OnInit {
   }
 
   savePredictions(): void {
+    // Check if the deadline has passed
+    if (this.deadlinePassed) {
+      alert("Veikkausten tallentaminen ei ole enää mahdollista, koska aikaraja on umpeutunut (20.4.2025 00:00).");
+      return;
+    }
+
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
 
     if (!user?.id) {
@@ -211,13 +248,23 @@ export class PredictionsComponent implements OnInit {
           alert("✅ Veikkaukset tallennettu onnistuneesti!");
         },
         error: (err) => {
-          console.error("Veikkausten tallentaminen epäonnistui:", err);
-          alert("❌ Virhe veikkauksia tallentaessa. Yritä uudelleen.");
+          if (err.status === 403) {
+            alert("❌ Veikkausten tallentaminen ei ole enää mahdollista, koska aikaraja on umpeutunut (20.4.2025 00:00).");
+          } else {
+            console.error("Veikkausten tallentaminen epäonnistui:", err);
+            alert("❌ Virhe veikkauksia tallentaessa. Yritä uudelleen.");
+          }
         }
       });
   }
 
   resetPredictions(): void {
+    // Check if the deadline has passed
+    if (this.deadlinePassed) {
+      alert("Veikkausten muokkaaminen ei ole enää mahdollista, koska aikaraja on umpeutunut (20.4.2025 00:00).");
+      return;
+    }
+
     if (confirm("Haluatko varmasti nollata tällä hetkellä valitut Top 3 veikkaukset?")) {
       // Reset all categories
       Object.keys(this.predictions).forEach(key => {

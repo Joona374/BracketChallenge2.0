@@ -1,24 +1,33 @@
 <div class="admin-container">
   <h1 class="admin-header">Admin Dashboard</h1>
 
-  <!-- Admin Navigation Tabs -->
-  <div class="admin-tabs">
+  <!-- Tab navigation -->
+  <div class="tab-navigation">
     <button
-      class="tab-button"
       [class.active]="activeTab === 'bracket'"
       (click)="setActiveTab('bracket')"
     >
       Bracket Management
     </button>
     <button
-      class="tab-button"
-      [class.active]="activeTab === 'users'"
-      (click)="setActiveTab('users')"
+      [class.active]="activeTab === 'codes'"
+      (click)="setActiveTab('codes')"
     >
-      User Management
+      Registration Codes
     </button>
     <button
-      class="tab-button"
+      [class.active]="activeTab === 'userLogos'"
+      (click)="setActiveTab('userLogos')"
+    >
+      User Logos
+    </button>
+    <button
+      [class.active]="activeTab === 'headlines'"
+      (click)="setActiveTab('headlines')"
+    >
+      Headlines
+    </button>
+    <button
       [class.active]="activeTab === 'settings'"
       (click)="setActiveTab('settings')"
     >
@@ -27,7 +36,7 @@
   </div>
 
   <!-- Bracket Management Tab -->
-  <div class="admin-tab-content" *ngIf="activeTab === 'bracket'">
+  <div *ngIf="activeTab === 'bracket'" class="tab-content">
     <div class="admin-section">
       <h2>Bracket Management</h2>
       <p>Configure and update NHL playoff bracket results.</p>
@@ -197,18 +206,22 @@
             <div
               class="matchup-result"
               *ngFor="let matchup of eastRoundMatchups; let i = index"
+              [class.has-result]="eastRoundResults[i].winner"
             >
               <div class="matchup-teams">
                 <div class="matchup-code">
                   {{ getMatchupDisplayName(matchup) }}
                 </div>
-                <div class="team">{{ getTeamName(matchup.team1) }}</div>
-                <div class="team">{{ getTeamName(matchup.team2) }}</div>
+                <div class="team">
+                  {{ getTeamName(matchup.team1) }} vs
+                  {{ getTeamName(matchup.team2) }}
+                </div>
               </div>
 
               <div class="result-entry">
                 <label>Winner:</label>
                 <select [(ngModel)]="eastRoundResults[i].winner">
+                  <option [value]="''">Select winner</option>
                   <option [value]="matchup.team1">
                     {{ getTeamName(matchup.team1) }}
                   </option>
@@ -216,7 +229,6 @@
                     {{ getTeamName(matchup.team2) }}
                   </option>
                 </select>
-
                 <label>Games:</label>
                 <select [(ngModel)]="eastRoundResults[i].games">
                   <option [value]="4">4</option>
@@ -224,6 +236,16 @@
                   <option [value]="6">6</option>
                   <option [value]="7">7</option>
                 </select>
+
+                <!-- Delete button for existing results -->
+                <button
+                  *ngIf="hasExistingResult(matchup.matchup_code)"
+                  class="delete-button"
+                  (click)="deleteMatchupResult(matchup.matchup_code)"
+                  title="Delete this result"
+                >
+                  ×
+                </button>
               </div>
             </div>
           </div>
@@ -236,18 +258,22 @@
             <div
               class="matchup-result"
               *ngFor="let matchup of westRoundMatchups; let i = index"
+              [class.has-result]="westRoundResults[i].winner"
             >
               <div class="matchup-teams">
                 <div class="matchup-code">
                   {{ getMatchupDisplayName(matchup) }}
                 </div>
-                <div class="team">{{ getTeamName(matchup.team1) }}</div>
-                <div class="team">{{ getTeamName(matchup.team2) }}</div>
+                <div class="team">
+                  {{ getTeamName(matchup.team1) }} vs
+                  {{ getTeamName(matchup.team2) }}
+                </div>
               </div>
 
               <div class="result-entry">
                 <label>Winner:</label>
                 <select [(ngModel)]="westRoundResults[i].winner">
+                  <option [value]="''">Select winner</option>
                   <option [value]="matchup.team1">
                     {{ getTeamName(matchup.team1) }}
                   </option>
@@ -263,6 +289,16 @@
                   <option [value]="6">6</option>
                   <option [value]="7">7</option>
                 </select>
+
+                <!-- Delete button for existing results -->
+                <button
+                  *ngIf="hasExistingResult(matchup.matchup_code)"
+                  class="delete-button"
+                  (click)="deleteMatchupResult(matchup.matchup_code)"
+                  title="Delete this result"
+                >
+                  ×
+                </button>
               </div>
             </div>
           </div>
@@ -272,16 +308,19 @@
         <div class="conference-section" *ngIf="selectedRound === 4">
           <h4>Stanley Cup Final</h4>
           <div class="results-grid" *ngIf="finalMatchup">
-            <div class="matchup-result">
+            <div class="matchup-result" [class.has-result]="finalResult.winner">
               <div class="matchup-teams">
                 <div class="matchup-code">SCF</div>
-                <div class="team">{{ getTeamName(finalMatchup.team1) }}</div>
-                <div class="team">{{ getTeamName(finalMatchup.team2) }}</div>
+                <div class="team">
+                  {{ getTeamName(finalMatchup.team1) }} vs
+                  {{ getTeamName(finalMatchup.team2) }}
+                </div>
               </div>
 
               <div class="result-entry">
                 <label>Winner:</label>
                 <select [(ngModel)]="finalResult.winner">
+                  <option [value]="''">Select winner</option>
                   <option [value]="finalMatchup.team1">
                     {{ getTeamName(finalMatchup.team1) }}
                   </option>
@@ -297,6 +336,16 @@
                   <option [value]="6">6</option>
                   <option [value]="7">7</option>
                 </select>
+
+                <!-- Delete button for existing results -->
+                <button
+                  *ngIf="hasExistingResult(finalResult.matchupCode)"
+                  class="delete-button"
+                  (click)="deleteMatchupResult(finalResult.matchupCode)"
+                  title="Delete this result"
+                >
+                  ×
+                </button>
               </div>
             </div>
           </div>
@@ -320,19 +369,599 @@
     </div>
   </div>
 
-  <!-- User Management Tab -->
-  <div class="admin-tab-content" *ngIf="activeTab === 'users'">
+  <!-- Registration Codes Tab -->
+  <div *ngIf="activeTab === 'codes'" class="tab-content">
+    <h2>Registration Codes</h2>
+
+    <!-- Generate new codes form -->
+    <div class="form-section">
+      <h3>Generate New Codes</h3>
+      <div class="form-group">
+        <label for="codesAmount">Number of codes to generate:</label>
+        <input
+          type="number"
+          id="codesAmount"
+          [(ngModel)]="newCodesAmount"
+          min="1"
+          max="100"
+        />
+        <button (click)="generateRegistrationCodes()">Generate</button>
+      </div>
+
+      <!-- Messages -->
+      <div *ngIf="codeMessage" class="success-message">{{ codeMessage }}</div>
+      <div *ngIf="codeError" class="error-message">{{ codeError }}</div>
+
+      <!-- Show newly generated codes -->
+      <div *ngIf="generatedCodes.length > 0" class="generated-codes">
+        <h4>New Codes:</h4>
+        <ul>
+          <li *ngFor="let code of generatedCodes">
+            {{ code }}
+            <button class="small-button" (click)="copyToClipboard(code)">
+              Copy
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Display existing codes -->
+    <div class="registration-codes-list">
+      <h3>Existing Codes</h3>
+
+      <table *ngIf="registrationCodes.length > 0">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let code of registrationCodes">
+            <td>{{ code.code }}</td>
+            <td>{{ code.created_at | date : "short" }}</td>
+            <td>{{ code.is_used ? "Used" : "Available" }}</td>
+            <td>
+              <button
+                *ngIf="!code.is_used"
+                class="small-button"
+                (click)="copyToClipboard(code.code)"
+              >
+                Copy
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="registrationCodes.length === 0" class="no-codes">
+        No registration codes found.
+      </div>
+    </div>
+  </div>
+
+  <!-- User Logos Tab -->
+  <div *ngIf="activeTab === 'userLogos'" class="tab-content">
+    <h2>User Logo Management</h2>
+
+    <div class="user-logos-container">
+      <div class="user-list">
+        <h3>Users</h3>
+        <div class="user-list-scroll">
+          <div
+            *ngFor="let user of users"
+            class="user-item"
+            [class.selected]="selectedUser?.id === user.id"
+            (click)="selectUser(user)"
+          >
+            <div class="user-item-content">
+              <img
+                [src]="user.selected_logo_url"
+                alt="Team logo"
+                class="user-logo"
+                onerror="this.src='https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png'"
+              />
+              <div class="user-details">
+                <div class="user-name">{{ user.team_name }}</div>
+                <div class="user-username">({{ user.username }})</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="logo-edit-section" *ngIf="selectedUser">
+        <h3>Edit Logos for: {{ selectedUser.team_name }}</h3>
+
+        <div class="form-section">
+          <!-- Logo preview -->
+          <div class="logo-preview">
+            <div class="logo-preview-item">
+              <img
+                [src]="
+                  logoFormData.logo1_url ||
+                  selectedUser.logo1_url ||
+                  'https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png'
+                "
+                alt="Logo 1"
+                class="logo-preview-image"
+              />
+              <div class="logo-label">Logo 1</div>
+              <div class="upload-controls">
+                <label
+                  class="upload-button"
+                  [class.disabled]="uploadInProgress"
+                >
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif"
+                    (change)="onFileSelected($event, 'logo1')"
+                    [disabled]="uploadInProgress"
+                  />
+                </label>
+              </div>
+            </div>
+            <div class="logo-preview-item">
+              <img
+                [src]="
+                  logoFormData.logo2_url ||
+                  selectedUser.logo2_url ||
+                  'https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png'
+                "
+                alt="Logo 2"
+                class="logo-preview-image"
+              />
+              <div class="logo-label">Logo 2</div>
+              <div class="upload-controls">
+                <label
+                  class="upload-button"
+                  [class.disabled]="uploadInProgress"
+                >
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif"
+                    (change)="onFileSelected($event, 'logo2')"
+                    [disabled]="uploadInProgress"
+                  />
+                </label>
+              </div>
+            </div>
+            <div class="logo-preview-item">
+              <img
+                [src]="
+                  logoFormData.logo3_url ||
+                  selectedUser.logo3_url ||
+                  'https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png'
+                "
+                alt="Logo 3"
+                class="logo-preview-image"
+              />
+              <div class="logo-label">Logo 3</div>
+              <div class="upload-controls">
+                <label
+                  class="upload-button"
+                  [class.disabled]="uploadInProgress"
+                >
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif"
+                    (change)="onFileSelected($event, 'logo3')"
+                    [disabled]="uploadInProgress"
+                  />
+                </label>
+              </div>
+            </div>
+            <div class="logo-preview-item">
+              <img
+                [src]="
+                  logoFormData.logo4_url ||
+                  selectedUser.logo4_url ||
+                  'https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png'
+                "
+                alt="Logo 4"
+                class="logo-preview-image"
+              />
+              <div class="logo-label">Logo 4</div>
+              <div class="upload-controls">
+                <label
+                  class="upload-button"
+                  [class.disabled]="uploadInProgress"
+                >
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif"
+                    (change)="onFileSelected($event, 'logo4')"
+                    [disabled]="uploadInProgress"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div class="logo-preview-item selected-logo">
+              <img
+                [src]="
+                  logoFormData.selected_logo_url ||
+                  selectedUser.selected_logo_url ||
+                  'https://res.cloudinary.com/dqwx4hrsc/image/upload/v1744055077/no_logo_v6li8y.png'
+                "
+                alt="Selected Logo"
+                class="logo-preview-image"
+              />
+              <div class="logo-label">Selected Logo</div>
+              <div class="upload-controls">
+                <label
+                  class="upload-button"
+                  [class.disabled]="uploadInProgress"
+                >
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif"
+                    (change)="onFileSelected($event, 'selected')"
+                    [disabled]="uploadInProgress"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image upload preview -->
+          <div class="upload-preview" *ngIf="imagePreview">
+            <h4>Upload Preview</h4>
+            <div class="upload-preview-container">
+              <img
+                [src]="imagePreview"
+                alt="Upload Preview"
+                class="upload-preview-image"
+              />
+              <div class="upload-position">
+                {{
+                  uploadingLogo === "selected"
+                    ? "Selected Logo"
+                    : "Logo " + uploadingLogo?.replace("logo", "")
+                }}
+              </div>
+              <div class="upload-actions">
+                <button
+                  (click)="uploadSelectedFile()"
+                  [disabled]="uploadInProgress"
+                  class="primary-button"
+                >
+                  {{ uploadInProgress ? "Uploading..." : "Confirm Upload" }}
+                </button>
+                <button
+                  (click)="cancelUpload()"
+                  [disabled]="uploadInProgress"
+                  class="secondary-button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form for logo URLs -->
+          <div class="logo-form">
+            <div class="form-group">
+              <label for="logo1Url">Logo 1 URL:</label>
+              <div class="input-with-button">
+                <input
+                  type="text"
+                  id="logo1Url"
+                  [(ngModel)]="logoFormData.logo1_url"
+                  placeholder="Enter URL for Logo 1"
+                />
+                <button
+                  class="small-button set-active-btn"
+                  (click)="setAsActive(1)"
+                  [disabled]="
+                    !logoFormData.logo1_url ||
+                    logoFormData.selected_logo_url === logoFormData.logo1_url
+                  "
+                >
+                  Set as Active
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="logo2Url">Logo 2 URL:</label>
+              <div class="input-with-button">
+                <input
+                  type="text"
+                  id="logo2Url"
+                  [(ngModel)]="logoFormData.logo2_url"
+                  placeholder="Enter URL for Logo 2"
+                />
+                <button
+                  class="small-button set-active-btn"
+                  (click)="setAsActive(2)"
+                  [disabled]="
+                    !logoFormData.logo2_url ||
+                    logoFormData.selected_logo_url === logoFormData.logo2_url
+                  "
+                >
+                  Set as Active
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="logo3Url">Logo 3 URL:</label>
+              <div class="input-with-button">
+                <input
+                  type="text"
+                  id="logo3Url"
+                  [(ngModel)]="logoFormData.logo3_url"
+                  placeholder="Enter URL for Logo 3"
+                />
+                <button
+                  class="small-button set-active-btn"
+                  (click)="setAsActive(3)"
+                  [disabled]="
+                    !logoFormData.logo3_url ||
+                    logoFormData.selected_logo_url === logoFormData.logo3_url
+                  "
+                >
+                  Set as Active
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="logo4Url">Logo 4 URL:</label>
+              <div class="input-with-button">
+                <input
+                  type="text"
+                  id="logo4Url"
+                  [(ngModel)]="logoFormData.logo4_url"
+                  placeholder="Enter URL for Logo 4"
+                />
+                <button
+                  class="small-button set-active-btn"
+                  (click)="setAsActive(4)"
+                  [disabled]="
+                    !logoFormData.logo4_url ||
+                    logoFormData.selected_logo_url === logoFormData.logo4_url
+                  "
+                >
+                  Set as Active
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="selectedLogoUrl">Selected Logo URL:</label>
+              <input
+                type="text"
+                id="selectedLogoUrl"
+                [(ngModel)]="logoFormData.selected_logo_url"
+                placeholder="Enter URL for selected logo"
+              />
+            </div>
+
+            <div class="button-group">
+              <button (click)="updateUserLogos()" class="primary-button">
+                Save All Changes
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div *ngIf="logoMessage" class="success-message">
+            {{ logoMessage }}
+          </div>
+          <div *ngIf="logoError" class="error-message">{{ logoError }}</div>
+        </div>
+      </div>
+
+      <div class="logo-edit-section-empty" *ngIf="!selectedUser">
+        <div class="empty-state">
+          <p>Select a user from the list to edit their logos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Headlines Tab -->
+  <div *ngIf="activeTab === 'headlines'" class="tab-content">
+    <h2>Headlines Management</h2>
     <div class="admin-section">
-      <h2>User Management</h2>
-      <p>Manage users and permissions.</p>
-      <!-- User management functionality will be implemented here -->
+      <p>Create, edit and manage news headlines that appear on the site.</p>
+
+      <!-- Create new headline -->
+      <div class="form-section">
+        <h3>Create New Headline</h3>
+        <form (ngSubmit)="createHeadline()">
+          <div class="form-group">
+            <label for="headlineText">Headline Text:</label>
+            <textarea
+              id="headlineText"
+              [(ngModel)]="newHeadline.headline"
+              name="headlineText"
+              placeholder="Enter headline text"
+              required
+              rows="2"
+              class="headline-textarea"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="headlineTeam">Team (optional):</label>
+            <select
+              id="headlineTeam"
+              [(ngModel)]="newHeadline.team_name"
+              name="headlineTeam"
+            >
+              <option [value]="null">Global (all teams)</option>
+              <option *ngFor="let team of userTeams" [value]="team.team_name">
+                {{ team.team_name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="admin-button save">
+              Create Headline
+            </button>
+          </div>
+        </form>
+
+        <!-- Messages -->
+        <div *ngIf="headlineMessage" class="success-message">
+          {{ headlineMessage }}
+        </div>
+        <div *ngIf="headlineError" class="error-message">
+          {{ headlineError }}
+        </div>
+      </div>
+
+      <!-- Headlines list -->
+      <div class="headlines-list">
+        <h3>Existing Headlines</h3>
+
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="headlinesFilter.showInactive"
+                (change)="filterHeadlines()"
+              />
+              Show inactive headlines
+            </label>
+          </div>
+          <div class="filter-group">
+            <label>Team filter:</label>
+            <select
+              [(ngModel)]="headlinesFilter.team"
+              (change)="filterHeadlines()"
+            >
+              <option value="all">All teams</option>
+              <option value="global">Global headlines only</option>
+              <option *ngFor="let team of userTeams" [value]="team.team_name">
+                {{ team.team_name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <table *ngIf="filteredHeadlines.length > 0">
+          <thead>
+            <tr>
+              <th>Headline</th>
+              <th>Team</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let headline of filteredHeadlines"
+              [class.inactive]="!headline.is_active"
+            >
+              <td>
+                <span *ngIf="selectedHeadlineId !== headline.id">{{
+                  headline.headline
+                }}</span>
+                <textarea
+                  *ngIf="selectedHeadlineId === headline.id"
+                  [(ngModel)]="headline.headline"
+                  rows="2"
+                  class="edit-headline-textarea"
+                ></textarea>
+              </td>
+              <td>
+                <span *ngIf="selectedHeadlineId !== headline.id">{{
+                  headline.team_name || "Global"
+                }}</span>
+                <select
+                  *ngIf="selectedHeadlineId === headline.id"
+                  [(ngModel)]="headline.team_name"
+                >
+                  <option [value]="null">Global (all teams)</option>
+                  <option
+                    *ngFor="let team of userTeams"
+                    [value]="team.team_name"
+                  >
+                    {{ team.team_name }}
+                  </option>
+                </select>
+              </td>
+              <td>{{ headline.created | date : "short" }}</td>
+              <td>
+                <span *ngIf="selectedHeadlineId !== headline.id">{{
+                  headline.is_active ? "Active" : "Inactive"
+                }}</span>
+                <div
+                  *ngIf="selectedHeadlineId === headline.id"
+                  class="toggle-active"
+                >
+                  <label class="switch">
+                    <input type="checkbox" [(ngModel)]="headline.is_active" />
+                    <span class="slider"></span>
+                  </label>
+                  <span>{{ headline.is_active ? "Active" : "Inactive" }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <ng-container
+                    *ngIf="selectedHeadlineId !== headline.id; else saveCancel"
+                  >
+                    <button
+                      class="edit-button"
+                      (click)="startEditHeadline(headline)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class="delete-button"
+                      (click)="deleteHeadline(headline.id)"
+                    >
+                      Delete
+                    </button>
+                  </ng-container>
+                  <ng-template #saveCancel>
+                    <button
+                      class="save-button"
+                      (click)="saveHeadline(headline)"
+                    >
+                      Save
+                    </button>
+                    <button
+                      class="cancel-button"
+                      (click)="cancelEditHeadline()"
+                    >
+                      Cancel
+                    </button>
+                  </ng-template>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredHeadlines.length === 0" class="no-headlines">
+          No headlines found with the current filters.
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Settings Tab -->
-  <div class="admin-tab-content" *ngIf="activeTab === 'settings'">
+  <div *ngIf="activeTab === 'settings'" class="tab-content">
+    <h2>System Settings</h2>
     <div class="admin-section">
-      <h2>System Settings</h2>
       <p>Configure application settings.</p>
       <!-- Settings functionality will be implemented here -->
     </div>

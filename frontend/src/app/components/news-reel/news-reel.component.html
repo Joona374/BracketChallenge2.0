@@ -1,8 +1,16 @@
 <div class="news-reel-wrapper">
-  <div class="news-reel-track">
-    <span *ngFor="let headline of headlines">
-      {{ headline }}
-      <span class="spacer"></span>
-    </span>
+  <div class="news-reel-track" #newsTrack>
+    <ng-container *ngFor="let headline of repeatedHeadlines; index as i">
+      <span class="headline">
+        <a
+          [routerLink]="['/user', getTeamNameForUrl(headline.teamName)]"
+          class="team-name"
+          >{{ "@" + getDisplayTeamName(headline.teamName) }}</a
+        >
+        {{ headline.content }}
+        <span class="timestamp">{{ formatTimestamp(headline.created) }}</span>
+        <span class="spacer"></span>
+      </span>
+    </ng-container>
   </div>
 </div>

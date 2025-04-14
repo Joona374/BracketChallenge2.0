@@ -1,20 +1,45 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from flask_cors import CORS
 import json
 import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode
+from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode, Headline
 
 import os
 from openai import OpenAI
 import requests
 from threading import Thread
 from dotenv import load_dotenv
+
+# Define the deadline for bracket, initial lineup, and prediction changes
+PLAYOFF_LOCK_DEADLINE = datetime(2025, 4, 20, 0, 0, 0, tzinfo=timezone.utc)
+
+def is_deadline_passed():
+    """
+    Check if the playoff lock deadline has passed
+    """
+    now = datetime.now(timezone.utc)
+    return now >= PLAYOFF_LOCK_DEADLINE
+
+def get_time_until_deadline():
+    """
+    Get the time remaining until the deadline in a readable format
+    """
+    now = datetime.now(timezone.utc)
+    if now >= PLAYOFF_LOCK_DEADLINE:
+        return "Deadline has passed"
+    
+    diff = PLAYOFF_LOCK_DEADLINE - now
+    days = diff.days
+    hours, remainder = divmod(diff.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    return f"{days} days, {hours} hours, {minutes} minutes"
 
 load_dotenv()
 
@@ -126,10 +151,6 @@ def register():
     code.is_used = True
     db.session.commit()
 
-    # Launch the image generation in a background thread so it doesn't delay the response
-    # thread = Thread(target=generate_team_logos, args=(team_name, new_user.id))
-    # thread.start()
-
     return jsonify({"message": "User registered successfully"}), 201
 
 @app.route("/api/login", methods=["POST"])
@@ -239,6 +260,10 @@ def save_picks():
 
     if not user_id or not picks:
         return jsonify({"error": "Missing user_id or picks"}), 400
+        
+    # Check if the deadline has passed
+    if is_deadline_passed():
+        return jsonify({"error": "Bracket submission deadline has passed. No changes allowed."}), 403
 
     existing_pick = Pick.query.filter_by(user_id=user_id).first()
     if existing_pick:
@@ -256,7 +281,7 @@ def save_picks():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "Failed to save picks", "details": str(e)}), 500 
+        return jsonify({"error": "Failed to save picks", "details": str(e)}), 500
 
 @app.route("/api/bracket/get-picks", methods=["GET"])
 def get_picks():
@@ -355,6 +380,22 @@ def save_lineup():
         with db.session.begin():
             # Get existing lineup if any
             existing = LineupPick.query.filter_by(user_id=user_id).first()
+            
+            # Check if the deadline has passed
+            deadline_passed = is_deadline_passed()
+            
+            # If this is a new lineup and the deadline has passed, reject it
+            if not existing and deadline_passed:
+                return jsonify({
+                    "error": "Lineup submission deadline has passed. New lineups cannot be created."
+                }), 403
+            
+            # If this is an existing lineup, the deadline has passed, and they're trying to use more trades than remaining
+            if existing and deadline_passed and trades_used > existing.remaining_trades:
+                return jsonify({
+                    "error": f"You only have {existing.remaining_trades} trades remaining."
+                }), 403
+                
             old_lineup = json.loads(existing.lineup_json) if existing else {}
             
             # Calculate current value of lineup
@@ -489,6 +530,10 @@ def save_predictions():
     
     if not user_id or not predictions_data:
         return jsonify({"error": "Missing required data"}), 400
+    
+    # Check if the deadline has passed
+    if is_deadline_passed():
+        return jsonify({"error": "Prediction submission deadline has passed. No changes allowed."}), 403
     
     # Convert predictions data to JSON string
     predictions_json = json.dumps(predictions_data)
@@ -845,7 +890,12 @@ def get_round_matchups():
                 "team2": m.team2,
                 "round": m.round,
                 "conference": m.conference,
-                "matchup_code": m.matchup_code
+                "matchup_code": m.matchup_code,
+                # Add result information if available
+                "result": {
+                    "winner": m.result.winner,
+                    "games": m.result.games
+                } if m.result else None
             } for m in east_matchups]
             
             result["west"] = [{
@@ -854,7 +904,12 @@ def get_round_matchups():
                 "team2": m.team2,
                 "round": m.round,
                 "conference": m.conference,
-                "matchup_code": m.matchup_code
+                "matchup_code": m.matchup_code,
+                # Add result information if available
+                "result": {
+                    "winner": m.result.winner,
+                    "games": m.result.games
+                } if m.result else None
             } for m in west_matchups]
         else:
             # Get Stanley Cup final matchup
@@ -866,7 +921,12 @@ def get_round_matchups():
                     "team2": final.team2,
                     "round": final.round,
                     "conference": final.conference,
-                    "matchup_code": final.matchup_code
+                    "matchup_code": final.matchup_code,
+                    # Add result information if available
+                    "result": {
+                        "winner": final.result.winner,
+                        "games": final.result.games
+                    } if final.result else None
                 }
         
         return jsonify(result), 200
@@ -874,6 +934,28 @@ def get_round_matchups():
     except Exception as e:
         print("Error getting round matchups:", e)
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/bracket/delete-result/<string:matchup_code>', methods=['DELETE'])
+def delete_matchup_result(matchup_code):
+    """
+    Delete a matchup result by its matchup_code
+    """
+    try:
+        # Find the result by matchup code
+        result = MatchupResult.query.filter_by(matchup_code=matchup_code).first()
+        
+        if not result:
+            return jsonify({"error": "Result not found"}), 404
+        
+        # Delete the result
+        db.session.delete(result)
+        db.session.commit()
+        
+        return jsonify({"message": f"Result for matchup {matchup_code} deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting matchup result: {e}")
+        return jsonify({"error": f"Failed to delete result: {str(e)}"}), 500
 
 @app.route('/api/bracket/save-results', methods=['POST'])
 def save_round_results():
@@ -1053,6 +1135,386 @@ def get_teams():
     except Exception as e:
         print(f"Error fetching teams: {e}")
         return jsonify({"error": "Failed to fetch teams"}), 500
+
+@app.route('/api/registration-codes', methods=['GET'])
+def get_registration_codes():
+    """
+    Get all registration codes from the database
+    """
+    try:
+        codes = RegistrationCode.query.all()
+        codes_data = [
+            {
+                'id': code.id,
+                'code': code.code,
+                'created_at': code.created_at.isoformat(),
+                'is_used': code.is_used
+            }
+            for code in codes
+        ]
+        
+        return jsonify(codes_data), 200
+    except Exception as e:
+        print(f"Error fetching registration codes: {e}")
+        return jsonify({"error": "Failed to fetch registration codes"}), 500
+
+@app.route('/api/registration-codes', methods=['POST'])
+def create_new_registration_codes():
+    """
+    Generate new registration codes
+    """
+    data = request.json
+    amount = data.get('amount', 1)
+    
+    if not isinstance(amount, int) or amount <= 0:
+        return jsonify({"error": "Amount must be a positive integer"}), 400
+        
+    try:
+        # Use the existing function from utils.py to generate codes
+        from utils import generate_random_code
+        
+        new_codes = []
+        for _ in range(amount):
+            code_value = generate_random_code()
+            new_code = RegistrationCode(
+                code=code_value,
+                created_at=datetime.now(timezone.utc),
+                is_used=False
+            )
+            db.session.add(new_code)
+            new_codes.append(code_value)
+            
+        db.session.commit()
+        
+        return jsonify({
+            "message": f"{amount} registration codes created successfully",
+            "codes": new_codes
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating registration codes: {e}")
+        return jsonify({"error": f"Failed to create registration codes: {str(e)}"}), 500
+
+@app.route('/api/users', methods=['GET'])
+def get_all_users():
+    """
+    Get all users with their logo information
+    """
+    try:
+        users = User.query.all()
+        users_data = [
+            {
+                'id': user.id,
+                'username': user.username,
+                'team_name': user.team_name,
+                'logo1_url': user.logo1_url,
+                'logo2_url': user.logo2_url,
+                'logo3_url': user.logo3_url,
+                'logo4_url': user.logo4_url,
+                'selected_logo_url': user.selected_logo_url,
+                'is_admin': user.is_admin
+            }
+            for user in users
+        ]
+        
+        return jsonify(users_data), 200
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return jsonify({"error": "Failed to fetch users"}), 500
+
+@app.route('/api/users/<int:user_id>/logos', methods=['PUT'])
+def update_user_logos(user_id):
+    """
+    Update a user's logo URLs
+    """
+    data = request.json
+    
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        # Update logo URLs if provided
+        if 'logo1_url' in data:
+            user.logo1_url = data['logo1_url']
+        if 'logo2_url' in data:
+            user.logo2_url = data['logo2_url']
+        if 'logo3_url' in data:
+            user.logo3_url = data['logo3_url']
+        if 'logo4_url' in data:
+            user.logo4_url = data['logo4_url']
+        if 'selected_logo_url' in data:
+            user.selected_logo_url = data['selected_logo_url']
+        
+        db.session.commit()
+        
+        return jsonify({
+            "message": "User logos updated successfully",
+            "user": {
+                'id': user.id,
+                'username': user.username,
+                'team_name': user.team_name,
+                'logo1_url': user.logo1_url,
+                'logo2_url': user.logo2_url,
+                'logo3_url': user.logo3_url,
+                'logo4_url': user.logo4_url,
+                'selected_logo_url': user.selected_logo_url
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating user logos: {e}")
+        return jsonify({"error": f"Failed to update user logos: {str(e)}"}), 500
+
+@app.route('/api/users/<int:user_id>/upload-logo', methods=['POST'])
+def upload_user_logo(user_id):
+    """
+    Upload a logo image for a user
+    """
+    data = request.json
+    
+    if not data or 'image_data' not in data:
+        return jsonify({"error": "Missing image data"}), 400
+    
+    # Get image data and position
+    image_data = data.get('image_data')
+    position = data.get('position')  # Position can be 1-4 for logo1-4, or 0 for selected_logo
+    
+    # Ensure image data is in the correct format
+    if not image_data.startswith('data:image'):
+        return jsonify({"error": "Invalid image format"}), 400
+    
+    # Extract the base64 data
+    try:
+        # Remove the data URL prefix (e.g., 'data:image/png;base64,')
+        image_data = image_data.split(',')[1] if ',' in image_data else image_data
+    except Exception as e:
+        return jsonify({"error": f"Failed to process image: {str(e)}"}), 400
+    
+    try:
+        # Import function from cloudinary_worker
+        from cloudinary_worker import upload_file_for_user
+        
+        # Upload the file
+        result = upload_file_for_user(user_id, image_data, position)
+        
+        if not result["success"]:
+            return jsonify({"error": result["message"]}), 500
+        
+        return jsonify({
+            "message": "Logo uploaded successfully",
+            "url": result["url"]
+        }), 200
+    except Exception as e:
+        print(f"Error uploading logo: {e}")
+        return jsonify({"error": f"Failed to upload logo: {str(e)}"}), 500
+
+@app.route('/api/headlines', methods=['GET'])
+def get_headlines():
+    """
+    Get active headlines, optionally filtered by team name
+    """
+    team_name = request.args.get('team_name')
+    
+    try:
+        query = Headline.query.filter_by(is_active=True)
+        
+        # If team_name is provided, get team-specific headlines plus global ones (where team_name is null)
+        if team_name:
+            query = query.filter((Headline.team_name == team_name) | (Headline.team_name.is_(None)))
+        
+        # Order by newest first
+        headlines = query.order_by(Headline.created.desc()).all()
+        
+        headline_data = [
+            {
+                'id': h.id,
+                'headline': h.headline,
+                'created': h.created.isoformat(),
+                'team_name': h.team_name
+            }
+            for h in headlines
+        ]
+        
+        return jsonify(headline_data), 200
+    
+    except Exception as e:
+        print(f"Error fetching headlines: {e}")
+        return jsonify({"error": f"Failed to fetch headlines: {str(e)}"}), 500
+
+@app.route('/api/headlines', methods=['POST'])
+def create_headline():
+    """
+    Create a new headline
+    """
+    data = request.json
+    
+    if not data or 'headline' not in data:
+        return jsonify({"error": "Missing headline text"}), 400
+    
+    headline_text = data.get('headline')
+    team_name = data.get('team_name')  # Can be None for global headlines
+    
+    try:
+        new_headline = Headline(
+            headline=headline_text,
+            team_name=team_name,
+            created=datetime.now(timezone.utc),
+            is_active=True
+        )
+        
+        db.session.add(new_headline)
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Headline created successfully",
+            "id": new_headline.id
+        }), 201
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating headline: {e}")
+        return jsonify({"error": f"Failed to create headline: {str(e)}"}), 500
+
+@app.route('/api/admin/headlines', methods=['GET'])
+def get_all_headlines():
+    """
+    Admin endpoint to get all headlines, including inactive ones
+    """
+    try:
+        headlines = Headline.query.order_by(Headline.created.desc()).all()
+        
+        headline_data = [
+            {
+                'id': h.id,
+                'headline': h.headline,
+                'created': h.created.isoformat(),
+                'team_name': h.team_name,
+                'is_active': h.is_active
+            }
+            for h in headlines
+        ]
+        
+        return jsonify(headline_data), 200
+    
+    except Exception as e:
+        print(f"Error fetching all headlines: {e}")
+        return jsonify({"error": f"Failed to fetch headlines: {str(e)}"}), 500
+
+@app.route('/api/admin/headlines/<int:headline_id>', methods=['PUT'])
+def update_headline(headline_id):
+    """
+    Update a headline's text, team, or active status
+    """
+    data = request.json
+    
+    try:
+        headline = Headline.query.get(headline_id)
+        if not headline:
+            return jsonify({"error": "Headline not found"}), 404
+        
+        if 'headline' in data:
+            headline.headline = data['headline']
+        if 'team_name' in data:
+            headline.team_name = data['team_name']
+        if 'is_active' in data:
+            headline.is_active = data['is_active']
+        
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Headline updated successfully",
+            "headline": {
+                'id': headline.id,
+                'headline': headline.headline,
+                'created': headline.created.isoformat(),
+                'team_name': headline.team_name,
+                'is_active': headline.is_active
+            }
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating headline: {e}")
+        return jsonify({"error": f"Failed to update headline: {str(e)}"}), 500
+
+@app.route('/api/admin/headlines/<int:headline_id>', methods=['DELETE'])
+def delete_headline(headline_id):
+    """
+    Delete a headline
+    """
+    try:
+        headline = Headline.query.get(headline_id)
+        if not headline:
+            return jsonify({"error": "Headline not found"}), 404
+        
+        db.session.delete(headline)
+        db.session.commit()
+        
+        return jsonify({"message": "Headline deleted successfully"}, 200)
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting headline: {e}")
+        return jsonify({"error": f"Failed to delete headline: {str(e)}"}), 500
+
+@app.route('/api/generate-headline', methods=['POST'])
+def generate_headline():
+    data = request.json
+    team_name = data.get('teamName')
+    
+    if not team_name:
+        return jsonify({'error': 'Team name is required'}), 400
+    
+    language = data.get('language', 'en')
+    
+    prompt = f"""Write a sarcastic, cocky, and darkly humorous news headlines about a fantasy hockey team called "{team_name}" that just joined an NHL Bracket Challenge.
+    The tone should be ruthless, teasing, and full of trash talk — the kind of humor you'd use to roast your best friends.
+    Make fun of their confidence, past failures, ridiculous team name, or just how delusional their bracket picks probably are.
+    Use hockey terms, NHL clichés, and lean into the chaos. If you can make fun of the name in any way thats always great!
+    Do not hold back. No politeness, no filters. Make it sound like something you'd post in the group chat to make everyone laugh and cry.
+    Also try and use random funny hashtags related to the headline.
+    Keep it under 200 characters."""
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a witty sports journalist writing humorous NHL headlines."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        headline = response.choices[0].message.content.strip()
+        
+        # Create new headline in database
+        new_headline = Headline(
+            headline=headline,
+            team_name=team_name,
+            is_active=True
+        )
+        db.session.add(new_headline)
+        db.session.commit()
+        
+        return jsonify({'message': 'Headline generated successfully', 'headline': headline}), 200
+        
+    except Exception as e:
+        print("Error generating headline:", str(e))
+        return jsonify({'error': 'Failed to generate headline'}), 500
+
+@app.route('/api/deadline/status', methods=['GET'])
+def get_deadline_status():
+    """
+    Get the status of the playoff bracket and lineup deadline
+    """
+    deadline_passed = is_deadline_passed()
+    time_remaining = get_time_until_deadline()
+    
+    return jsonify({
+        "deadline_passed": deadline_passed,
+        "time_remaining": time_remaining,
+        "deadline_timestamp": PLAYOFF_LOCK_DEADLINE.isoformat()
+    }), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

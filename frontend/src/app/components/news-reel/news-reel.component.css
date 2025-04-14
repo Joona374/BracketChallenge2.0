@@ -6,31 +6,58 @@
   border-bottom: 2px solid #ff4444;
   padding: 6px 0;
   position: relative;
-  z-index: 99; /* Lower than navbar but higher than regular content */
+  z-index: 99;
 }
 
 .news-reel-track {
   display: inline-block;
   white-space: nowrap;
-  color: #ff4444;
+  color: #ccc;
   font-family: "Orbitron", monospace;
   font-size: 18px;
-  animation: scroll-left 80s linear infinite;
-  text-shadow: 0 0 2px #ff0000;
+  text-shadow: 0 0 2px rgba(255, 0, 0, 0.3);
+  animation: scroll-left linear infinite;
 }
 
-/* Huge gap between headlines — ensures only one on screen at a time */
+.headline {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(20, 0, 0, 0.3);
+  border-radius: 4px;
+  /* border: 1px solid rgba(255, 68, 68, 0.2); */
+  margin: 0 4px;
+}
+
 .spacer {
   display: inline-block;
-  width: 110vw; /* try 120vw, 150vw, even 200vw for long headlines */
+  width: 70vw;
+}
+
+.team-name {
+  color: #ff4444;
+  font-weight: bold;
+  margin-right: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.team-name:hover {
+  color: #ff6666;
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+}
+
+.timestamp {
+  color: #666;
+  font-size: 14px;
+  margin-left: 8px;
+  font-family: monospace;
 }
 
 @keyframes scroll-left {
   0% {
-    transform: translateX(120vw);
+    transform: translateX(1%);
   }
-
   100% {
-    transform: translateX(-590vw); /* move far enough to carry full loop */
+    transform: translateX(-100%);
   }
 }

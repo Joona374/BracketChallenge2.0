@@ -5,6 +5,7 @@ from flask import Flask
 from config import Config
 from db import db_engine as db
 from models import RegistrationCode, Matchup, Player
+from app import test_generate_headline_api
 
 def generate_random_code():
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -193,5 +194,6 @@ def add_mock_players():
             print("❌ Players already seeded.")
 
 if __name__ == "__main__":
-    create_matchups()
+    # create_matchups()
     # add_mock_players()
+    pass

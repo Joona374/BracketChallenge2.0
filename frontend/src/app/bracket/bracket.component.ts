@@ -4,7 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { environment } from "../../environments/environment";
-
+import { DeadlineService } from "../services/deadline.service";
 
 interface Matchups {
   west: any[];
@@ -24,10 +24,12 @@ interface RoundPicks {
 })
 export class BracketComponent implements OnInit {
   matchups: Matchups = { west: [], east: [] };
+  deadlinePassed: boolean = false;
+  timeRemaining: string = "";
 
   userPicks: {
-    round1: { [key: string]: string }; // Changed from number to string
-    round1Games: { [key: string]: number }; // Changed from number to string
+    round1: { [key: string]: string };
+    round1Games: { [key: string]: number };
 
     round2: RoundPicks;
     round2Games: { [key: string]: number };
@@ -40,34 +42,34 @@ export class BracketComponent implements OnInit {
   } = {
       round1: {},
       round1Games: {
-        'W1': 4,
-        'W2': 4,
-        'W3': 4,
-        'W4': 4,
-        'E1': 4,
-        'E2': 4,
-        'E3': 4,
-        'E4': 4
+        W1: 4,
+        W2: 4,
+        W3: 4,
+        W4: 4,
+        E1: 4,
+        E2: 4,
+        E3: 4,
+        E4: 4,
       },
       round2: {},
       round2Games: {
-        'w-semi': 4,
-        'w-semi2': 4,
-        'e-semi': 4,
-        'e-semi2': 4
+        "w-semi": 4,
+        "w-semi2": 4,
+        "e-semi": 4,
+        "e-semi2": 4,
       },
       round3: {},
       round3Games: {
-        'west-final': 4,
-        'east-final': 4
+        "west-final": 4,
+        "east-final": 4,
       },
       final: {},
       finalGames: {
-        'cup-winner': 4
-      }
+        cup: 4,
+      },
     };
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private deadlineService: DeadlineService) { }
 
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
@@ -76,6 +78,22 @@ export class BracketComponent implements OnInit {
       window.location.href = "/";
       return;
     }
+
+    // Check deadline status
+    this.deadlineService.isDeadlinePassed().subscribe({
+      next: (passed) => {
+        this.deadlinePassed = passed;
+        if (passed) {
+          console.log("Deadline has passed. Bracket is locked.");
+        }
+      },
+    });
+
+    this.deadlineService.getTimeRemaining().subscribe({
+      next: (timeRemaining) => {
+        this.timeRemaining = timeRemaining;
+      },
+    });
 
     // Single HTTP GET request
     this.http.get(`${environment.apiUrl}/bracket/matchups`).subscribe({
@@ -97,6 +115,12 @@ export class BracketComponent implements OnInit {
   }
 
   pickWinner(matchupId: string, team: string) {
+    // Don't allow changes if deadline has passed
+    if (this.deadlinePassed) {
+      alert("The bracket submission deadline has passed. No changes can be made.");
+      return;
+    }
+
     if (matchupId.startsWith("W") || matchupId.startsWith("E")) {
       // First round matchups (W1, W2, E1, E2, etc.)
       this.userPicks.round1[matchupId] = team;
@@ -225,19 +249,19 @@ export class BracketComponent implements OnInit {
 
       if (gamesObj) {
         // Find all keys that have game counts associated with winner entries
-        const keysToClean = Object.keys(gamesObj).filter(key =>
-          key.includes('-winner') || key === 'cup-winner'
+        const keysToClean = Object.keys(gamesObj).filter(
+          (key) => key.includes("-winner") || key === "cup-winner"
         );
 
-        keysToClean.forEach(key => {
+        keysToClean.forEach((key) => {
           let matchupKey: string;
 
           // Handle special case for finals
-          if (key === 'cup-winner') {
-            matchupKey = 'cup';
+          if (key === "cup-winner") {
+            matchupKey = "cup";
           } else {
             // For other rounds, remove the "-winner" suffix
-            matchupKey = key.replace('-winner', '');
+            matchupKey = key.replace("-winner", "");
           }
 
           // Transfer the game count to the correct matchup key
@@ -250,29 +274,44 @@ export class BracketComponent implements OnInit {
     };
 
     // Clean up game counts for each round
-    cleanGameCounts('round1');
-    cleanGameCounts('round2');
-    cleanGameCounts('round3');
-    cleanGameCounts('final');
+    cleanGameCounts("round1");
+    cleanGameCounts("round2");
+    cleanGameCounts("round3");
+    cleanGameCounts("final");
   }
 
   savePicks() {
+    // Don't allow changes if deadline has passed
+    if (this.deadlinePassed) {
+      alert("The bracket submission deadline has passed. No changes can be made.");
+      return;
+    }
+
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
 
-    const payload = {
-      user_id: user.id,
-      picks: this.userPicks,
-    };
+    if (!user?.id) {
+      alert("You must be logged in to save picks");
+      return;
+    }
 
     this.http
-      .post(`${environment.apiUrl}/bracket/save-picks`, payload)
+      .post(`${environment.apiUrl}/bracket/save-picks`, {
+        user_id: user.id,
+        picks: this.userPicks,
+      })
       .subscribe({
         next: () => {
-          alert("Picks saved successfully!");
+          alert("Your bracket picks have been saved!");
         },
         error: (err) => {
-          console.error("Failed to save picks", err);
-          alert("Error saving picks.");
+          if (err.status === 403) {
+            alert(
+              "The bracket submission deadline has passed. Your picks cannot be saved."
+            );
+          } else {
+            console.error("Failed to save picks:", err);
+            alert("Failed to save picks. Please try again.");
+          }
         },
       });
   }
@@ -281,11 +320,10 @@ export class BracketComponent implements OnInit {
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
 
     if (!user?.id) {
-      alert("You must be logged in to load saved picks.");
+      alert("You must be logged in to load picks");
       return;
     }
 
-    // Call the existing method to load previous picks
     this.loadPreviousPicks(user.id);
   }
 
@@ -308,34 +346,40 @@ export class BracketComponent implements OnInit {
   }
 
   resetBracket() {
+    // Don't allow changes if deadline has passed
+    if (this.deadlinePassed) {
+      alert("The bracket submission deadline has passed. No changes can be made.");
+      return;
+    }
+
     this.userPicks = {
       round1: {},
       round1Games: {
-        'W1': 4,
-        'W2': 4,
-        'W3': 4,
-        'W4': 4,
-        'E1': 4,
-        'E2': 4,
-        'E3': 4,
-        'E4': 4
+        W1: 4,
+        W2: 4,
+        W3: 4,
+        W4: 4,
+        E1: 4,
+        E2: 4,
+        E3: 4,
+        E4: 4,
       },
       round2: {},
       round2Games: {
-        'w-semi': 4,
-        'w-semi2': 4,
-        'e-semi': 4,
-        'e-semi2': 4
+        "w-semi": 4,
+        "w-semi2": 4,
+        "e-semi": 4,
+        "e-semi2": 4,
       },
       round3: {},
       round3Games: {
-        'west-final': 4,
-        'east-final': 4
+        "west-final": 4,
+        "east-final": 4,
       },
       final: {},
       finalGames: {
-        'cup-winner': 4
-      }
+        cup: 4,
+      },
     };
     this.computeNextRounds();
   }
@@ -349,14 +393,20 @@ export class BracketComponent implements OnInit {
   }
 
   increaseGames(round: string, matchupId: string) {
+    // Don't allow changes if deadline has passed
+    if (this.deadlinePassed) {
+      alert("The bracket submission deadline has passed. No changes can be made.");
+      return;
+    }
+
     const gamesKey = `${round}Games` as keyof typeof this.userPicks;
 
     // Convert any winner keys to their base matchup keys
     let actualMatchupId = matchupId;
-    if (matchupId.includes('-winner')) {
-      actualMatchupId = matchupId.replace('-winner', '');
-    } else if (matchupId === 'cup-winner') {
-      actualMatchupId = 'cup';
+    if (matchupId.includes("-winner")) {
+      actualMatchupId = matchupId.replace("-winner", "");
+    } else if (matchupId === "cup-winner") {
+      actualMatchupId = "cup";
     }
 
     // ✅ Make sure the object exists
@@ -376,14 +426,20 @@ export class BracketComponent implements OnInit {
   }
 
   decreaseGames(round: string, matchupId: string) {
+    // Don't allow changes if deadline has passed
+    if (this.deadlinePassed) {
+      alert("The bracket submission deadline has passed. No changes can be made.");
+      return;
+    }
+
     const gamesKey = `${round}Games` as keyof typeof this.userPicks;
 
     // Convert any winner keys to their base matchup keys
     let actualMatchupId = matchupId;
-    if (matchupId.includes('-winner')) {
-      actualMatchupId = matchupId.replace('-winner', '');
-    } else if (matchupId === 'cup-winner') {
-      actualMatchupId = 'cup';
+    if (matchupId.includes("-winner")) {
+      actualMatchupId = matchupId.replace("-winner", "");
+    } else if (matchupId === "cup-winner") {
+      actualMatchupId = "cup";
     }
 
     // ✅ Make sure the object exists
@@ -408,10 +464,10 @@ export class BracketComponent implements OnInit {
 
     // Convert any winner keys to their base matchup keys
     let actualMatchupId = matchupId;
-    if (matchupId.includes('-winner')) {
-      actualMatchupId = matchupId.replace('-winner', '');
-    } else if (matchupId === 'cup-winner') {
-      actualMatchupId = 'cup';
+    if (matchupId.includes("-winner")) {
+      actualMatchupId = matchupId.replace("-winner", "");
+    } else if (matchupId === "cup-winner") {
+      actualMatchupId = "cup";
     }
 
     return gamesObj?.[actualMatchupId] ?? 4; // fallback to 4

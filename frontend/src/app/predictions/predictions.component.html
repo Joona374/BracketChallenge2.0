@@ -6,6 +6,13 @@
     Kun olet valinnut kaikkiin kategorioihin pelaajat, voit tallentaa veikkauksesi. Valintoja voi vaihtaa aina veikkausten lukkiutumiseen saakka!"
   ></app-tooltip>
 </h2>
+
+<!-- Deadline status indicator -->
+<div *ngIf="deadlinePassed" class="deadline-notice">
+  <span class="lock-icon">🔒</span> Veikkaukset ovat lukittu - aikaraja on
+  umpeutunut (20.4.2025 00:00)
+</div>
+
 <p class="section-subheader">Valitse 3 pelaajaa jokaiseen kategoriaan</p>
 
 <div class="predictions-container">
@@ -16,6 +23,7 @@
       class="category-tab"
       [class.active]="selectedCategory === cat.key"
       [class.completed]="cat.value.length === 3"
+      [class.locked]="deadlinePassed"
       (click)="changeCategory(castToPredictionCategory(cat.key))"
     >
       {{ categoryLabels[castToPredictionCategory(cat.key)] }}
@@ -49,6 +57,7 @@
           <button
             class="remove-pick"
             (click)="removePlayer(selectedCategory, i)"
+            [disabled]="deadlinePassed"
           >
             ✕
           </button>
@@ -76,13 +85,14 @@
     </div>
 
     <!-- Right side: Player selection -->
-    <div class="player-selection-panel">
+    <div class="player-selection-panel" [class.disabled]="deadlinePassed">
       <div class="search-controls">
         <input
           type="text"
           placeholder="Hae pelaajia..."
           [(ngModel)]="searchTerm"
           class="search-box"
+          [disabled]="deadlinePassed"
         />
       </div>
 
@@ -232,6 +242,7 @@
               *ngFor="let player of filteredPlayers"
               (click)="selectPlayer(player)"
               class="player-row"
+              [class.locked]="deadlinePassed"
             >
               <td>{{ player?.position || "" }}</td>
               <td>{{ player?.firstName || "" }}</td>
@@ -284,13 +295,26 @@
 
   <!-- Global action buttons -->
   <div class="action-buttons-container">
-    <button class="prediction-button save" (click)="savePredictions()">
-      💾 Tallenna kaikki veikkaukset
+    <button
+      class="prediction-button save"
+      (click)="savePredictions()"
+      [disabled]="deadlinePassed"
+    >
+      <span *ngIf="!deadlinePassed">💾 Tallenna kaikki veikkaukset</span>
+      <span *ngIf="deadlinePassed">🔒 Veikkaukset lukittu</span>
     </button>
-    <button class="prediction-button reset" (click)="resetPredictions()">
+    <button
+      class="prediction-button reset"
+      (click)="resetPredictions()"
+      [disabled]="deadlinePassed"
+    >
       🔄 Nollaa veikkaukset
     </button>
-    <button class="prediction-button load" (click)="loadPredictions()">
+    <button
+      class="prediction-button load"
+      (click)="loadPredictions()"
+      [disabled]="deadlinePassed"
+    >
       📂 Lataa tallennetut veikkaukset
     </button>
   </div>

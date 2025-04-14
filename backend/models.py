@@ -300,3 +300,16 @@ class LineupHistory(db.Model):
     
     user = db.relationship('User', backref='lineup_histories')
     player = db.relationship('Player', backref='lineup_appearances')
+
+class Headline(db.Model):
+    __tablename__ = 'headlines'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    headline = db.Column(db.String(255), nullable=False)
+    created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    team_name = db.Column(db.String(80), nullable=True)  # Can be null for generic headlines
+    is_active = db.Column(db.Boolean, default=True)  # To easily disable headlines
+    
+    def __repr__(self):
+        team_info = f"for {self.team_name}" if self.team_name else "global"
+        return f'<Headline {self.id}: {self.headline} ({team_info})>'

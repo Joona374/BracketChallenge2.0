@@ -7,7 +7,7 @@ import { GoalieService } from "../services/goalie.service";
 import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment";
-
+import { DeadlineService } from "../services/deadline.service";
 
 type SlotKey = "L" | "C" | "R" | "LD" | "RD" | "G";
 type PlayerPosition = "L" | "C" | "R" | "D" | "G";
@@ -47,29 +47,38 @@ export class LineupPageComponent implements OnInit {
   remainingTrades: number = 9;
   maxTrades: number = 9;
 
-  // Helper method to track unsaved changes
-  private hasUnsavedChanges = false;
-
   // Properties for the original lineup
   private originalLineup: Record<SlotKey, Player | Goalie | null> = {
     L: null, C: null, R: null, LD: null, RD: null, G: null
   };
   private pendingTradeSlots: Set<SlotKey> = new Set();
 
-  // Confirmed trades counter
-  private confirmedTradesUsed: number = 0;
-
   // Sorting properties
   sortKey: string | null = 'price';
   sortAsc: boolean = false;
 
+  // Deadline property
+  deadlinePassed: boolean = false;
+
   constructor(
     private playerService: PlayerService,
     private goalieService: GoalieService,
-    private http: HttpClient
+    private http: HttpClient,
+    private deadlineService: DeadlineService
   ) { }
 
   ngOnInit(): void {
+    // Check deadline status
+    this.deadlineService.isDeadlinePassed().subscribe({
+      next: (passed) => {
+        this.deadlinePassed = passed;
+      },
+      error: (err) => {
+        console.error('Error checking deadline status:', err);
+        this.deadlinePassed = false;
+      }
+    });
+
     // Load both players and goalies
     this.playerService.getPlayers().subscribe((data) => {
       this.players = data;
@@ -300,21 +309,26 @@ export class LineupPageComponent implements OnInit {
 
   // Get actual remaining trades
   get effectiveRemainingTrades(): number {
+    if (!this.deadlinePassed) {
+      return this.maxTrades; // Always return max trades before deadline
+    }
+
+    // After deadline, count used trades
     const pendingTrades = this.slotKeys.reduce((count, slot) => {
       const originalPlayer = this.originalLineup[slot];
       const currentPlayer = this.slotMap[slot];
       return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
     }, 0);
-    return this.maxTrades - (this.confirmedTradesUsed + pendingTrades);
+    return this.remainingTrades - pendingTrades;
   }
 
   onSlotClick(slot: SlotKey): void {
-    if (this.lineupLocked) {
-      // Check if removing this player would exceed trade limit
+    // If deadline has passed, use trade system
+    if (this.deadlinePassed) {
       if (this.slotMap[slot] &&
         this.slotMap[slot] !== this.originalLineup[slot] &&
         this.effectiveRemainingTrades <= 0) {
-        alert('You have no trades remaining for this playoff season.');
+        alert('Sinulla ei ole enää vaihtoja jäljellä.');
         return;
       }
       if (this.slotMap[slot]) {
@@ -322,13 +336,19 @@ export class LineupPageComponent implements OnInit {
       }
       this.selectedSlot = slot;
     } else {
+      // Before deadline, allow free switches
       this.selectedSlot = this.selectedSlot === slot ? null : slot;
     }
   }
 
+  private formatPlayerForDisplay(player: Player | Goalie | null): string {
+    if (!player) return 'Empty slot';
+    return `${player.firstName} ${player.lastName} (${this.formatPrice(player.price)})`;
+  }
+
   assignPlayerToSlot(entity: Player | Goalie): void {
-    if (this.lineupLocked && this.effectiveRemainingTrades < 0) {
-      alert('You have no trades remaining for this playoff season.');
+    if (this.deadlinePassed && this.effectiveRemainingTrades <= 0) {
+      alert('Sinulla ei ole enää vaihtoja jäljellä.');
       return;
     }
 
@@ -348,9 +368,23 @@ export class LineupPageComponent implements OnInit {
     }
 
     if (this.selectedSlot) {
-      // Mark slot for pending trade if the new player is different from original
-      if (this.lineupLocked && entity !== this.originalLineup[this.selectedSlot]) {
-        this.pendingTradeSlots.add(this.selectedSlot);
+      const currentPlayer = this.slotMap[this.selectedSlot];
+
+      // If after deadline and making a change, show confirmation
+      if (this.deadlinePassed && currentPlayer && entity.id !== currentPlayer.id) {
+        const confirmed = confirm(
+          `Vahvista vaihto:\n\n` +
+          `${this.formatPlayerForDisplay(currentPlayer)} →\n` +
+          `${this.formatPlayerForDisplay(entity)}\n\n` +
+          `Sinulla on ${this.effectiveRemainingTrades} vaihtoa jäljellä.\n` +
+          `Haluatko jatkaa?`
+        );
+
+        if (!confirmed) return;
+
+        if (entity !== this.originalLineup[this.selectedSlot]) {
+          this.pendingTradeSlots.add(this.selectedSlot);
+        }
       }
 
       this.slotMap[this.selectedSlot] = entity;
@@ -418,9 +452,9 @@ export class LineupPageComponent implements OnInit {
   }
 
   clearLineup(): void {
-    // Don't allow clearing lineup after it's locked
-    if (this.lineupLocked) {
-      alert("Your lineup is locked. You can only make trades by replacing individual players.");
+    // Don't allow clearing lineup after deadline
+    if (this.deadlinePassed) {
+      alert("Lineup clearing is disabled after the deadline. You can only make trades by replacing individual players.");
       return;
     }
     this.slotKeys.forEach((key) => (this.slotMap[key] = null));
@@ -450,6 +484,32 @@ export class LineupPageComponent implements OnInit {
       return;
     }
 
+    // If after deadline, show confirmation for all trades
+    if (this.deadlinePassed) {
+      const trades = this.slotKeys
+        .filter(slot => {
+          const originalPlayer = this.originalLineup[slot];
+          const currentPlayer = this.slotMap[slot];
+          return originalPlayer?.id !== currentPlayer?.id;
+        })
+        .map(slot => {
+          const originalPlayer = this.originalLineup[slot];
+          const currentPlayer = this.slotMap[slot];
+          return `${this.formatPlayerForDisplay(originalPlayer)} → ${this.formatPlayerForDisplay(currentPlayer)}`;
+        });
+
+      if (trades.length > 0) {
+        const confirmed = confirm(
+          `Vahvista seuraavat vaihdot:\n\n${trades.join('\n')}\n\n` +
+          `Yhteensä ${trades.length} vaihto${trades.length > 1 ? 'a' : ''}.\n` +
+          `Sinulla on ${this.effectiveRemainingTrades} vaihtoa jäljellä tämän jälkeen.\n\n` +
+          `Haluatko jatkaa?`
+        );
+
+        if (!confirmed) return;
+      }
+    }
+
     const lineupPayload = Object.entries(this.slotMap).reduce(
       (acc, [slot, player]) => {
         acc[slot as SlotKey] = player ? player.id : null;
@@ -458,12 +518,13 @@ export class LineupPageComponent implements OnInit {
       {} as Record<SlotKey, number | null>
     );
 
-    // Calculate trades used if lineup is locked
-    const tradesUsed = this.lineupLocked ? this.slotKeys.reduce((count, slot) => {
-      const originalPlayer = this.originalLineup[slot];
-      const currentPlayer = this.slotMap[slot];
-      return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
-    }, 0) : 0;
+    // Only count trades after deadline
+    const tradesUsed = this.deadlinePassed ?
+      this.slotKeys.reduce((count, slot) => {
+        const originalPlayer = this.originalLineup[slot];
+        const currentPlayer = this.slotMap[slot];
+        return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
+      }, 0) : 0;
 
     this.http.post(`${environment.apiUrl}/lineup/save`, {
       user_id: user.id,
@@ -471,35 +532,25 @@ export class LineupPageComponent implements OnInit {
       tradesUsed: tradesUsed,
       unusedBudget: this.remainingBudget
     }).subscribe({
-      next: () => {
-        if (!this.lineupLocked) {
-          this.lineupLocked = true;
+      next: (res: any) => {
+        if (!this.deadlinePassed) {
           // Store the newly saved lineup as original
           Object.keys(this.slotMap).forEach(slot => {
             this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
           });
-          alert("✅ Lineup saved! Your lineup is now locked for the playoffs. You have 9 trades available.");
+          alert('✅ Kokoonpano tallennettu! Voit muokata sitä vapaasti deadlineen asti.');
         } else {
-          // Count trades used in this save
-          const tradesUsed = this.slotKeys.reduce((count, slot) => {
-            const originalPlayer = this.originalLineup[slot];
-            const currentPlayer = this.slotMap[slot];
-            return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
-          }, 0);
-
-          this.confirmedTradesUsed += tradesUsed;
-
-          // Update original lineup
+          // Update remaining trades and original lineup
+          this.remainingTrades -= tradesUsed;
           Object.keys(this.slotMap).forEach(slot => {
             this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
           });
-
-          alert(`✅ ${tradesUsed} trade${tradesUsed > 1 ? 's' : ''} completed! You have ${this.effectiveRemainingTrades} trades remaining.`);
+          alert(`✅ ${tradesUsed} vaihto${tradesUsed > 1 ? 'a' : ''} tehty! Sinulla on ${this.effectiveRemainingTrades} vaihtoa jäljellä.`);
         }
       },
       error: (err) => {
         console.error("Lineup save error:", err);
-        alert("❌ Failed to save lineup.");
+        alert("❌ Kentällisen tallennus epäonnistui.");
       },
     });
   }

@@ -6,7 +6,6 @@ import { LogoSelectionComponent } from '../logo-selection/logo-selection.compone
 import { Player } from '../models/player.model';
 import { environment } from "../../environments/environment";
 
-
 interface User {
   id: number;
   username: string;
@@ -14,17 +13,61 @@ interface User {
   logoUrl?: string;
 }
 
+interface BracketRound {
+  name: string;
+  correct: number;
+  avgCorrect: number;
+  bestCorrect: number;
+  points: number;
+  avgPoints: number;
+  bestPoints: number;
+}
+
+interface TeamInfo {
+  name: string;
+  logoUrl: string;
+  isActive: boolean;
+  odds?: string;
+}
+
+interface MatchupTeam {
+  name: string;
+  logoUrl: string;
+}
+
+interface KeyMatchup {
+  homeTeam: MatchupTeam;
+  awayTeam: MatchupTeam;
+  seriesStatus: string;
+  nextGame?: string;
+  yourPick: 'home' | 'away' | null;
+}
+
 interface BracketSummary {
+  rounds: BracketRound[];
+  totalCorrect: number;
+  avgTotalCorrect: number;
+  bestTotalCorrect: number;
+  avgTotalPoints: number;
+  bestTotalPoints: number;
   completed: number;
   total: number;
-  topPick?: string;
+}
+
+interface Trade {
+  playerOut: string;
+  playerIn: string;
+  positionOut: string;
+  positionIn: string;
+  date: string;
 }
 
 interface LineupSummary {
-  lineup: { [key: string]: number };  // Changed from LineupPlayer | null to number
+  lineup: { [key: string]: number };
   remainingTrades: number;
   unusedBudget: number;
   totalValue: number;
+  tradeHistory?: Trade[];
 }
 
 interface LineupPlayer {
@@ -36,10 +79,25 @@ interface LineupPlayer {
   price: number;
 }
 
+interface PredictionCategory {
+  name: string;
+  userPicks: string[];
+  currentTop3: string[];
+  correctPicks: number;
+}
+
+interface ConnSmythe {
+  player: string;
+  teamLogo: string;
+}
+
 interface PredictionsSummary {
   completed: number;
   totalToComplete: number;
   top3Picks: string[];
+  categories: PredictionCategory[];
+  connSmythe?: ConnSmythe;
+  totalCorrect: number;
 }
 
 @Component({
@@ -52,20 +110,68 @@ interface PredictionsSummary {
 export class UserDashboardComponent implements OnInit {
   user: User | null = null;
   userRank: number | null = null;
-  bracketSummary: BracketSummary = { completed: 0, total: 15 };
+  bracketSummary: BracketSummary = {
+    rounds: [
+      {
+        name: 'First Round',
+        correct: 6,
+        avgCorrect: 5.2,
+        bestCorrect: 8,
+        points: 12,
+        avgPoints: 10.4,
+        bestPoints: 16
+      },
+      {
+        name: 'Second Round',
+        correct: 2,
+        avgCorrect: 2.5,
+        bestCorrect: 4,
+        points: 8,
+        avgPoints: 10,
+        bestPoints: 16
+      },
+      {
+        name: 'Conference Finals',
+        correct: 1,
+        avgCorrect: 0.8,
+        bestCorrect: 2,
+        points: 10,
+        avgPoints: 8,
+        bestPoints: 20
+      },
+      {
+        name: 'Stanley Cup Final',
+        correct: 0,
+        avgCorrect: 0.3,
+        bestCorrect: 1,
+        points: 0,
+        avgPoints: 3,
+        bestPoints: 10
+      }
+    ],
+    totalCorrect: 9,
+    avgTotalCorrect: 8.8,
+    bestTotalCorrect: 15,
+    avgTotalPoints: 31.4,
+    bestTotalPoints: 62,
+    completed: 12,
+    total: 15
+  };
   lineupSummary: LineupSummary = {
     lineup: {},
     remainingTrades: 9,
-    unusedBudget: 5000000,
-    totalValue: 5000000
+    unusedBudget: 2000000,
+    totalValue: 2000000,
+    tradeHistory: []
   };
   predictionsSummary: PredictionsSummary = {
     completed: 0,
     totalToComplete: 3,
     top3Picks: [],
+    categories: [],
+    totalCorrect: 0
   };
 
-  // Mock point values (to be implemented fully later)
   points = {
     total: 0,
     bracket: 0,
@@ -73,7 +179,6 @@ export class UserDashboardComponent implements OnInit {
     predictions: 0
   };
 
-  // Logo selection modal control
   showLogoSelectionModal = false;
 
   private allPlayers: Player[] = [];
@@ -123,7 +228,6 @@ export class UserDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error("Failed to load user stats", err);
-        // Reset points to 0 if there's an error
         this.points = {
           total: 0,
           bracket: 0,
@@ -146,11 +250,52 @@ export class UserDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error("Failed to load bracket summary", err);
-        // Use mock data when API fails or isn't implemented yet
         this.bracketSummary = {
-          completed: 8,
-          total: 15,
-          topPick: "Colorado Avalanche"
+          rounds: [
+            {
+              name: 'Ensimmäinen kierros',
+              correct: 6,
+              avgCorrect: 5.2,
+              bestCorrect: 8,
+              points: 12,
+              avgPoints: 10.4,
+              bestPoints: 16
+            },
+            {
+              name: 'Toinen kierros',
+              correct: 2,
+              avgCorrect: 2.5,
+              bestCorrect: 4,
+              points: 8,
+              avgPoints: 10,
+              bestPoints: 16
+            },
+            {
+              name: 'Konferenssi finaalit',
+              correct: 1,
+              avgCorrect: 0.8,
+              bestCorrect: 2,
+              points: 10,
+              avgPoints: 8,
+              bestPoints: 20
+            },
+            {
+              name: 'Stanley Cup Finaali',
+              correct: 0,
+              avgCorrect: 0.3,
+              bestCorrect: 1,
+              points: 0,
+              avgPoints: 3,
+              bestPoints: 10
+            }
+          ],
+          totalCorrect: 9,
+          avgTotalCorrect: 8.8,
+          bestTotalCorrect: 15,
+          avgTotalPoints: 31.4,
+          bestTotalPoints: 62,
+          completed: 12,
+          total: 15
         };
       }
     });
@@ -166,8 +311,45 @@ export class UserDashboardComponent implements OnInit {
           this.lineupSummary = {
             lineup: data.lineup || {},
             remainingTrades: data.remainingTrades || 9,
-            unusedBudget: data.unusedBudget || 5000000,
-            totalValue: data.totalValue || 5000000
+            unusedBudget: data.unusedBudget || 2000000,
+            totalValue: data.totalValue || 2000000,
+            tradeHistory: [
+              {
+                playerOut: "Mikko Rantanen",
+                playerIn: "Nathan MacKinnon",
+                positionOut: "OL",
+                positionIn: "KH",
+                date: "15.4.2025"
+              },
+              {
+                playerOut: "Andrei Vasilevskiy",
+                playerIn: "Igor Shesterkin",
+                positionOut: "MV",
+                positionIn: "MV",
+                date: "17.4.2025"
+              },
+              {
+                playerOut: "Roman Josi",
+                playerIn: "Cale Makar",
+                positionOut: "VP",
+                positionIn: "VP",
+                date: "20.4.2025"
+              },
+              {
+                playerOut: "Brad Marchand",
+                playerIn: "Artemi Panarin",
+                positionOut: "VL",
+                positionIn: "VL",
+                date: "22.4.2025"
+              },
+              {
+                playerOut: "Victor Hedman",
+                playerIn: "Quinn Hughes",
+                positionOut: "VP",
+                positionIn: "VP",
+                date: "25.4.2025"
+              }
+            ]
           };
         }
       },
@@ -176,8 +358,45 @@ export class UserDashboardComponent implements OnInit {
         this.lineupSummary = {
           lineup: {},
           remainingTrades: 9,
-          unusedBudget: 5000000,
-          totalValue: 5000000
+          unusedBudget: 2000000,
+          totalValue: 2000000,
+          tradeHistory: [
+            {
+              playerOut: "Mikko Rantanen",
+              playerIn: "Nathan MacKinnon",
+              positionOut: "OL",
+              positionIn: "KH",
+              date: "15.4.2025"
+            },
+            {
+              playerOut: "Andrei Vasilevskiy",
+              playerIn: "Igor Shesterkin",
+              positionOut: "MV",
+              positionIn: "MV",
+              date: "17.4.2025"
+            },
+            {
+              playerOut: "Roman Josi",
+              playerIn: "Cale Makar",
+              positionOut: "VP",
+              positionIn: "VP",
+              date: "20.4.2025"
+            },
+            {
+              playerOut: "Brad Marchand",
+              playerIn: "Artemi Panarin",
+              positionOut: "VL",
+              positionIn: "VL",
+              date: "22.4.2025"
+            },
+            {
+              playerOut: "Victor Hedman",
+              playerIn: "Quinn Hughes",
+              positionOut: "VP",
+              positionIn: "VP",
+              date: "25.4.2025"
+            }
+          ]
         };
       }
     });
@@ -194,7 +413,6 @@ export class UserDashboardComponent implements OnInit {
           team: player.team_abbr,
           price: player.price,
           isU23: player.is_U23,
-          // ... other fields mapped as needed
         }));
       },
       error: (err) => {
@@ -216,18 +434,60 @@ export class UserDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error("Failed to load predictions summary", err);
-        // Use mock data when API fails or isn't implemented yet
         this.predictionsSummary = {
-          completed: 2,
-          totalToComplete: 3,
-          top3Picks: ["Nathan MacKinnon", "Connor McDavid"]
+          completed: 17,
+          totalToComplete: 21,
+          top3Picks: ["Nathan MacKinnon", "Connor McDavid", "Leon Draisaitl"],
+          categories: [
+            {
+              name: "Maalit",
+              userPicks: ["Auston Matthews", "Steven Stamkos", "David Pastrnak"],
+              currentTop3: ["Auston Matthews", "Sam Reinhart", "Zach Hyman"],
+              correctPicks: 1
+            },
+            {
+              name: "Syötöt",
+              userPicks: ["Connor McDavid", "Nikita Kucherov", "Leon Draisaitl"],
+              currentTop3: ["Nikita Kucherov", "Connor McDavid", "Nathan MacKinnon"],
+              correctPicks: 2
+            },
+            {
+              name: "Pisteet",
+              userPicks: ["Connor McDavid", "Nikita Kucherov", "Nathan MacKinnon"],
+              currentTop3: ["Nikita Kucherov", "Connor McDavid", "Nathan MacKinnon"],
+              correctPicks: 3
+            },
+            {
+              name: "Plus/Minus",
+              userPicks: ["Cale Makar", "Victor Hedman", "Charlie McAvoy"],
+              currentTop3: ["Cale Makar", "Devon Toews", "Mikko Rantanen"],
+              correctPicks: 1
+            },
+            {
+              name: "Torjuntaprosentti",
+              userPicks: ["Andrei Vasilevskiy", "Igor Shesterkin", "Jake Oettinger"],
+              currentTop3: ["Linus Ullmark", "Igor Shesterkin", "Jeremy Swayman"],
+              correctPicks: 1
+            },
+            {
+              name: "Voitot",
+              userPicks: ["Andrei Vasilevskiy", "Igor Shesterkin", "Sergei Bobrovsky"],
+              currentTop3: ["Andrei Vasilevskiy", "Frederik Andersen", "Jeremy Swayman"],
+              correctPicks: 1
+            }
+          ],
+          connSmythe: {
+            player: "Nathan MacKinnon",
+            teamLogo: "assets/team-logos/colorado.png"
+          },
+          totalCorrect: 9
         };
       }
     });
   }
 
   formatCurrency(value: number): string {
-    return "$" + value.toLocaleString();
+    return new Intl.NumberFormat('fi-FI', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
   }
 
   getProgressPercentage(completed: number, total: number): number {
@@ -244,7 +504,6 @@ export class UserDashboardComponent implements OnInit {
       .substring(0, 2);
   }
 
-  // Logo selection handling
   openLogoSelectionModal(): void {
     this.showLogoSelectionModal = true;
   }
@@ -256,8 +515,6 @@ export class UserDashboardComponent implements OnInit {
   handleLogoSelected(logoUrl: string): void {
     if (this.user) {
       this.user.logoUrl = logoUrl;
-      // Logo update is now handled by the event dispatch in the LogoSelectionComponent
-      // Other components will update automatically when they receive the event
     }
   }
 
@@ -275,7 +532,6 @@ export class UserDashboardComponent implements OnInit {
     } else if (position === "OP") {
       position = "RD"
     }
-
 
     if (!this.lineupSummary.lineup || !this.allPlayers.length) return null;
 
