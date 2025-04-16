@@ -443,10 +443,212 @@
   .dashboard-header {
     flex-direction: column;
     gap: 20px;
+    padding: 15px;
   }
 
   .points-summary {
     width: 100%;
+  }
+
+  .user-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .avatar-circle {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+
+  .user-info h1 {
+    font-size: 1.4rem;
+    margin-top: 10px;
+  }
+
+  .user-info h2 {
+    font-size: 1rem;
+  }
+
+  .points-breakdown {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .point-category {
+    min-width: 30%;
+    padding: 8px 5px;
+  }
+
+  .dashboard-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .card-content {
+    padding: 15px 10px;
+  }
+
+  .bracket-summary,
+  .lineup-details,
+  .stat-categories {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .round-stats-header {
+    display: none;
+  }
+
+  .round-row,
+  .round-stats-total {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 0.25rem;
+    padding: 12px 8px;
+  }
+
+  .round-name,
+  .total-label {
+    grid-column: 1 / span 2;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .round-metric:nth-child(2)::before {
+    content: "Sinun: ";
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .round-metric:nth-child(3)::before {
+    content: "Keskim.: ";
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .round-metric:nth-child(4)::before {
+    content: "Paras: ";
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .total-value:nth-child(2)::before {
+    content: "Sinun: ";
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .total-value:nth-child(3)::before {
+    content: "Keskim.: ";
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .total-value:nth-child(4)::before {
+    content: "Paras: ";
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  /* Improved table display for mobile */
+  .matchup-table {
+    font-size: 0.75rem;
+  }
+
+  .matchup-table th {
+    font-size: 0.65rem;
+    padding: 4px 2px;
+  }
+
+  .matchup-table td {
+    padding: 5px 2px;
+  }
+
+  .team-abbr {
+    font-size: 0.8rem;
+  }
+
+  /* Improve player grid display */
+  .player-slot {
+    flex-wrap: wrap;
+  }
+
+  .player-name {
+    width: 100%;
+    margin-top: 5px;
+    font-size: 0.9rem;
+  }
+
+  /* Improve trade history display */
+  .trade-item {
+    padding: 15px 8px 10px;
+  }
+
+  .trade-date {
+    top: -8px;
+  }
+
+  /* Better points display */
+  .points-value {
+    font-size: 2rem;
+  }
+
+  .category-points {
+    font-size: 1rem;
+  }
+
+  /* Improve predictions display */
+  .player-picks {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rounds-points {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .card-header {
+    padding: 10px;
+  }
+
+  .card-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .action-link {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .action-link,
+  .player-slot,
+  .card-header,
+  .trade-item {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+
+  .player-pick,
+  .budget-detail {
+    padding: 12px 8px;
+  }
+
+  .action-link:active {
+    background: #cc2222;
+    transform: scale(0.98);
   }
 }
 

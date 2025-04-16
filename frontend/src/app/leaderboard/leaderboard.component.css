@@ -533,4 +533,7 @@ tr.current-user td {
     height: 24px;
     font-size: 10px;
   }
+  .podium-team {
+    margin-bottom: -10px;
+  }
 }
