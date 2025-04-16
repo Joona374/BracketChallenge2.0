@@ -29,6 +29,13 @@
 
   <div class="navbar-right" [class.open]="menuOpen || !isMobileView">
     <ng-container *ngIf="isLoggedIn; else guestLinks">
+      <a
+        routerLink="/"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeDropdown()"
+        >Etusivu</a
+      >
       <!-- Dropdown menu for gameplay options -->
       <div class="dropdown" (clickOutside)="isDropdownOpen = false">
         <button class="dropdown-toggle" (click)="toggleDropdown()">

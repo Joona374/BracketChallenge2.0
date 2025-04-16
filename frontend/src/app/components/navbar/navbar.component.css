@@ -305,7 +305,7 @@
 }
 
 /* Mobile styles */
-@media (max-width: 999px) {
+@media (max-width: 1400px) {
   .hamburger {
     display: block;
   }
@@ -330,7 +330,7 @@
 }
 
 /* Mobile View Dropdown Adjustments */
-@media (max-width: 1000px) {
+@media (max-width: 1400px) {
   .dropdown-menu {
     position: static;
     background-color: rgba(0, 0, 0, 0.2);

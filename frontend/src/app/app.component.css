@@ -25,6 +25,12 @@ app-news-reel {
   z-index: 800; /* Lower than navbar */
 }
 
+@media (max-width: 580px) {
+  app-news-reel {
+    top: 50px; /* Adjust for mobile navbar height */
+  }
+}
+
 /* Update navbar dropdown if needed */
 app-navbar .dropdown-menu {
   position: absolute;

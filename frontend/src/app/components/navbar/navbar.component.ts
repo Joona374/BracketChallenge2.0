@@ -111,7 +111,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   checkViewport() {
-    this.isMobileView = window.innerWidth < 1000;
+    this.isMobileView = window.innerWidth < 1400;
     if (!this.isMobileView) this.menuOpen = false;
   }
 

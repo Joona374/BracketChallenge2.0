@@ -1,4 +1,4 @@
-<h2 style="gap: 8px">
+<h2 style="gap: 8px" class="title-container">
   NHL Bracket Challenge 2025
   <app-tooltip
     [text]="
@@ -13,46 +13,173 @@
   umpeutunut (20.4.2025 00:00)
 </div>
 
-<div class="bracket-grid-7">
-  <!-- Column 1: West R1 -->
-  <div class="column-container">
-    <h4>Länsi 1. Kierros</h4>
-    <div class="column">
-      <div *ngFor="let m of matchups.west" class="matchup">
-        <div class="teams-and-games west">
-          <div class="game-control" *ngIf="userPicks.round1[m.matchupCode]">
-            <button
-              class="plus-button"
-              (click)="increaseGames('round1', m.matchupCode)"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-            <div>{{ getGames("round1", m.matchupCode) }}</div>
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round1', m.matchupCode)"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-          </div>
-          <div class="teams">
-            <div
-              class="team"
-              [class]="getTeamClass(m.matchupCode, m.team1)"
-              [class.disabled]="!isTeamSelectable(m.team1) || deadlinePassed"
-              (click)="pickWinner(m.matchupCode, m.team1)"
-            >
-              {{ m.team1 || "\u00A0" }}
+<!-- Mobile view selector -->
+<div class="view-selector-mobile">
+  <button
+    class="view-button"
+    (click)="setActiveBracketSection('west')"
+    [class.active]="activeBracketSection === 'west'"
+  >
+    Western Conference
+  </button>
+  <button
+    class="view-button"
+    (click)="setActiveBracketSection('cup')"
+    [class.active]="activeBracketSection === 'cup'"
+  >
+    Stanley Cup
+  </button>
+  <button
+    class="view-button"
+    (click)="setActiveBracketSection('east')"
+    [class.active]="activeBracketSection === 'east'"
+  >
+    Eastern Conference
+  </button>
+</div>
+
+<div class="bracket-grid-7" [class.mobile-view]="isMobileView">
+  <!-- West Conference Section -->
+  <div
+    class="conference-section west-section"
+    [class.active]="
+      (isMobileView && activeBracketSection === 'west') || !isMobileView
+    "
+  >
+    <div class="west-bracket">
+      <!-- Column 1: West R1 -->
+      <div class="column-container">
+        <h4>Länsi 1. Kierros</h4>
+        <div class="column">
+          <div *ngFor="let m of matchups.west" class="matchup">
+            <div class="teams-and-games west">
+              <div class="game-control" *ngIf="userPicks.round1[m.matchupCode]">
+                <button
+                  class="plus-button"
+                  (click)="increaseGames('round1', m.matchupCode)"
+                  [disabled]="deadlinePassed"
+                >
+                  +
+                </button>
+                <div>{{ getGames("round1", m.matchupCode) }}</div>
+                <button
+                  class="minus-button"
+                  (click)="decreaseGames('round1', m.matchupCode)"
+                  [disabled]="deadlinePassed"
+                >
+                  –
+                </button>
+              </div>
+              <div class="teams">
+                <div
+                  class="team"
+                  [class]="getTeamClass(m.matchupCode, m.team1)"
+                  [class.disabled]="
+                    !isTeamSelectable(m.team1) || deadlinePassed
+                  "
+                  (click)="pickWinner(m.matchupCode, m.team1)"
+                >
+                  {{ m.team1 || "\u00A0" }}
+                </div>
+                <div
+                  class="team"
+                  [class]="getTeamClass(m.matchupCode, m.team2)"
+                  [class.disabled]="
+                    !isTeamSelectable(m.team2) || deadlinePassed
+                  "
+                  (click)="pickWinner(m.matchupCode, m.team2)"
+                >
+                  {{ m.team2 || "\u00A0" }}
+                </div>
+              </div>
             </div>
-            <div
-              class="team"
-              [class]="getTeamClass(m.matchupCode, m.team2)"
-              [class.disabled]="!isTeamSelectable(m.team2) || deadlinePassed"
-              (click)="pickWinner(m.matchupCode, m.team2)"
-            >
-              {{ m.team2 || "\u00A0" }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: West R2 -->
+      <div class="column-container">
+        <h4>Länsi Div Finaalit</h4>
+        <div class="column">
+          <div *ngFor="let key of ['w-semi', 'w-semi2']" class="matchup">
+            <div class="teams-and-games west">
+              <div
+                class="game-control"
+                *ngIf="userPicks.round2[key + '-winner']"
+              >
+                <button
+                  class="plus-button"
+                  (click)="increaseGames('round2', key)"
+                  [disabled]="deadlinePassed"
+                >
+                  +
+                </button>
+                <div>{{ getGames("round2", key) }}</div>
+
+                <button
+                  class="minus-button"
+                  (click)="decreaseGames('round2', key)"
+                  [disabled]="deadlinePassed"
+                >
+                  –
+                </button>
+              </div>
+              <div class="teams">
+                <div
+                  class="team"
+                  *ngFor="let team of getTeamArray('round2', key)"
+                  [class]="getTeamClass(key, team)"
+                  [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
+                  (click)="isTeamSelectable(team) && pickWinner(key, team)"
+                >
+                  {{ team || "\u00A0" }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3: West Final -->
+      <div class="column-container">
+        <h4>Länsi Konf Finaali</h4>
+        <div class="column">
+          <div class="matchup">
+            <div class="teams-and-games west">
+              <div
+                class="game-control"
+                *ngIf="userPicks.round3['west-final-winner']"
+              >
+                <button
+                  class="plus-button"
+                  (click)="increaseGames('round3', 'west-final')"
+                  [disabled]="deadlinePassed"
+                >
+                  +
+                </button>
+                <div>{{ getGames("round3", "west-final") }}</div>
+
+                <button
+                  class="minus-button"
+                  (click)="decreaseGames('round3', 'west-final')"
+                  [disabled]="deadlinePassed"
+                >
+                  –
+                </button>
+              </div>
+              <div class="teams">
+                <div
+                  class="team"
+                  *ngFor="let team of getTeamArray('round3', 'west-final')"
+                  [class]="getTeamClass('west-final', team)"
+                  [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
+                  (click)="
+                    isTeamSelectable(team) && pickWinner('west-final', team)
+                  "
+                >
+                  {{ team || "\u00A0" }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -60,39 +187,65 @@
     </div>
   </div>
 
-  <!-- Column 2: West R2 -->
-  <div class="column-container">
-    <h4>Länsi Div Finaalit</h4>
-    <div class="column">
-      <div *ngFor="let key of ['w-semi', 'w-semi2']" class="matchup">
-        <div class="teams-and-games west">
-          <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
-            <button
-              class="plus-button"
-              (click)="increaseGames('round2', key)"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-            <div>{{ getGames("round2", key) }}</div>
+  <!-- Cup Section -->
+  <div
+    class="conference-section cup-section"
+    [class.active]="
+      (isMobileView && activeBracketSection === 'cup') || !isMobileView
+    "
+  >
+    <!-- Column 4: Stanley Cup Final -->
+    <div class="column-container">
+      <h4>Stanley Cup Finaali</h4>
+      <div class="column">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Stanley_Cup_no_background.png"
+          alt="Stanley Cup"
+          class="cup-image"
+        />
+        <div class="matchup">
+          <div class="teams-and-games cup-final">
+            <!-- Teams -->
+            <div class="teams">
+              <div
+                class="team"
+                *ngFor="let team of getTeamArray('final', 'cup')"
+                [class]="getTeamClass('cup', team)"
+                [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
+                (click)="isTeamSelectable(team) && pickWinner('cup', team)"
+              >
+                {{ team || "\u00A0" }}
+              </div>
+            </div>
 
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round2', key)"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-          </div>
-          <div class="teams">
+            <!-- Game controls -->
             <div
-              class="team"
-              *ngFor="let team of getTeamArray('round2', key)"
-              [class]="getTeamClass(key, team)"
-              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
-              (click)="isTeamSelectable(team) && pickWinner(key, team)"
+              class="game-control final-control"
+              *ngIf="userPicks.final['cup-winner']"
             >
-              {{ team || "\u00A0" }}
+              <button
+                class="minus-button"
+                (click)="decreaseGames('final', 'cup')"
+                [disabled]="deadlinePassed"
+              >
+                –
+              </button>
+              <div>{{ getGames("final", "cup") }}</div>
+              <button
+                class="plus-button"
+                (click)="increaseGames('final', 'cup')"
+                [disabled]="deadlinePassed"
+              >
+                +
+              </button>
+            </div>
+
+            <!-- Champion label -->
+            <div class="champion-label" *ngIf="userPicks.final['cup-winner']">
+              <div>🏆 CHAMPION:</div>
+              <div class="champion-name">
+                {{ userPicks.final["cup-winner"] }}
+              </div>
             </div>
           </div>
         </div>
@@ -100,231 +253,147 @@
     </div>
   </div>
 
-  <!-- Column 3: West Final -->
-  <div class="column-container">
-    <h4>Länsi Konf Finaali</h4>
-    <div class="column">
-      <div class="matchup">
-        <div class="teams-and-games west">
-          <div
-            class="game-control"
-            *ngIf="userPicks.round3['west-final-winner']"
-          >
-            <button
-              class="plus-button"
-              (click)="increaseGames('round3', 'west-final')"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-            <div>{{ getGames("round3", "west-final") }}</div>
+  <!-- East Conference Section -->
+  <div
+    class="conference-section east-section"
+    [class.active]="
+      (isMobileView && activeBracketSection === 'east') || !isMobileView
+    "
+  >
+    <div class="east-bracket">
+      <!-- Column 5: East Final -->
+      <div class="column-container">
+        <h4>Itä Konf Finaali</h4>
+        <div class="column">
+          <div class="matchup">
+            <div class="teams-and-games east">
+              <div
+                class="game-control"
+                *ngIf="userPicks.round3['east-final-winner']"
+              >
+                <button
+                  class="plus-button"
+                  (click)="increaseGames('round3', 'east-final')"
+                  [disabled]="deadlinePassed"
+                >
+                  +
+                </button>
+                <div>{{ getGames("round3", "east-final") }}</div>
 
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round3', 'west-final')"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-          </div>
-          <div class="teams">
-            <div
-              class="team"
-              *ngFor="let team of getTeamArray('round3', 'west-final')"
-              [class]="getTeamClass('west-final', team)"
-              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
-              (click)="isTeamSelectable(team) && pickWinner('west-final', team)"
-            >
-              {{ team || "\u00A0" }}
+                <button
+                  class="minus-button"
+                  (click)="decreaseGames('round3', 'east-final')"
+                  [disabled]="deadlinePassed"
+                >
+                  –
+                </button>
+              </div>
+              <div class="teams">
+                <div
+                  class="team"
+                  *ngFor="let team of getTeamArray('round3', 'east-final')"
+                  [class]="getTeamClass('east-final', team)"
+                  [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
+                  (click)="
+                    isTeamSelectable(team) && pickWinner('east-final', team)
+                  "
+                >
+                  {{ team || "\u00A0" }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Column 4: Stanley Cup Final -->
-  <div class="column-container">
-    <h4>Stanley Cup Finaali</h4>
-    <div class="column">
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Stanley_Cup_no_background.png"
-        alt="Stanley Cup"
-        class="cup-image"
-      />
-      <div class="matchup">
-        <div class="teams-and-games cup-final">
-          <!-- Trophy image -->
+      <!-- Column 6: East R2 -->
+      <div class="column-container">
+        <h4>Itä Div Finaali</h4>
+        <div class="column">
+          <div *ngFor="let key of ['e-semi', 'e-semi2']" class="matchup">
+            <div class="teams-and-games east">
+              <div
+                class="game-control"
+                *ngIf="userPicks.round2[key + '-winner']"
+              >
+                <button
+                  class="plus-button"
+                  (click)="increaseGames('round2', key)"
+                  [disabled]="deadlinePassed"
+                >
+                  +
+                </button>
+                <div>{{ getGames("round2", key) }}</div>
 
-          <!-- Teams -->
-          <div class="teams">
-            <div
-              class="team"
-              *ngFor="let team of getTeamArray('final', 'cup')"
-              [class]="getTeamClass('cup', team)"
-              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
-              (click)="isTeamSelectable(team) && pickWinner('cup', team)"
-            >
-              {{ team || "\u00A0" }}
-            </div>
-          </div>
-
-          <!-- Game controls -->
-          <div
-            class="game-control final-control"
-            *ngIf="userPicks.final['cup-winner']"
-          >
-            <button
-              class="minus-button"
-              (click)="decreaseGames('final', 'cup')"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-            <div>{{ getGames("final", "cup") }}</div>
-            <button
-              class="plus-button"
-              (click)="increaseGames('final', 'cup')"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-          </div>
-
-          <!-- Champion label -->
-          <div class="champion-label" *ngIf="userPicks.final['cup-winner']">
-            <div>🏆 CHAMPION:</div>
-            <div class="champion-name">
-              {{ userPicks.final["cup-winner"] }}
+                <button
+                  class="minus-button"
+                  (click)="decreaseGames('round2', key)"
+                  [disabled]="deadlinePassed"
+                >
+                  –
+                </button>
+              </div>
+              <div class="teams">
+                <div
+                  class="team"
+                  *ngFor="let team of getTeamArray('round2', key)"
+                  [class]="getTeamClass(key, team)"
+                  [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
+                  (click)="isTeamSelectable(team) && pickWinner(key, team)"
+                >
+                  {{ team || "\u00A0" }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Column 5: East Final -->
-  <div class="column-container">
-    <h4>Itä Konf Finaali</h4>
-    <div class="column">
-      <div class="matchup">
-        <div class="teams-and-games east">
-          <div
-            class="game-control"
-            *ngIf="userPicks.round3['east-final-winner']"
-          >
-            <button
-              class="plus-button"
-              (click)="increaseGames('round3', 'east-final')"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-            <div>{{ getGames("round3", "east-final") }}</div>
-
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round3', 'east-final')"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-          </div>
-          <div class="teams">
-            <div
-              class="team"
-              *ngFor="let team of getTeamArray('round3', 'east-final')"
-              [class]="getTeamClass('east-final', team)"
-              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
-              (click)="isTeamSelectable(team) && pickWinner('east-final', team)"
-            >
-              {{ team || "\u00A0" }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Column 6: East R2 -->
-  <div class="column-container">
-    <h4>Itä Div Finaali</h4>
-    <div class="column">
-      <div *ngFor="let key of ['e-semi', 'e-semi2']" class="matchup">
-        <div class="teams-and-games east">
-          <div class="game-control" *ngIf="userPicks.round2[key + '-winner']">
-            <button
-              class="plus-button"
-              (click)="increaseGames('round2', key)"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-            <div>{{ getGames("round2", key) }}</div>
-
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round2', key)"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-          </div>
-          <div class="teams">
-            <div
-              class="team"
-              *ngFor="let team of getTeamArray('round2', key)"
-              [class]="getTeamClass(key, team)"
-              [class.disabled]="!isTeamSelectable(team) || deadlinePassed"
-              (click)="isTeamSelectable(team) && pickWinner(key, team)"
-            >
-              {{ team || "\u00A0" }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Column 7: East R1 -->
-  <div class="column-container">
-    <h4>Itä 1. Kierros</h4>
-    <div class="column">
-      <div *ngFor="let m of matchups.east" class="matchup">
-        <div class="teams-and-games east">
-          <div class="game-control" *ngIf="userPicks.round1[m.matchupCode]">
-            <button
-              class="plus-button"
-              (click)="increaseGames('round1', m.matchupCode)"
-              [disabled]="deadlinePassed"
-            >
-              +
-            </button>
-            <div>{{ getGames("round1", m.matchupCode) }}</div>
-            <button
-              class="minus-button"
-              (click)="decreaseGames('round1', m.matchupCode)"
-              [disabled]="deadlinePassed"
-            >
-              –
-            </button>
-          </div>
-          <div class="teams">
-            <div
-              class="team"
-              [class]="getTeamClass(m.matchupCode, m.team1)"
-              [class.disabled]="!isTeamSelectable(m.team1) || deadlinePassed"
-              (click)="pickWinner(m.matchupCode, m.team1)"
-            >
-              {{ m.team1 || "\u00A0" }}
-            </div>
-            <div
-              class="team"
-              [class]="getTeamClass(m.matchupCode, m.team2)"
-              [class.disabled]="!isTeamSelectable(m.team2) || deadlinePassed"
-              (click)="pickWinner(m.matchupCode, m.team2)"
-            >
-              {{ m.team2 || "\u00A0" }}
+      <!-- Column 7: East R1 -->
+      <div class="column-container">
+        <h4>Itä 1. Kierros</h4>
+        <div class="column">
+          <div *ngFor="let m of matchups.east" class="matchup">
+            <div class="teams-and-games east">
+              <div class="game-control" *ngIf="userPicks.round1[m.matchupCode]">
+                <button
+                  class="plus-button"
+                  (click)="increaseGames('round1', m.matchupCode)"
+                  [disabled]="deadlinePassed"
+                >
+                  +
+                </button>
+                <div>{{ getGames("round1", m.matchupCode) }}</div>
+                <button
+                  class="minus-button"
+                  (click)="decreaseGames('round1', m.matchupCode)"
+                  [disabled]="deadlinePassed"
+                >
+                  –
+                </button>
+              </div>
+              <div class="teams">
+                <div
+                  class="team"
+                  [class]="getTeamClass(m.matchupCode, m.team1)"
+                  [class.disabled]="
+                    !isTeamSelectable(m.team1) || deadlinePassed
+                  "
+                  (click)="pickWinner(m.matchupCode, m.team1)"
+                >
+                  {{ m.team1 || "\u00A0" }}
+                </div>
+                <div
+                  class="team"
+                  [class]="getTeamClass(m.matchupCode, m.team2)"
+                  [class.disabled]="
+                    !isTeamSelectable(m.team2) || deadlinePassed
+                  "
+                  (click)="pickWinner(m.matchupCode, m.team2)"
+                >
+                  {{ m.team2 || "\u00A0" }}
+                </div>
+              </div>
             </div>
           </div>
         </div>

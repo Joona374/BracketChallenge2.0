@@ -2,6 +2,8 @@
   font-family: "Montserrat", "Arial", sans-serif;
   color: #fff;
   min-height: 100vh;
+  box-sizing: border-box;
+  padding-top: 0; /* Remove any top padding to accommodate fixed navbar */
 }
 
 .hero-section {
@@ -40,7 +42,6 @@
   padding: 0 20px;
 }
 
-/* Remove the old logo container styles that are no longer needed */
 .logo-container {
   display: none;
 }
@@ -102,7 +103,6 @@
   overflow: hidden;
 }
 
-/* Remove the before/after elements as the logo will replace them */
 .puck::before,
 .puck::after {
   display: none;
@@ -154,7 +154,7 @@
   margin-right: 15px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden; /* Add this to contain the image */
+  overflow: hidden;
 }
 
 .avatar-circle:hover {
@@ -332,7 +332,6 @@
   color: #777;
 }
 
-/* Scroll indicator in the bottom right corner instead of center */
 .scroll-indicator {
   position: absolute;
   bottom: 20px;
@@ -348,7 +347,7 @@
   align-items: center;
   box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
   border: 1px solid rgba(255, 50, 50, 0.3);
-  z-index: 1000; /* Ensure it's above other elements */
+  z-index: 1000;
 }
 
 .scroll-indicator .scroll-text {
@@ -363,7 +362,6 @@
   font-size: 1.2rem;
 }
 
-/* Separated the animation to apply only to the arrow */
 .arrow-down {
   animation: bounce 2s infinite;
 }
@@ -421,20 +419,117 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1400px) {
   .main-title {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
   }
 
   .season {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+  }
+
+  .tagline {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+
+  .puck {
+    width: 100px;
+    height: 100px;
   }
 
   .user-card {
     flex-direction: column;
   }
 
+  .action-button {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+
+  .welcome-panel {
+    width: 90%;
+    max-width: 450px;
+    margin: 15px auto;
+  }
+
+  .auth-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .features-section {
+    padding: 40px 15px;
+    gap: 20px;
+  }
+
+  .feature {
+    min-width: 100%;
+    padding: 20px 15px;
+  }
+
+  .hero-section {
+    height: auto;
+    padding: 60px 0;
+    min-height: 450px;
+  }
+
+  .content {
+    width: 90%;
+  }
+
+  .scroll-indicator {
+    bottom: 10px;
+    right: 10px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 760px) {
   .user-info {
     text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 1.6rem;
+  }
+
+  .season {
+    font-size: 1rem;
+    margin: 5px 0 15px;
+  }
+
+  .tagline {
+    font-size: 1rem;
+  }
+
+  .puck {
+    width: 80px;
+    height: 80px;
+    margin: 0 10px;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+
+  .user-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .user-actions .action-button {
+    width: 100%;
+  }
+
+  .welcome-message {
+    font-size: 1rem;
   }
 }

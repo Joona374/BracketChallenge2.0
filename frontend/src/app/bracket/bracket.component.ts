@@ -1,5 +1,5 @@
 // bracket.component.ts
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, HostListener } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -27,6 +27,8 @@ export class BracketComponent implements OnInit {
   matchups: Matchups = { west: [], east: [] };
   deadlinePassed: boolean = false;
   timeRemaining: string = "";
+  isMobileView: boolean = false;
+  activeBracketSection: 'west' | 'cup' | 'east' = 'west';
 
   userPicks: {
     round1: { [key: string]: string };
@@ -72,6 +74,11 @@ export class BracketComponent implements OnInit {
 
   constructor(private http: HttpClient, private deadlineService: DeadlineService) { }
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.isMobileView = window.innerWidth <= 768;
+  }
+
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
 
@@ -79,6 +86,8 @@ export class BracketComponent implements OnInit {
       window.location.href = "/";
       return;
     }
+
+    this.isMobileView = window.innerWidth <= 768;
 
     // Check deadline status
     this.deadlineService.isDeadlinePassed().subscribe({
@@ -485,5 +494,9 @@ export class BracketComponent implements OnInit {
     const value = roundData[key];
 
     return Array.isArray(value) ? value : [];
+  }
+
+  setActiveBracketSection(section: 'west' | 'cup' | 'east') {
+    this.activeBracketSection = section;
   }
 }
