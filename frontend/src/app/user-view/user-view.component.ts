@@ -212,12 +212,11 @@ export class UserViewComponent implements OnInit {
   }
 
   getLineupPoints(): number {
-    console.log("User points: ", this.userPoints.lineup);
+
     return this.userPoints.lineup;
   }
 
   getPredictionsPoints(): number {
-    console.log("Prediction points: ", this.userPoints.predictions);
     return this.userPoints.predictions;
   }
 

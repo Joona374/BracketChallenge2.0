@@ -81,7 +81,7 @@ export class NewsReelComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private fetchHeadlines() {
-    console.log("Fetching headlines from API...");
+
     return this.http.get<Headline[]>(`${environment.apiUrl}/headlines`);
   }
 
@@ -141,7 +141,7 @@ export class NewsReelComponent implements OnInit, OnDestroy, AfterViewInit {
       `${durationInSeconds}s`
     );
 
-    console.log(`News reel: ${trackWidth}px wide, ${durationInSeconds}s duration at ${this.scrollSpeed}px/s`);
+
   }
 
   formatTimestamp(timestamp: string): string {
