@@ -43,6 +43,21 @@ interface KeyMatchup {
   yourPick: 'home' | 'away' | null;
 }
 
+interface MatchupComparison {
+  matchupTitle?: string; // Now optional since we're not displaying it
+  userPickedTeam: string;
+  actualWinner: string;
+  userPickedGames: number;
+  actualGames: number;
+  userCorrect: boolean;
+  gamesCorrect: boolean;
+}
+
+interface RoundMatchups {
+  name: string;
+  matchups: MatchupComparison[];
+}
+
 interface BracketSummary {
   rounds: BracketRound[];
   totalCorrect: number;
@@ -52,6 +67,7 @@ interface BracketSummary {
   bestTotalPoints: number;
   completed: number;
   total: number;
+  roundMatchups: RoundMatchups[];
 }
 
 interface Trade {
@@ -60,6 +76,8 @@ interface Trade {
   positionOut: string;
   positionIn: string;
   date: string;
+  playerOutId?: number; // Added for direct player ID reference
+  playerInId?: number;  // Added for direct player ID reference
 }
 
 interface LineupSummary {
@@ -81,8 +99,8 @@ interface LineupPlayer {
 
 interface PredictionCategory {
   name: string;
-  userPicks: string[];
-  currentTop3: string[];
+  userPicks: Player[];
+  currentTop3: Player[];
   correctPicks: number;
 }
 
@@ -155,13 +173,155 @@ export class UserDashboardComponent implements OnInit {
     avgTotalPoints: 31.4,
     bestTotalPoints: 62,
     completed: 12,
-    total: 15
+    total: 15,
+    roundMatchups: [
+      {
+        name: 'Ensimmäinen kierros',
+        matchups: [
+          {
+            userPickedTeam: "BOS",
+            actualWinner: "BOS",
+            userPickedGames: 6,
+            actualGames: 7,
+            userCorrect: true,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "FLA",
+            actualWinner: "FLA",
+            userPickedGames: 5,
+            actualGames: 5,
+            userCorrect: true,
+            gamesCorrect: true
+          },
+          {
+            userPickedTeam: "NYR",
+            actualWinner: "NYR",
+            userPickedGames: 4,
+            actualGames: 5,
+            userCorrect: true,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "CAR",
+            actualWinner: "CAR",
+            userPickedGames: 6,
+            actualGames: 6,
+            userCorrect: true,
+            gamesCorrect: true
+          },
+          {
+            userPickedTeam: "DAL",
+            actualWinner: "VGK",
+            userPickedGames: 7,
+            actualGames: 6,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "COL",
+            actualWinner: "COL",
+            userPickedGames: 6,
+            actualGames: 5,
+            userCorrect: true,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "EDM",
+            actualWinner: "EDM",
+            userPickedGames: 5,
+            actualGames: 5,
+            userCorrect: true,
+            gamesCorrect: true
+          },
+          {
+            userPickedTeam: "VAN",
+            actualWinner: "VAN",
+            userPickedGames: 7,
+            actualGames: 5,
+            userCorrect: true,
+            gamesCorrect: false
+          }
+        ]
+      },
+      {
+        name: 'Toinen kierros',
+        matchups: [
+          {
+            userPickedTeam: "BOS",
+            actualWinner: "FLA",
+            userPickedGames: 7,
+            actualGames: 7,
+            userCorrect: false,
+            gamesCorrect: true
+          },
+          {
+            userPickedTeam: "CAR",
+            actualWinner: "NYR",
+            userPickedGames: 6,
+            actualGames: 6,
+            userCorrect: false,
+            gamesCorrect: true
+          },
+          {
+            userPickedTeam: "COL",
+            actualWinner: "COL",
+            userPickedGames: 7,
+            actualGames: 6,
+            userCorrect: true,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "EDM",
+            actualWinner: "EDM",
+            userPickedGames: 6,
+            actualGames: 6,
+            userCorrect: true,
+            gamesCorrect: true
+          }
+        ]
+      },
+      {
+        name: 'Konferenssifinaalit',
+        matchups: [
+          {
+            userPickedTeam: "NYR",
+            actualWinner: "FLA",
+            userPickedGames: 7,
+            actualGames: 6,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "COL",
+            actualWinner: "EDM",
+            userPickedGames: 7,
+            actualGames: 6,
+            userCorrect: false,
+            gamesCorrect: false
+          }
+        ]
+      },
+      {
+        name: 'Stanley Cup Finaali',
+        matchups: [
+          {
+            userPickedTeam: "EDM",
+            actualWinner: "Kesken",
+            userPickedGames: 6,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          }
+        ]
+      }
+    ]
   };
   lineupSummary: LineupSummary = {
     lineup: {},
     remainingTrades: 9,
     unusedBudget: 2000000,
-    totalValue: 2000000,
+    totalValue: 0,
     tradeHistory: []
   };
   predictionsSummary: PredictionsSummary = {
@@ -176,7 +336,11 @@ export class UserDashboardComponent implements OnInit {
     total: 0,
     bracket: 0,
     lineup: 0,
-    predictions: 0
+    predictions: 0,
+    predictionsR1: 0,
+    predictionsR2: 0,
+    predictionsR3: 0,
+    predictionsFinal: 0
   };
 
   showLogoSelectionModal = false;
@@ -217,11 +381,16 @@ export class UserDashboardComponent implements OnInit {
         if (data) {
           this.userRank = data.rank;
           if (data.points) {
+            console.log("User points data:", data.points);
             this.points = {
               total: data.points.total || 0,
               bracket: data.points.bracket || 0,
               lineup: data.points.lineup || 0,
-              predictions: data.points.predictions || 0
+              predictions: data.points.predictions || 0,
+              predictionsR1: data.points.predictionsR1 || 0,
+              predictionsR2: data.points.predictionsR2 || 0,
+              predictionsR3: data.points.predictionsR3 || 0,
+              predictionsFinal: data.points.predictionsFinal || 0
             };
           }
         }
@@ -232,7 +401,11 @@ export class UserDashboardComponent implements OnInit {
           total: 0,
           bracket: 0,
           lineup: 0,
-          predictions: 0
+          predictions: 0,
+          predictionsR1: 0,
+          predictionsR2: 0,
+          predictionsR3: 0,
+          predictionsFinal: 0
         };
       }
     });
@@ -295,7 +468,149 @@ export class UserDashboardComponent implements OnInit {
           avgTotalPoints: 31.4,
           bestTotalPoints: 62,
           completed: 12,
-          total: 15
+          total: 15,
+          roundMatchups: [
+            {
+              name: 'Ensimmäinen kierros',
+              matchups: [
+                {
+                  userPickedTeam: "BOS",
+                  actualWinner: "BOS",
+                  userPickedGames: 6,
+                  actualGames: 7,
+                  userCorrect: true,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "FLA",
+                  actualWinner: "FLA",
+                  userPickedGames: 5,
+                  actualGames: 5,
+                  userCorrect: true,
+                  gamesCorrect: true
+                },
+                {
+                  userPickedTeam: "NYR",
+                  actualWinner: "NYR",
+                  userPickedGames: 4,
+                  actualGames: 5,
+                  userCorrect: true,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "CAR",
+                  actualWinner: "CAR",
+                  userPickedGames: 6,
+                  actualGames: 6,
+                  userCorrect: true,
+                  gamesCorrect: true
+                },
+                {
+                  userPickedTeam: "DAL",
+                  actualWinner: "VGK",
+                  userPickedGames: 7,
+                  actualGames: 6,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "COL",
+                  actualWinner: "COL",
+                  userPickedGames: 6,
+                  actualGames: 5,
+                  userCorrect: true,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "EDM",
+                  actualWinner: "EDM",
+                  userPickedGames: 5,
+                  actualGames: 5,
+                  userCorrect: true,
+                  gamesCorrect: true
+                },
+                {
+                  userPickedTeam: "VAN",
+                  actualWinner: "VAN",
+                  userPickedGames: 7,
+                  actualGames: 5,
+                  userCorrect: true,
+                  gamesCorrect: false
+                }
+              ]
+            },
+            {
+              name: 'Toinen kierros',
+              matchups: [
+                {
+                  userPickedTeam: "BOS",
+                  actualWinner: "FLA",
+                  userPickedGames: 7,
+                  actualGames: 7,
+                  userCorrect: false,
+                  gamesCorrect: true
+                },
+                {
+                  userPickedTeam: "CAR",
+                  actualWinner: "NYR",
+                  userPickedGames: 6,
+                  actualGames: 6,
+                  userCorrect: false,
+                  gamesCorrect: true
+                },
+                {
+                  userPickedTeam: "COL",
+                  actualWinner: "COL",
+                  userPickedGames: 7,
+                  actualGames: 6,
+                  userCorrect: true,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "EDM",
+                  actualWinner: "EDM",
+                  userPickedGames: 6,
+                  actualGames: 6,
+                  userCorrect: true,
+                  gamesCorrect: true
+                }
+              ]
+            },
+            {
+              name: 'Konferenssifinaalit',
+              matchups: [
+                {
+                  userPickedTeam: "NYR",
+                  actualWinner: "FLA",
+                  userPickedGames: 7,
+                  actualGames: 6,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "COL",
+                  actualWinner: "EDM",
+                  userPickedGames: 7,
+                  actualGames: 6,
+                  userCorrect: false,
+                  gamesCorrect: false
+                }
+              ]
+            },
+            {
+              name: 'Stanley Cup Finaali',
+              matchups: [
+                {
+                  userPickedTeam: "EDM",
+                  actualWinner: "Kesken",
+                  userPickedGames: 6,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                }
+              ]
+            }
+          ]
         };
       }
     });
@@ -305,52 +620,32 @@ export class UserDashboardComponent implements OnInit {
     const userId = this.user?.id;
     if (!userId) return;
 
+    // Fetch lineup summary as before
     this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
       next: (data: any) => {
         if (data) {
-          this.lineupSummary = {
-            lineup: data.lineup || {},
-            remainingTrades: data.remainingTrades || 9,
-            unusedBudget: data.unusedBudget || 2000000,
-            totalValue: data.totalValue || 2000000,
-            tradeHistory: [
-              {
-                playerOut: "Mikko Rantanen",
-                playerIn: "Nathan MacKinnon",
-                positionOut: "OL",
-                positionIn: "KH",
-                date: "15.4.2025"
-              },
-              {
-                playerOut: "Andrei Vasilevskiy",
-                playerIn: "Igor Shesterkin",
-                positionOut: "MV",
-                positionIn: "MV",
-                date: "17.4.2025"
-              },
-              {
-                playerOut: "Roman Josi",
-                playerIn: "Cale Makar",
-                positionOut: "VP",
-                positionIn: "VP",
-                date: "20.4.2025"
-              },
-              {
-                playerOut: "Brad Marchand",
-                playerIn: "Artemi Panarin",
-                positionOut: "VL",
-                positionIn: "VL",
-                date: "22.4.2025"
-              },
-              {
-                playerOut: "Victor Hedman",
-                playerIn: "Quinn Hughes",
-                positionOut: "VP",
-                positionIn: "VP",
-                date: "25.4.2025"
-              }
-            ]
-          };
+          // Fetch trade history from backend
+          this.http.get<any[]>(`${environment.apiUrl}/lineup/history?user_id=${userId}`).subscribe({
+            next: (trades: any[]) => {
+              this.lineupSummary = {
+                lineup: data.lineup || {},
+                remainingTrades: data.remainingTrades || 9,
+                unusedBudget: data.unusedBudget || 0,
+                totalValue: data.totalValue || 0,
+                tradeHistory: trades || []
+              };
+            },
+            error: (err) => {
+              // Fallback to no trade history if error
+              this.lineupSummary = {
+                lineup: data.lineup || {},
+                remainingTrades: data.remainingTrades || 9,
+                unusedBudget: data.unusedBudget || 0,
+                totalValue: data.totalValue || 0,
+                tradeHistory: []
+              };
+            }
+          });
         }
       },
       error: (err) => {
@@ -359,44 +654,8 @@ export class UserDashboardComponent implements OnInit {
           lineup: {},
           remainingTrades: 9,
           unusedBudget: 2000000,
-          totalValue: 2000000,
-          tradeHistory: [
-            {
-              playerOut: "Mikko Rantanen",
-              playerIn: "Nathan MacKinnon",
-              positionOut: "OL",
-              positionIn: "KH",
-              date: "15.4.2025"
-            },
-            {
-              playerOut: "Andrei Vasilevskiy",
-              playerIn: "Igor Shesterkin",
-              positionOut: "MV",
-              positionIn: "MV",
-              date: "17.4.2025"
-            },
-            {
-              playerOut: "Roman Josi",
-              playerIn: "Cale Makar",
-              positionOut: "VP",
-              positionIn: "VP",
-              date: "20.4.2025"
-            },
-            {
-              playerOut: "Brad Marchand",
-              playerIn: "Artemi Panarin",
-              positionOut: "VL",
-              positionIn: "VL",
-              date: "22.4.2025"
-            },
-            {
-              playerOut: "Victor Hedman",
-              playerIn: "Quinn Hughes",
-              positionOut: "VP",
-              positionIn: "VP",
-              date: "25.4.2025"
-            }
-          ]
+          totalValue: 0,
+          tradeHistory: []
         };
       }
     });
@@ -429,61 +688,59 @@ export class UserDashboardComponent implements OnInit {
     this.http.get(`${environment.apiUrl}/predictions/summary?userId=${userId}`).subscribe({
       next: (data: any) => {
         if (data) {
+          console.log("Predictions summary data:", data);
+          // Transform the string arrays into Player arrays
+          if (data.categories) {
+            data.categories = data.categories.map((category: any) => ({
+              ...category,
+              userPicks: category.userPicks.map((pick: any) => typeof pick === 'string'
+                ? this.findPlayerByName(pick)
+                : pick),
+              currentTop3: category.currentTop3.map((pick: any) => typeof pick === 'string'
+                ? this.findPlayerByName(pick)
+                : pick)
+            }));
+          }
           this.predictionsSummary = data;
         }
       },
       error: (err) => {
         console.error("Failed to load predictions summary", err);
         this.predictionsSummary = {
-          completed: 17,
-          totalToComplete: 21,
-          top3Picks: ["Nathan MacKinnon", "Connor McDavid", "Leon Draisaitl"],
-          categories: [
-            {
-              name: "Maalit",
-              userPicks: ["Auston Matthews", "Steven Stamkos", "David Pastrnak"],
-              currentTop3: ["Auston Matthews", "Sam Reinhart", "Zach Hyman"],
-              correctPicks: 1
-            },
-            {
-              name: "Syötöt",
-              userPicks: ["Connor McDavid", "Nikita Kucherov", "Leon Draisaitl"],
-              currentTop3: ["Nikita Kucherov", "Connor McDavid", "Nathan MacKinnon"],
-              correctPicks: 2
-            },
-            {
-              name: "Pisteet",
-              userPicks: ["Connor McDavid", "Nikita Kucherov", "Nathan MacKinnon"],
-              currentTop3: ["Nikita Kucherov", "Connor McDavid", "Nathan MacKinnon"],
-              correctPicks: 3
-            },
-            {
-              name: "Plus/Minus",
-              userPicks: ["Cale Makar", "Victor Hedman", "Charlie McAvoy"],
-              currentTop3: ["Cale Makar", "Devon Toews", "Mikko Rantanen"],
-              correctPicks: 1
-            },
-            {
-              name: "Torjuntaprosentti",
-              userPicks: ["Andrei Vasilevskiy", "Igor Shesterkin", "Jake Oettinger"],
-              currentTop3: ["Linus Ullmark", "Igor Shesterkin", "Jeremy Swayman"],
-              correctPicks: 1
-            },
-            {
-              name: "Voitot",
-              userPicks: ["Andrei Vasilevskiy", "Igor Shesterkin", "Sergei Bobrovsky"],
-              currentTop3: ["Andrei Vasilevskiy", "Frederik Andersen", "Jeremy Swayman"],
-              correctPicks: 1
-            }
-          ],
-          connSmythe: {
-            player: "Nathan MacKinnon",
-            teamLogo: "assets/team-logos/colorado.png"
-          },
-          totalCorrect: 9
+          completed: 0,
+          totalToComplete: 3,
+          top3Picks: [],
+          categories: [],
+          totalCorrect: 0
         };
       }
     });
+  }
+
+  private findPlayerByName(playerName: string): Player {
+    // Split the name into first and last name
+    const [firstName, ...lastNameParts] = playerName.split(' ');
+    const lastName = lastNameParts.join(' ');
+
+    // Try to find the player in allPlayers
+    const player = this.allPlayers.find(p =>
+      p.firstName === firstName && p.lastName === lastName
+    );
+
+    // If player is not found, create a minimal player object
+    if (!player) {
+      return {
+        id: 0,
+        firstName,
+        lastName,
+        team: '',
+        position: '',
+        isU23: false,
+        price: 0
+      };
+    }
+
+    return player;
   }
 
   formatCurrency(value: number): string {
@@ -549,5 +806,22 @@ export class UserDashboardComponent implements OnInit {
       team: player.team,
       price: player.price
     };
+  }
+
+  isPlayerInList(player: any, playerList: any[]): boolean {
+    return playerList.some(p => p.id === player.id);
+  }
+
+  getCategoryLabel(categoryName: string): string {
+    const labels: { [key: string]: string } = {
+      'connSmythe': 'Conn Smythe -voittaja',
+      'penaltyMinutes': 'Jäähypörssi',
+      'goals': 'Maalipörssi',
+      'defensePoints': 'Puolustajien Pistepörssi',
+      'U23Points': 'U23 Pistepörssi',
+      'goalieWins': 'Eniten Voittoja - MV',
+      'finnishPoints': 'Suomalaisten Pistepörssi'
+    };
+    return labels[categoryName] || categoryName;
   }
 }

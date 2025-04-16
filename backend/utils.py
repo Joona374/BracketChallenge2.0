@@ -5,7 +5,6 @@ from flask import Flask
 from config import Config
 from db import db_engine as db
 from models import RegistrationCode, Matchup, Player
-from app import test_generate_headline_api
 
 def generate_random_code():
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'

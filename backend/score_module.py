@@ -103,13 +103,13 @@ def calculate_bracket_points(user_id):
         actual_result = results_by_code.get(matchup_code)
 
         if matchup_code == "cup":
-            points_to_give = 5
+            points_to_give = 16
         elif matchup_code in ["west-final", "east-final"]:
-            points_to_give = 3
+            points_to_give = 8
         elif matchup_code in ["w-semi", "w-semi2", "e-semi", "e-semi2"]:
-            points_to_give = 2
+            points_to_give = 4
         else:
-            points_to_give = 1
+            points_to_give = 2
         
         points = 0
         actual_winner = "N/A"
@@ -194,11 +194,99 @@ def calculate_bracket_points(user_id):
     
     return total_points
 
+def calculate_lineup_points(user_id):
+    """
+    Calculate points for a user's lineup based on playoff stats and update UserPoints.
+    Forwards: 2*goals + assists + plus_minus
+    Defenders: 3*goals + assists + plus_minus
+    Goalies: 1/game played + 1/win + 1/shutout + 1 if save% > 92%
+    """
+    from models import LineupHistory, Player, Goalie, UserPoints, db
+    from sqlalchemy import and_
+    
+    lineup_entries = LineupHistory.query.filter_by(user_id=user_id).all()
+    if not lineup_entries:
+        print(f"No lineup history for user {user_id}")
+        return 0
+    total_points = 0
+    for entry in lineup_entries:
+        player = Player.query.get(entry.player_id)
+        if player:
+            # Forwards: L, C, R; Defenders: D (LD, RD slots)
+            if player.position in ("L", "C", "R"):
+                total_points += 2 * (player.playoff_goals or 0) + (player.playoff_assists or 0) + (player.playoff_plus_minus or 0)
+            elif player.position == "D":
+                total_points += 3 * (player.playoff_goals or 0) + (player.playoff_assists or 0) + (player.playoff_plus_minus or 0)
+        else:
+            goalie = Goalie.query.get(entry.player_id)
+            if goalie:
+                # 1/game played + 1/win + 1/shutout + 1 if save% > 92%
+                total_points += (goalie.playoff_gp or 0)
+                total_points += (goalie.playoff_wins or 0)
+                total_points += (goalie.playoff_shutouts or 0)
+                if goalie.playoff_save_pct and goalie.playoff_save_pct > 0.92:
+                    total_points += 1
+    user_points = UserPoints.query.filter_by(user_id=user_id).first()
+    if not user_points:
+        user_points = UserPoints(user_id=user_id)
+        db.session.add(user_points)
+    user_points.lineup_total_points = total_points
+    user_points.update_total_points()
+    db.session.commit()
+    print(f"Updated lineup points for user {user_id}: {total_points}")
+    return total_points
+
+def calculate_lineup_points_from_gamelogs(user_id):
+    """
+    For each game log, check if the user had the player in their lineup at game start and for at least 2 hours after.
+    If so, award points for that game and sum to user_points.lineup_total_points.
+    Forwards: 2*goals + assists + plus_minus
+    Defenders: 3*goals + assists + plus_minus
+    Goalies: 1/game played + 1/win + 1/shutout + 1 if save% > 92%
+    """
+    from models import GameLog, LineupHistory, UserPoints, db, Player, Goalie
+    from sqlalchemy import and_
+    from datetime import timedelta
+
+    total_points = 0
+    game_logs = GameLog.query.order_by(GameLog.start_time_utc).all()
+    for log in game_logs:
+        lh = LineupHistory.query.filter_by(user_id=user_id, player_id=log.player_id).order_by(LineupHistory.added_at).all()
+        eligible = False
+        for entry in lh:
+            if entry.added_at <= log.start_time_utc:
+                if not entry.removed_at or entry.removed_at >= log.start_time_utc + timedelta(hours=2):
+                    eligible = True
+                    break
+        if eligible:
+            if not log.is_goalie:
+                player = Player.query.filter_by(api_id=log.api_id).first()
+                if player and player.position in ("L", "C", "R"):
+                    total_points += 2 * (log.goals or 0) + (log.assists or 0) + (log.plus_minus or 0)
+                elif player and player.position == "D":
+                    total_points += 3 * (log.goals or 0) + (log.assists or 0) + (log.plus_minus or 0)
+            else:
+                # Goalie: 1/game played + 1/win + 1/shutout + 1 if save% > 92%
+                total_points += 1  # game played
+                total_points += (log.wins or 0)
+                total_points += (log.shutouts or 0)
+                if log.shots and log.saves is not None and log.shots > 0:
+                    save_pct = log.saves / log.shots
+                    if save_pct > 0.92:
+                        total_points += 1
+    user_points = UserPoints.query.filter_by(user_id=user_id).first()
+    if not user_points:
+        user_points = UserPoints(user_id=user_id)
+        db.session.add(user_points)
+    user_points.lineup_total_points = total_points
+    user_points.update_total_points()
+    db.session.commit()
+    print(f"Updated lineup points for user {user_id}: {total_points}")
+    return total_points
+
 # You can add other scoring functions for lineup and predictions games here in the future
 
 if __name__ == "__main__":
-
-    
     # Create Flask app
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -208,5 +296,5 @@ if __name__ == "__main__":
     with app.app_context():
         # Example usage
         user_id = 3  # Replace with actual user ID
-        points = calculate_bracket_points(user_id)
-        print(f"User {user_id} earned {points} points from their bracket predictions.")
+        points = calculate_lineup_points_from_gamelogs(user_id)
+        print(f"User {user_id} earned {points} points from their lineup.")

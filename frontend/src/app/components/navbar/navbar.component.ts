@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { AuthService, User } from '../../services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
+import { DeadlineService } from '../../services/deadline.service';
 
 @Component({
   selector: "app-navbar",
@@ -12,14 +13,12 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
   styleUrls: ["./navbar.component.css"],
 })
 
-
-
 export class NavbarComponent implements OnInit, OnDestroy {
   get isLoggedIn(): boolean {
     return !!localStorage.getItem("loggedInUser");
   }
 
-  deadline = new Date("2025-04-20T00:00:00+03:00"); // Set your lock-in deadline (Helsinki time)
+  deadline: Date | null = null; // Will be set from backend
   timeLeft: string = "";
   private intervalId: any;
 
@@ -31,11 +30,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   // Reference to event listener for cleanup
   private logoUpdateListener: any;
 
-  constructor() { }
+  constructor(private deadlineService: DeadlineService) { }
 
   ngOnInit() {
-    this.updateTimeLeft();
-    this.intervalId = setInterval(() => this.updateTimeLeft(), 1000);
+    // Fetch deadline from backend
+    this.deadlineService.getDeadlineStatus().subscribe(status => {
+      this.deadline = new Date(status.deadline_timestamp);
+      this.updateTimeLeft();
+      this.intervalId = setInterval(() => this.updateTimeLeft(), 1000);
+    });
 
     this.checkViewport();
     window.addEventListener("resize", this.checkViewport.bind(this));
@@ -121,6 +124,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   updateTimeLeft() {
+    if (!this.deadline) {
+      this.timeLeft = '';
+      return;
+    }
     const now = new Date();
     const diff = this.deadline.getTime() - now.getTime();
 

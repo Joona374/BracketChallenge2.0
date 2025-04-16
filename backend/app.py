@@ -8,7 +8,9 @@ import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode, Headline
+from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode, Headline, Setting
+from score_module import calculate_bracket_points
+from stats_module import get_current_standings
 
 import os
 from openai import OpenAI
@@ -16,30 +18,59 @@ import requests
 from threading import Thread
 from dotenv import load_dotenv
 
-# Define the deadline for bracket, initial lineup, and prediction changes
-PLAYOFF_LOCK_DEADLINE = datetime(2025, 4, 20, 0, 0, 0, tzinfo=timezone.utc)
+# Default deadline (will be used only if not in database)
+DEFAULT_DEADLINE = datetime(2025, 4, 20, 0, 0, 0, tzinfo=timezone.utc)
+
+def get_deadline_from_db():
+    """Get the playoff deadline from the database settings table"""
+    setting = Setting.query.filter_by(key='playoff_deadline').first()
+    
+    if setting:
+        try:
+            return datetime.fromisoformat(setting.value)
+        except ValueError:
+            print(f"Invalid deadline format in database: {setting.value}")
+    
+    # Default to April 20, 2025 00:00:00 UTC if not found or invalid
+    default_deadline = datetime(2025, 4, 20, 0, 0, 0, tzinfo=timezone.utc)
+    
+    # Create the setting if it doesn't exist
+    if not setting:
+        setting = Setting(
+            key='playoff_deadline',
+            value=default_deadline.isoformat(),
+            description='Deadline for playoff bracket, lineup, and predictions submissions'
+        )
+        db.session.add(setting)
+        db.session.commit()
+    
+    return default_deadline
 
 def is_deadline_passed():
-    """
-    Check if the playoff lock deadline has passed
-    """
+    """Check if the playoff submission deadline has passed"""
     now = datetime.now(timezone.utc)
-    return now >= PLAYOFF_LOCK_DEADLINE
+    deadline = get_deadline_from_db()
+    return now >= deadline
 
 def get_time_until_deadline():
-    """
-    Get the time remaining until the deadline in a readable format
-    """
+    """Get a human-readable string of time remaining until the deadline"""
     now = datetime.now(timezone.utc)
-    if now >= PLAYOFF_LOCK_DEADLINE:
+    deadline = get_deadline_from_db()
+    
+    if now >= deadline:
         return "Deadline has passed"
     
-    diff = PLAYOFF_LOCK_DEADLINE - now
-    days = diff.days
-    hours, remainder = divmod(diff.seconds, 3600)
+    time_diff = deadline - now
+    days = time_diff.days
+    hours, remainder = divmod(time_diff.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     
-    return f"{days} days, {hours} hours, {minutes} minutes"
+    if days > 0:
+        return f"{days} days, {hours} hours, {minutes} minutes"
+    elif hours > 0:
+        return f"{hours} hours, {minutes} minutes"
+    else:
+        return f"{minutes} minutes, {seconds} seconds"
 
 load_dotenv()
 
@@ -414,8 +445,11 @@ def save_lineup():
 
                             # If this is a new goalie in this slot
                             if not old_lineup.get(slot) == player_id:
+                                # Get the old player's ID before closing the history entry
+                                old_player_id = old_lineup.get(slot)
+                                
                                 # Close out old goalie's history
-                                if old_lineup.get(slot):
+                                if old_player_id:
                                     db.session.query(LineupHistory)\
                                         .filter_by(user_id=user_id, slot=slot, removed_at=None)\
                                         .update({"removed_at": current_time})
@@ -424,6 +458,7 @@ def save_lineup():
                                 history = LineupHistory(
                                     user_id=user_id,
                                     player_id=player_id,
+                                    player_out_id=old_player_id,  # Record the replaced player's ID
                                     slot=slot,
                                     added_at=current_time,
                                     price_at_time=goalie.price
@@ -437,8 +472,11 @@ def save_lineup():
                             
                             # If this is a new player in this slot
                             if not old_lineup.get(slot) == player_id:
+                                # Get the old player's ID before closing the history entry
+                                old_player_id = old_lineup.get(slot)
+                                
                                 # Close out old player's history
-                                if old_lineup.get(slot):
+                                if old_player_id:
                                     db.session.query(LineupHistory)\
                                         .filter_by(user_id=user_id, slot=slot, removed_at=None)\
                                         .update({"removed_at": current_time})
@@ -447,6 +485,7 @@ def save_lineup():
                                 history = LineupHistory(
                                     user_id=user_id,
                                     player_id=player_id,
+                                    player_out_id=old_player_id,  # Record the replaced player's ID
                                     slot=slot,
                                     added_at=current_time,
                                     price_at_time=player.price
@@ -522,6 +561,58 @@ def get_lineup():
         # Handle JSON parsing errors
         return jsonify({"error": "Failed to parse lineup", "details": str(e)}), 500
 
+@app.route('/api/lineup/history', methods=['GET'])
+def get_lineup_history():
+    """
+    Returns the trade (lineup) history for a user, sorted by added_at.
+    Query param: user_id
+    """
+    user_id = request.args.get('user_id', type=int)
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+    from models import LineupHistory, Player, Goalie
+    history = LineupHistory.query.filter_by(user_id=user_id).order_by(LineupHistory.added_at).all()
+    trades = []
+    for h in history:
+        # Find the player being added
+        player_in = Player.query.get(h.player_id) or Goalie.query.get(h.player_id)
+        player_in_name = f"{player_in.first_name} {player_in.last_name}" if player_in else "Unknown"
+        position_in = h.slot
+        
+        # Find the player being removed (if any)
+        player_out_name = None
+        position_out = None
+        player_out_id = h.player_out_id
+        
+        # If we have a player_out_id, use it directly to get the player details
+        if player_out_id:
+            player_out = Player.query.get(player_out_id) or Goalie.query.get(player_out_id)
+            if player_out:
+                player_out_name = f"{player_out.first_name} {player_out.last_name}"
+                position_out = position_in  # Same position as the incoming player
+        # Fallback to old logic if player_out_id is not set
+        elif h.removed_at:
+            # Find the next history entry for this slot (if any)
+            prev = LineupHistory.query.filter_by(user_id=user_id, slot=h.slot, removed_at=h.added_at).first()
+            if prev:
+                player_out = Player.query.get(prev.player_id) or Goalie.query.get(prev.player_id)
+                player_out_name = f"{player_out.first_name} {player_out.last_name}" if player_out else "Unknown"
+                position_out = prev.slot
+                player_out_id = prev.player_id
+        
+        # Use Finnish date format
+        date_str = h.added_at.strftime('%d.%m.%Y') if h.added_at else ""
+        trades.append({
+            "playerOut": player_out_name or "-",
+            "playerOutId": player_out_id,
+            "playerIn": player_in_name,
+            "playerInId": h.player_id,
+            "positionOut": position_out or position_in,
+            "positionIn": position_in,
+            "date": date_str
+        })
+    return jsonify(trades), 200
+
 @app.route('/api/predictions/save', methods=['POST'])
 def save_predictions():
     data = request.json
@@ -573,6 +664,283 @@ def get_predictions():
     predictions_data = json.loads(prediction.predictions_json)
     
     return jsonify({"predictions": predictions_data}), 200
+
+@app.route('/api/predictions/summary', methods=['GET'])
+def get_predictions_summary():
+    """Get a summary of the user's predictions compared to current standings"""
+    from stats_module import get_current_standings
+    
+    user_id = request.args.get('userId')
+    print(f"\nProcessing predictions summary for user {user_id}")
+    
+    if not user_id:
+        return jsonify({"error": "Missing userId parameter"}), 400
+        
+    try:
+        # Get the user's predictions
+        prediction = Prediction.query.filter_by(user_id=user_id).first()
+        if not prediction:
+            return jsonify({"error": "No predictions found for this user"}), 404
+            
+        predictions_data = json.loads(prediction.predictions_json)
+        
+        # Get current standings from stats module
+        print("\nFetching current standings...")
+        current_standings = get_current_standings()
+        print(f"\nGot current standings for categories: {list(current_standings.keys())}")
+        
+        # Initialize summary structure
+        summary = {
+            "completed": 0,
+            "totalToComplete": len(current_standings) * 3,  # 3 picks per category
+            "categories": [],
+            "totalCorrect": 0
+        }
+        
+        # Process each category from the current standings
+        for category, curr_top3 in current_standings.items():
+            print(f"\nProcessing category: {category}")
+            if category in predictions_data:
+                # Get user's picks for this category
+                user_picks = predictions_data[category]
+                if isinstance(user_picks, list):
+                    user_picks = user_picks[:3]  # Get top 3 picks
+                                    
+                # Count correct picks by comparing IDs
+                correct_picks = 0
+                for pick in user_picks:
+                    if isinstance(pick, str):
+                        # Legacy format: compare by name
+                        pick_name = pick
+                        correct_picks += sum(1 for p in curr_top3 if f"{p.first_name} {p.last_name}" == pick_name)
+                    else:
+                        # New format: compare by ID
+                        pick_id = pick.get('id')
+                        correct_picks += sum(1 for p in curr_top3 if p.id == pick_id)
+                
+                
+                # Convert current top 3 players/goalies to dictionaries
+                current_top3_dicts = []
+                for player in curr_top3:
+                    if hasattr(player, 'reg_gaa'):  # It's a goalie
+                        player_dict = {
+                            'id': player.id,
+                            'firstName': player.first_name,
+                            'lastName': player.last_name,
+                            'team': player.team_abbr,
+                            'position': player.position,
+                            'isU23': player.is_U23,
+                            'price': player.price,
+                            'reg_gp': player.reg_gp,
+                            'reg_gaa': player.reg_gaa,
+                            'reg_save_pct': player.reg_save_pct,
+                            'reg_shutouts': player.reg_shutouts,
+                            'reg_wins': player.reg_wins
+                        }
+                    else:  # It's a player
+                        player_dict = {
+                            'id': player.id,
+                            'firstName': player.first_name,
+                            'lastName': player.last_name,
+                            'team': player.team_abbr,
+                            'position': player.position,
+                            'isU23': player.is_U23,
+                            'price': player.price,
+                            'reg_gp': player.reg_gp,
+                            'reg_goals': player.reg_goals,
+                            'reg_assists': player.reg_assists,
+                            'reg_points': player.reg_points,
+                            'reg_plus_minus': player.reg_plus_minus,
+                            'playoff_goals': 0,
+                            'playoff_assists': 0,
+                            'playoff_points': 0,
+                            'playoff_plus_minus': 0
+                        }
+                        if hasattr(player, 'reg_penalty_minutes'):
+                            player_dict['reg_penalty_minutes'] = player.reg_penalty_minutes
+                            
+                    current_top3_dicts.append(player_dict)
+
+                category_summary = {
+                    "name": category,
+                    "userPicks": user_picks,
+                    "currentTop3": current_top3_dicts,
+                    "correctPicks": correct_picks
+                }
+                
+                summary["categories"].append(category_summary)
+                summary["totalCorrect"] += correct_picks
+                
+                # Update completed count if we have actual standings
+                if curr_top3:
+                    summary["completed"] += 1
+        
+        return jsonify(summary), 200
+        
+    except Exception as e:
+        print(f"Error getting predictions summary: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"error": f"Failed to get predictions summary: {str(e)}"}), 500
+
+@app.route("/api/bracket/summary", methods=["GET"])
+def get_bracket_summary():
+    """
+    Returns a summary of the user's bracket picks vs. actual results for dashboard display.
+    """
+    user_id = request.args.get('userId')
+    if not user_id:
+        return jsonify({"error": "Missing userId parameter"}), 400
+    try:
+        # Get the user's picks
+        pick = Pick.query.filter_by(user_id=user_id).first()
+        if not pick:
+            return jsonify({"error": "No picks found for this user"}), 404
+        picks_data = json.loads(pick.picks_json)
+
+        # Get all actual results
+        all_results = MatchupResult.query.all()
+        results_by_code = {result.matchup_code: result for result in all_results}
+
+        # Helper for round structure
+        def build_matchup_comparison(matchup_code, user_pick, user_games, round_name):
+            actual = results_by_code.get(matchup_code)
+            actual_winner = actual.winner if actual else "Kesken"
+            actual_games = actual.games if actual else 0
+            user_correct = actual and actual.winner == user_pick
+            games_correct = actual and actual.games == user_games and user_correct
+            return {
+                "userPickedTeam": user_pick or "-",
+                "actualWinner": actual_winner or "Kesken",
+                "userPickedGames": user_games or 0,
+                "actualGames": actual_games or 0,
+                "userCorrect": bool(user_correct),
+                "gamesCorrect": bool(games_correct)
+            }
+
+        # Build roundMatchups for dashboard
+        round_matchups = []
+        # Round 1
+        r1 = []
+        for code in ["W1", "W2", "W3", "W4", "E1", "E2", "E3", "E4"]:
+            user_pick = picks_data.get("round1", {}).get(code)
+            user_games = picks_data.get("round1Games", {}).get(code)
+            if user_pick:
+                r1.append(build_matchup_comparison(code, user_pick, user_games, "Ensimmäinen kierros"))
+        round_matchups.append({"name": "Ensimmäinen kierros", "matchups": r1})
+        # Round 2
+        r2 = []
+        for code in ["w-semi", "w-semi2", "e-semi", "e-semi2"]:
+            user_pick = picks_data.get("round2", {}).get(f"{code}-winner")
+            user_games = picks_data.get("round2Games", {}).get(code)
+            if user_pick:
+                r2.append(build_matchup_comparison(code, user_pick, user_games, "Toinen kierros"))
+        round_matchups.append({"name": "Toinen kierros", "matchups": r2})
+        # Round 3
+        r3 = []
+        for code in ["west-final", "east-final"]:
+            user_pick = picks_data.get("round3", {}).get(f"{code}-winner")
+            user_games = picks_data.get("round3Games", {}).get(code)
+            if user_pick:
+                r3.append(build_matchup_comparison(code, user_pick, user_games, "Konferenssifinaalit"))
+        round_matchups.append({"name": "Konferenssifinaalit", "matchups": r3})
+        # Final
+        rf = []
+        user_pick = picks_data.get("final", {}).get("cup-winner")
+        user_games = picks_data.get("finalGames", {}).get("cup")
+        if user_pick:
+            rf.append(build_matchup_comparison("cup", user_pick, user_games, "Finaali"))
+        round_matchups.append({"name": "Finaali", "matchups": rf})
+
+        # Calculate points/corrects using score_module
+        calculate_bracket_points(int(user_id))  # updates UserPoints
+        user_points = UserPoints.query.filter_by(user_id=int(user_id)).first()
+        
+        # Get statistics across all users
+        all_user_points = UserPoints.query.all()
+        
+        # Calculate statistics for each round
+        round1_correct_values = [up.bracket_round1_correct for up in all_user_points if up.bracket_round1_correct is not None]
+        round1_points_values = [up.bracket_round1_points for up in all_user_points if up.bracket_round1_points is not None]
+        
+        round2_correct_values = [up.bracket_round2_correct for up in all_user_points if up.bracket_round2_correct is not None]
+        round2_points_values = [up.bracket_round2_points for up in all_user_points if up.bracket_round2_points is not None]
+        
+        round3_correct_values = [up.bracket_round3_correct for up in all_user_points if up.bracket_round3_correct is not None]
+        round3_points_values = [up.bracket_round3_points for up in all_user_points if up.bracket_round3_points is not None]
+        
+        final_correct_values = [up.bracket_final_correct for up in all_user_points if up.bracket_final_correct is not None]
+        final_points_values = [up.bracket_final_points for up in all_user_points if up.bracket_final_points is not None]
+        
+        # Calculate totals across all rounds
+        total_correct_values = [(up.bracket_round1_correct or 0) + 
+                               (up.bracket_round2_correct or 0) + 
+                               (up.bracket_round3_correct or 0) + 
+                               (up.bracket_final_correct or 0) for up in all_user_points]
+        
+        total_points_values = [(up.bracket_round1_points or 0) + 
+                              (up.bracket_round2_points or 0) + 
+                              (up.bracket_round3_points or 0) + 
+                              (up.bracket_final_points or 0) for up in all_user_points]
+        
+        # Helper function to safely calculate average
+        def safe_avg(values):
+            return sum(values) / len(values) if values else 0
+        
+        # Build rounds summary for dashboard
+        rounds = [
+            {
+                "name": "1. kierros",
+                "correct": user_points.bracket_round1_correct,
+                "avgCorrect": round(safe_avg(round1_correct_values), 1),
+                "bestCorrect": max(round1_correct_values, default=0),
+                "points": user_points.bracket_round1_points,
+                "avgPoints": round(safe_avg(round1_points_values), 1),
+                "bestPoints": max(round1_points_values, default=0)
+            },
+            {
+                "name": "2. kierros",
+                "correct": user_points.bracket_round2_correct,
+                "avgCorrect": round(safe_avg(round2_correct_values), 1),
+                "bestCorrect": max(round2_correct_values, default=0),
+                "points": user_points.bracket_round2_points,
+                "avgPoints": round(safe_avg(round2_points_values), 1),
+                "bestPoints": max(round2_points_values, default=0)
+            },
+            {
+                "name": "3. Kierros",
+                "correct": user_points.bracket_round3_correct,
+                "avgCorrect": round(safe_avg(round3_correct_values), 1),
+                "bestCorrect": max(round3_correct_values, default=0),
+                "points": user_points.bracket_round3_points,
+                "avgPoints": round(safe_avg(round3_points_values), 1),
+                "bestPoints": max(round3_points_values, default=0)
+            },
+            {
+                "name": "Finaali",
+                "correct": user_points.bracket_final_correct,
+                "avgCorrect": round(safe_avg(final_correct_values), 1),
+                "bestCorrect": max(final_correct_values, default=0),
+                "points": user_points.bracket_final_points,
+                "avgPoints": round(safe_avg(final_points_values), 1),
+                "bestPoints": max(final_points_values, default=0)
+            }
+        ]
+        summary = {
+            "rounds": rounds,
+            "totalCorrect": sum(r["correct"] for r in rounds),
+            "avgTotalCorrect": round(safe_avg(total_correct_values), 1),
+            "bestTotalCorrect": max(total_correct_values, default=0),
+            "avgTotalPoints": round(safe_avg(total_points_values), 1),
+            "bestTotalPoints": max(total_points_values, default=0),
+            "completed": sum(r["correct"] for r in rounds),
+            "total": 15,  # 8+4+2+1
+            "roundMatchups": round_matchups
+        }
+        return jsonify(summary), 200
+    except Exception as e:
+        print("Error in get_bracket_summary:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/user/by-team-name", methods=["GET"])
 def get_user_by_team_name():
@@ -677,7 +1045,11 @@ def get_user_stats():
                     "total": 0,
                     "bracket": 0,
                     "lineup": 0,
-                    "predictions": 0
+                    "predictions": 0,
+                    "predictionsR1": 0,
+                    "predictionsR2": 0,
+                    "predictionsR3": 0,
+                    "predictionsFinal": 0
                 }
             }), 200
         
@@ -699,7 +1071,11 @@ def get_user_stats():
                 "total": user_points.total_points,
                 "bracket": user_points.bracket_total_points,
                 "lineup": user_points.lineup_total_points,
-                "predictions": user_points.predictions_total_points
+                "predictions": user_points.predictions_total_points,
+                "predictionsR1": user_points.predictions_r1_points,
+                "predictionsR2": user_points.predictions_r2_points,
+                "predictionsR3": user_points.predictions_r3_points,
+                "predictionsFinal": user_points.predictions_final_points
             }
         }), 200
     
@@ -709,31 +1085,62 @@ def get_user_stats():
 
 @app.route("/api/leaderboard", methods=["GET"])
 def get_leaderboard():
-    # Return actual data from the database, keeping the rank and points using the mock data
-
+    """
+    Return leaderboard with real user points and correct ranking.
+    Rank by total points (desc), then by number of playoff series correctly predicted (desc).
+    """
     users = User.query.all()
     if not users:
         return jsonify({"error": "No users found"}), 404
-    leaderboard = []
 
-    for i, user in enumerate(users):
-        # Assuming you have a way to calculate the points for each user
-        # For now, we will use mock data for points and ranks
-        bracket_points = random.randint(0, 100)  # Placeholder for actual points calculation
-        lineup_points = random.randint(0, 100)  # Placeholder for actual points calculation
-        predictions_points = random.randint(0, 100)  # Placeholder for actual points calculation
-        total_points = bracket_points + lineup_points + predictions_points
+    leaderboard = []
+    # Gather all user points and corrects
+    for user in users:
+        points = UserPoints.query.filter_by(user_id=user.id).first()
+        if points:
+
+            bracket_points = points.bracket_total_points or 0
+            lineup_points = points.lineup_total_points or 0
+            predictions_points = points.predictions_total_points or 0
+            total_points = bracket_points + lineup_points + predictions_points
+            # Sum of all correct series predictions
+            correct_series = (
+                (points.bracket_round1_correct or 0)
+                + (points.bracket_round2_correct or 0)
+                + (points.bracket_round3_correct or 0)
+                + (points.bracket_final_correct or 0)
+            )
+        else:
+            total_points = 0
+            bracket_points = 0
+            lineup_points = 0
+            predictions_points = 0
+            correct_series = 0
         leaderboard.append({
             "id": user.id,
-            "rank": i + 1,  # Rank based on the order in the list
             "username": user.username,
             "teamName": user.team_name,
             "logoUrl": user.selected_logo_url,
-            "totalPoints": total_points,  # Placeholder total points
-            "bracketPoints": bracket_points,  # Placeholder bracket points
-            "lineupPoints": lineup_points,  # Placeholder lineup points
-            "predictionsPoints": 0  # Placeholder predictions points
+            "totalPoints": total_points,
+            "bracketPoints": bracket_points,
+            "lineupPoints": lineup_points,
+            "predictionsPoints": predictions_points,
+            "correctSeries": correct_series
         })
+
+    # Sort: totalPoints desc, then correctSeries desc
+    leaderboard.sort(key=lambda x: (-x["totalPoints"], -x["correctSeries"]))
+
+    # Assign ranks (1-based, ties get same rank, next rank is skipped)
+    last_points = last_correct = None
+    last_rank = 0
+    for idx, entry in enumerate(leaderboard):
+        if (entry["totalPoints"], entry["correctSeries"]) != (last_points, last_correct):
+            last_rank = idx + 1
+            last_points = entry["totalPoints"]
+            last_correct = entry["correctSeries"]
+        entry["rank"] = last_rank
+        entry.pop("correctSeries", None)
 
     return jsonify(leaderboard), 200
 
@@ -1469,8 +1876,9 @@ def generate_headline():
     language = data.get('language', 'en')
     
     prompt = f"""Write a sarcastic, cocky, and darkly humorous news headlines about a fantasy hockey team called "{team_name}" that just joined an NHL Bracket Challenge.
-    The tone should be ruthless, teasing, and full of trash talk — the kind of humor you'd use to roast your best friends.
-    Make fun of their confidence, past failures, ridiculous team name, or just how delusional their bracket picks probably are.
+    The tone should be full of trash talk — the kind of humor you'd use to roast your best friends.
+    It should vaguely feel like its been written by a sports writer for tsn  etc.
+    If you can think of a zinger to make fun of their ridiculous team name thats great. You can also roast how bad they are going to do.
     Use hockey terms, NHL clichés, and lean into the chaos. If you can make fun of the name in any way thats always great!
     Do not hold back. No politeness, no filters. Make it sound like something you'd post in the group chat to make everyone laugh and cry.
     Also try and use random funny hashtags related to the headline.
@@ -1513,8 +1921,136 @@ def get_deadline_status():
     return jsonify({
         "deadline_passed": deadline_passed,
         "time_remaining": time_remaining,
-        "deadline_timestamp": PLAYOFF_LOCK_DEADLINE.isoformat()
+        "deadline_timestamp": get_deadline_from_db().isoformat()
     }), 200
+
+@app.route('/api/admin/settings/deadline', methods=['PUT'])
+def update_deadline():
+    """
+    Admin endpoint to update the playoff deadline
+    """
+    data = request.get_json()
+    
+    if not data or 'deadline' not in data:
+        return jsonify({"error": "Missing deadline parameter"}), 400
+        
+    try:
+        # Parse the deadline string to datetime
+        deadline_str = data['deadline']
+        new_deadline = datetime.fromisoformat(deadline_str)
+        
+        # Ensure datetime has timezone info
+        if new_deadline.tzinfo is None:
+            new_deadline = new_deadline.replace(tzinfo=timezone.utc)
+            
+        # Update the setting in database
+        setting = Setting.query.filter_by(key='playoff_deadline').first()
+        if not setting:
+            setting = Setting(
+                key='playoff_deadline',
+                value=new_deadline.isoformat(),
+                description='Deadline for playoff bracket, lineup, and predictions submissions'
+            )
+            db.session.add(setting)
+        else:
+            setting.value = new_deadline.isoformat()
+            
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Deadline updated successfully",
+            "deadline": new_deadline.isoformat(),
+            "deadline_passed": datetime.now(timezone.utc) >= new_deadline,
+            "time_remaining": get_time_until_deadline()
+        }), 200
+        
+    except ValueError:
+        return jsonify({"error": "Invalid deadline format. Expected ISO format datetime string."}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update deadline: {str(e)}"}), 500
+
+@app.route('/api/admin/settings/deadline', methods=['GET'])
+def get_admin_deadline():
+    """
+    Admin endpoint to get the current playoff deadline
+    """
+    deadline = get_deadline_from_db()
+    
+    return jsonify({
+        "deadline": deadline.isoformat(),
+        "deadline_passed": datetime.now(timezone.utc) >= deadline,
+        "time_remaining": get_time_until_deadline()
+    }), 200
+
+@app.route('/api/admin/trigger-prediction-check', methods=['POST'])
+def trigger_prediction_check():
+    """
+    Admin endpoint to check and score top 3 predictions for a given round.
+    Expects JSON: {"round": 1|2|3|4}
+    """
+    import json
+    data = request.get_json()
+    round_num = int(data.get('round', 1))
+    if round_num not in [1, 2, 3, 4]:
+        return jsonify({"error": "Invalid round number"}), 400
+
+    # Get current top 3 for each category (with stat value)
+    standings = get_current_standings()
+    # standings: {category: [player_obj, ...]}
+
+    # For each user, check predictions and award points
+    users = User.query.all()
+    for user in users:
+        prediction = Prediction.query.filter_by(user_id=user.id).first()
+        if not prediction:
+            continue
+        predictions_data = json.loads(prediction.predictions_json)
+        user_points = UserPoints.query.filter_by(user_id=user.id).first()
+        if not user_points:
+            user_points = UserPoints(user_id=user.id)
+            db.session.add(user_points)
+        round_points = 0
+        for category, curr_top3 in standings.items():
+            # Get user's picks for this category
+            user_picks = predictions_data.get(category, [])
+            # Only compare by player id
+            curr_top3_ids = set([p.id for p in curr_top3])
+            for pick in user_picks:
+                pick_id = pick.get('id') if isinstance(pick, dict) else None
+                if pick_id and pick_id in curr_top3_ids:
+                    round_points += 1
+        # Write to correct column
+        if round_num == 1:
+            user_points.predictions_r1_points = round_points
+        elif round_num == 2:
+            user_points.predictions_r2_points = round_points
+        elif round_num == 3:
+            user_points.predictions_r3_points = round_points
+        elif round_num == 4:
+            user_points.predictions_final_points = round_points
+        # Update total
+        user_points.predictions_total_points = (
+            (user_points.predictions_r1_points or 0) +
+            (user_points.predictions_r2_points or 0) +
+            (user_points.predictions_r3_points or 0) +
+            (user_points.predictions_final_points or 0)
+        )
+        user_points.update_total_points()
+    db.session.commit()
+    return jsonify({"status": "Prediction check complete for round", "round": round_num}), 200
+
+@app.route('/api/admin/trigger-bracket-recount', methods=['POST'])
+def trigger_bracket_recount():
+    """
+    Admin endpoint to recalculate bracket points for all users.
+    """
+    from score_module import calculate_bracket_points
+    users = User.query.all()
+    for user in users:
+        calculate_bracket_points(user.id)
+    db.session.commit()
+    return jsonify({"message": "Bracket points recounted for all users."}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

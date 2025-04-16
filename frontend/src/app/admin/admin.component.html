@@ -367,6 +367,26 @@
         </div>
       </div>
     </div>
+
+    <div class="admin-section">
+      <h3>Trigger Top 3 Predictions Check</h3>
+      <label for="round-select">Select Playoff Round:</label>
+      <select id="round-select" [(ngModel)]="selectedRound">
+        <option [value]="1">Round 1</option>
+        <option [value]="2">Round 2</option>
+        <option [value]="3">Round 3</option>
+        <option [value]="4">Final</option>
+      </select>
+      <button
+        (click)="triggerPredictionCheck()"
+        [disabled]="loadingPredictionCheck"
+      >
+        Trigger Prediction Check
+      </button>
+      <div *ngIf="predictionCheckMessage" class="admin-message">
+        {{ predictionCheckMessage }}
+      </div>
+    </div>
   </div>
 
   <!-- Registration Codes Tab -->
@@ -961,9 +981,93 @@
   <!-- Settings Tab -->
   <div *ngIf="activeTab === 'settings'" class="tab-content">
     <h2>System Settings</h2>
+
+    <!-- Deadline Management Section -->
     <div class="admin-section">
-      <p>Configure application settings.</p>
-      <!-- Settings functionality will be implemented here -->
+      <h3>Playoff Deadline Management</h3>
+      <p>
+        Configure the system-wide deadline for bracket submissions, lineup
+        changes, and predictions.
+      </p>
+
+      <!-- Load deadline button (visible if deadline isn't loaded yet) -->
+      <button
+        *ngIf="!deadline && !deadlineLoading"
+        (click)="loadDeadline()"
+        class="admin-button"
+      >
+        Load Current Deadline
+      </button>
+
+      <!-- Loading indicator -->
+      <div *ngIf="deadlineLoading" class="loading-indicator">
+        Loading deadline settings...
+      </div>
+
+      <!-- Deadline form (visible once deadline is loaded) -->
+      <div *ngIf="deadline && !deadlineLoading" class="deadline-form">
+        <div class="deadline-status" [class.deadline-passed]="deadlinePassed">
+          <div class="status-label">Status:</div>
+          <div class="status-value">
+            {{ deadlinePassed ? "DEADLINE PASSED" : "DEADLINE ACTIVE" }}
+          </div>
+        </div>
+
+        <div class="time-remaining">
+          <div class="time-label">Time remaining:</div>
+          <div class="time-value">{{ timeRemaining }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="deadline-datetime">Deadline Date and Time:</label>
+          <input
+            type="datetime-local"
+            id="deadline-datetime"
+            [(ngModel)]="deadlineISOString"
+            class="datetime-input"
+            [class.deadline-passed]="deadlinePassed"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button
+            (click)="updateDeadline()"
+            class="admin-button save"
+            [disabled]="deadlineLoading"
+          >
+            Update Deadline
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div *ngIf="deadlineMessage" class="success-message">
+          {{ deadlineMessage }}
+        </div>
+        <div *ngIf="deadlineError" class="error-message">
+          {{ deadlineError }}
+        </div>
+
+        <!-- Additional deadline information -->
+        <div class="deadline-info">
+          <p><strong>Important:</strong> This deadline affects:</p>
+          <ul>
+            <li>Playoff bracket submissions</li>
+            <li>Initial lineup creation</li>
+            <li>Predictions submissions</li>
+          </ul>
+          <p>After this deadline passes:</p>
+          <ul>
+            <li>Users can't create or update bracket picks</li>
+            <li>Users can't make initial lineup selections</li>
+            <li>
+              Users can only make trades using their remaining trade allowance
+            </li>
+            <li>Users can't update their Top 3 predictions</li>
+          </ul>
+        </div>
+      </div>
     </div>
+
+    <!-- Add additional settings sections here as needed -->
   </div>
 </div>

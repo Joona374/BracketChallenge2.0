@@ -466,15 +466,13 @@ export class UserViewComponent implements OnInit {
 
   getCategoryLabel(category: string): string {
     const labels = {
-      'connSmythe': 'Conn Smythe voittaja',
-      'penatlyMinutes': 'Jäähypörssi',
+      'connSmythe': 'Conn Smythe -voittaja',
+      'penaltyMinutes': 'Jäähypörssi',
       'goals': 'Maalipörssi',
-      'points': 'Pistepörssi',
-      'defencePoints': 'Puolustajien pistepörssi',
-      'U23Points': 'U23 pistepörssi',
-      'finnishPoints': 'Suomalaisten pistepörssi',
-      'goalieGaa': 'Paras GAA Maalivahti',
-
+      'defensePoints': 'Puolustajien Pistepörssi',
+      'U23Points': 'U23 Pistepörssi',
+      'goalieWins': 'Eniten Voittoja - MV',
+      'finnishPoints': 'Suomalaisten Pistepörssi'
     };
     return labels[category as keyof typeof labels] || category;
   }

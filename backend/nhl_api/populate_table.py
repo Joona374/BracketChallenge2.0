@@ -239,8 +239,11 @@ def calculate_prices():
     players = Player.query.all()
     player_scores = []
     for player in players:
+        print(f"Calculating price for player {player.first_name} {player.last_name}")
         # Skip players with no games played to avoid division by zero
         if not player.reg_gp or player.reg_gp == 0:
+            performance = 0
+        elif player.reg_gp < 5:
             performance = 0
         else:
             # Calculate performance using the formula
@@ -271,7 +274,9 @@ def calculate_prices():
                 player.price = round(player.price, -3)
                 
                 # Handle special cases for players with fewer than 10 or 20 games played
-                if player.reg_gp < 10:
+                if player.reg_gp < 5:
+                    player.price = 250000
+                elif player.reg_gp < 10:
                     player.price = int(player.price * 0.8)
                 elif player.reg_gp < 20:
                     player.price = int(player.price * 0.85)
@@ -279,7 +284,8 @@ def calculate_prices():
                 # Ensure price stays within bounds
                 player.price = max(MIN_PRICE, min(MAX_PRICE, player.price))
                 player.initial_price = player.price  # Store the initial price for reference
-    
+                print(f"Updated price for {player.first_name} {player.last_name}: ${player.price/1000:.1f}K")
+
     # Now handle goalies separately
     goalies = Goalie.query.all()
     goalie_scores = []
@@ -333,9 +339,14 @@ def populate_db():
     
     with app.app_context():
         db.create_all()  # Create tables if they don't exist
-        print("Populating teams...")
-        fetch_and_store_teams()
-        
+        teams = Team.query.all()
+        if teams:
+            print("Teams already populated, skipping team population.")
+        else:
+            print("No teams found, populating teams...")
+            fetch_and_store_teams()
+            print("Teams populated.")
+
         # Now fetch players for each team in our teams table.
         teams = Team.query.all()
         for team in teams:
@@ -352,9 +363,11 @@ if __name__ == '__main__':
     db.init_app(app)
     
     with app.app_context():
-        # Check if specific argument is provided
-        if len(sys.argv) > 1 and sys.argv[1] == "populate":
-            populate_db()
-        else:
-            # By default, just recalculate prices for existing players
-            calculate_prices()
+        # # Check if specific argument is provided
+        # if len(sys.argv) > 1 and sys.argv[1] == "populate":
+        #     populate_db()
+        # else:
+        #     # By default, just recalculate prices for existing players
+        calculate_prices()
+        # populate_db()
+        # fetch_and_store_players_for_team("VGK")

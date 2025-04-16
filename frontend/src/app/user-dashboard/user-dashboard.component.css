@@ -1,6 +1,6 @@
 /* Main container */
 .dashboard-container {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 20px;
   font-family: "Orbitron", monospace;
@@ -625,6 +625,26 @@
   text-shadow: 0 0 5px rgba(255, 153, 51, 0.3);
 }
 
+/* Updated Bracket Matchup Tables */
+.team-cell,
+.games-cell {
+  text-align: center;
+  padding: 6px 4px;
+}
+
+.team-cell {
+  font-weight: 600;
+}
+
+.games-cell {
+  font-size: 0.85rem;
+}
+
+.games-cell.correct {
+  color: #66ff66;
+  font-weight: 500;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .round-stats-header,
@@ -698,6 +718,25 @@
     content: "Paras: ";
     font-size: 0.7rem;
     color: #999;
+  }
+
+  .matchup-table thead th {
+    font-size: 0.7rem;
+    padding: 4px 2px;
+  }
+
+  .matchup-table th:nth-child(3),
+  .matchup-table th:nth-child(4) {
+    font-size: 0.65rem;
+  }
+
+  .team-cell,
+  .games-cell {
+    padding: 5px 2px;
+  }
+
+  .team-abbr {
+    font-size: 0.75rem;
   }
 }
 
@@ -1266,5 +1305,312 @@
 @media (max-width: 480px) {
   .trade-item {
     padding-top: 15px;
+  }
+}
+
+/* Bracket Matchup Tables */
+.bracket-matchups-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 50, 50, 0.2);
+}
+
+.round-matchups {
+  margin-bottom: 15px;
+}
+
+.round-title {
+  color: #ff3232;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  text-align: center;
+  font-family: "Orbitron", monospace;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.2);
+}
+
+.matchup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  color: #eee;
+  background: rgba(20, 20, 20, 0.4);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.matchup-table th {
+  text-align: center;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #ccc;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.matchup-table td {
+  padding: 6px 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.matchup-table tr:last-child td {
+  border-bottom: none;
+}
+
+.team-pick,
+.team-result {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.team-abbr {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.5px;
+}
+
+.games-pick,
+.games-result {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-left: 3px;
+}
+
+tr.correct-pick {
+  background-color: rgba(102, 255, 102, 0.1);
+}
+
+.games-accuracy .correct {
+  color: #66ff66;
+}
+
+/* Team Colors */
+/* Dallas */
+.team-abbr.dal {
+  color: #006847;
+}
+
+/* Vegas */
+.team-abbr.vgk {
+  color: #b4975a;
+}
+
+/* Winnipeg */
+.team-abbr.wpg {
+  color: #004c97;
+}
+
+/* Colorado */
+.team-abbr.col {
+  color: #6f263d;
+}
+
+/* Vancouver */
+.team-abbr.van {
+  color: #00843d;
+}
+
+/* Nashville */
+.team-abbr.nsh {
+  color: #ffb81c;
+}
+
+/* Edmonton */
+.team-abbr.edm {
+  color: #fc4c02;
+}
+
+/* Los Angeles */
+.team-abbr.lak {
+  color: #a2aaad;
+}
+
+/* Florida */
+.team-abbr.fla {
+  color: #c8102e;
+}
+
+/* Tampa Bay */
+.team-abbr.tbl {
+  color: #002868;
+}
+
+/* Boston */
+.team-abbr.bos {
+  color: #ffb81c;
+}
+
+/* Toronto */
+.team-abbr.tor {
+  color: #00205b;
+}
+
+/* New York Rangers */
+.team-abbr.nyr {
+  color: #0038a8;
+}
+
+/* Washington */
+.team-abbr.wsh {
+  color: #c8102e;
+}
+
+/* Carolina */
+.team-abbr.car {
+  color: #cc0000;
+}
+
+/* New York Islanders */
+.team-abbr.nyi {
+  color: #00539b;
+}
+
+/* Minnesota */
+.team-abbr.min {
+  color: #154734;
+}
+
+/* Seattle */
+.team-abbr.sea {
+  color: #99d9d9;
+}
+
+/* New Jersey */
+.team-abbr.njd {
+  color: #ce1126;
+}
+
+/* Ottawa */
+.team-abbr.ott {
+  color: #da1a32;
+}
+
+/* Montreal */
+.team-abbr.mtl {
+  color: #af1e2d;
+}
+
+/* Columbus */
+.team-abbr.cbj {
+  color: #002654;
+}
+
+/* Pittsburgh */
+.team-abbr.pit {
+  color: #fcb514;
+}
+
+/* Detroit */
+.team-abbr.det {
+  color: #ce1126;
+}
+
+/* Buffalo */
+.team-abbr.buf {
+  color: #003087;
+}
+
+/* Philadelphia */
+.team-abbr.phi {
+  color: #f74902;
+}
+
+/* St Louis */
+.team-abbr.stl {
+  color: #002f87;
+}
+
+/* Calgary */
+.team-abbr.cgy {
+  color: #d2001c;
+}
+
+/* For matchups in progress or not yet played */
+.team-abbr.kesken {
+  color: #999999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .matchup-table {
+    font-size: 0.75rem;
+  }
+
+  .matchup-table th,
+  .matchup-table td {
+    padding: 5px 3px;
+  }
+
+  .team-abbr {
+    font-size: 0.8rem;
+  }
+
+  .games-pick,
+  .games-result {
+    font-size: 0.65rem;
+  }
+}
+
+/* Prediction Round Points */
+.prediction-details {
+  margin: 15px 0;
+  background-color: #222;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.prediction-details .section-title {
+  font-size: 1rem;
+  color: #ccc;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.rounds-points {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.round-point {
+  flex: 1;
+  background-color: #1a1a1a;
+  border-radius: 5px;
+  padding: 8px 5px;
+  text-align: center;
+  border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+}
+
+.round-label {
+  font-size: 0.8rem;
+  color: #999;
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+.round-value {
+  font-size: 1.2rem;
+  color: #ff4444;
+  font-weight: bold;
+  font-family: "Orbitron", monospace;
+}
+
+@media (max-width: 480px) {
+  .rounds-points {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .round-point {
+    flex-basis: 45%;
   }
 }

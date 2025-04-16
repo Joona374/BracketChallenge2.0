@@ -8,6 +8,7 @@ import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 import { DeadlineService } from "../services/deadline.service";
+import { TooltipComponent } from "../tooltip/tooltip.component";
 
 type SlotKey = "L" | "C" | "R" | "LD" | "RD" | "G";
 type PlayerPosition = "L" | "C" | "R" | "D" | "G";
@@ -16,7 +17,7 @@ type SortableEntity = Player | Goalie;
 @Component({
   selector: "app-lineup-page",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TooltipComponent],
   templateUrl: "./lineup-page.component.html",
   styleUrls: ["./lineup-page.component.css"],
 })

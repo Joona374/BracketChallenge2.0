@@ -58,7 +58,7 @@ header = f"{'Name':<25} {'Pos':<3} {'GP':>3} {'G':>3} {'A':>3} {'P':>3} {'+/-':>
 print(header)
 print("-" * len(header))
 
-for player in players:
+for player in players[:1]:
     player_id = player['id']
     first_name = player['firstName']['default']
     last_name = player['lastName']['default']
@@ -71,6 +71,9 @@ for player in players:
     if response.status_code != 200:
         print(f"❌ Failed to fetch data for {full_name}")
         continue
+
+    print(f"Fetching data for {full_name}...")
+    print(response.json())
 
     stats = response.json().get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
 

@@ -103,6 +103,9 @@ export class AdminComponent implements OnInit {
   westRoundResults: MatchupResult[] = [];
   finalResult: MatchupResult = { matchupId: 0, winner: '', games: 4 };
 
+  loadingPredictionCheck = false;
+  predictionCheckMessage = '';
+
   // Registration code management
   registrationCodes: RegistrationCode[] = [];
   newCodesAmount: number = 1;
@@ -144,6 +147,15 @@ export class AdminComponent implements OnInit {
     team: 'all'
   };
   userTeams: { id: number; team_name: string }[] = [];
+
+  // Deadline management
+  deadline: Date | null = null;
+  deadlineMessage: string = '';
+  deadlineError: string = '';
+  deadlineISOString: string = '';
+  deadlinePassed: boolean = false;
+  deadlineLoading: boolean = false;
+  timeRemaining: string = '';
 
   // API URL
   private apiUrl = environment.apiUrl;
@@ -410,13 +422,37 @@ export class AdminComponent implements OnInit {
       formattedResults: formattedResults
     }).subscribe({
       next: () => {
-        alert(`Round ${this.selectedRound} results saved successfully!`);
+        // After saving results, trigger bracket points recount for all users
+        this.http.post(`${this.apiUrl}/admin/trigger-bracket-recount`, {}).subscribe({
+          next: () => {
+            alert(`Round ${this.selectedRound} results saved and bracket points updated!`);
+          },
+          error: (err) => {
+            alert(`Results saved, but failed to update bracket points: ${err.error?.error || err.message}`);
+          }
+        });
       },
       error: (err) => {
         console.error('Error saving results:', err);
         alert('Failed to save results. Please try again.');
       }
     });
+  }
+
+  triggerPredictionCheck() {
+    this.loadingPredictionCheck = true;
+    this.predictionCheckMessage = '';
+    this.http.post(`${environment.apiUrl}/admin/trigger-prediction-check`, { round: this.selectedRound })
+      .subscribe({
+        next: (res: any) => {
+          this.predictionCheckMessage = 'Prediction check complete for round ' + this.selectedRound + '!';
+          this.loadingPredictionCheck = false;
+        },
+        error: (err) => {
+          this.predictionCheckMessage = 'Error: ' + (err.error?.error || err.message);
+          this.loadingPredictionCheck = false;
+        }
+      });
   }
 
   // Load teams from API
@@ -929,6 +965,61 @@ export class AdminComponent implements OnInit {
         return h.team_name === null;
       } else {
         return h.team_name === this.headlinesFilter.team;
+      }
+    });
+  }
+
+  // Deadline management
+  loadDeadline(): void {
+    this.deadlineLoading = true;
+    this.deadlineMessage = '';
+    this.deadlineError = '';
+
+    this.http.get<any>(`${this.apiUrl}/admin/settings/deadline`).subscribe({
+      next: (data) => {
+        // Parse the ISO string deadline to a Date object
+        this.deadline = new Date(data.deadline);
+        this.deadlineISOString = this.deadline.toISOString().slice(0, 16); // Format for datetime-local input
+        this.deadlinePassed = data.deadline_passed;
+        this.timeRemaining = data.time_remaining;
+        this.deadlineLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading deadline:', err);
+        this.deadlineError = 'Failed to load deadline settings';
+        this.deadlineLoading = false;
+      }
+    });
+  }
+
+  updateDeadline(): void {
+    if (!this.deadlineISOString) {
+      this.deadlineError = 'Please select a valid deadline date and time';
+      return;
+    }
+
+    // Parse the local datetime string to a Date object
+    this.deadline = new Date(this.deadlineISOString);
+
+    // Show loading indicator
+    this.deadlineLoading = true;
+    this.deadlineMessage = '';
+    this.deadlineError = '';
+
+    // Send the deadline to the server
+    this.http.put<any>(`${this.apiUrl}/admin/settings/deadline`, {
+      deadline: this.deadline.toISOString() // Convert to ISO string format
+    }).subscribe({
+      next: (data) => {
+        this.deadlineMessage = 'Deadline updated successfully';
+        this.deadlinePassed = data.deadline_passed;
+        this.timeRemaining = data.time_remaining;
+        this.deadlineLoading = false;
+      },
+      error: (err) => {
+        console.error('Error updating deadline:', err);
+        this.deadlineError = err.error?.error || 'Failed to update deadline';
+        this.deadlineLoading = false;
       }
     });
   }

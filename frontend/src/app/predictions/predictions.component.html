@@ -149,7 +149,7 @@
               </th>
 
               <!-- Skater specific columns -->
-              <ng-container *ngIf="selectedCategory !== 'goalieGaa'">
+              <ng-container *ngIf="selectedCategory !== 'goalieWins'">
                 <th
                   (click)="sortBy('reg_goals')"
                   [class.sorted]="sortKey === 'reg_goals'"
@@ -193,7 +193,7 @@
               </ng-container>
 
               <!-- Goalie specific columns -->
-              <ng-container *ngIf="selectedCategory === 'goalieGaa'">
+              <ng-container *ngIf="selectedCategory === 'goalieWins'">
                 <th
                   (click)="sortBy('reg_gaa')"
                   [class.sorted]="sortKey === 'reg_gaa'"
@@ -251,7 +251,7 @@
               <td class="stat-column">{{ player?.reg_gp || 0 }}</td>
 
               <!-- Skater stats (only shown when not viewing goalies) -->
-              <ng-container *ngIf="selectedCategory !== 'goalieGaa'">
+              <ng-container *ngIf="selectedCategory !== 'goalieWins'">
                 <td class="stat-column">
                   {{ getGoals(player) }}
                 </td>
@@ -272,7 +272,7 @@
               </ng-container>
 
               <!-- Goalie stats (only shown when viewing goalies) -->
-              <ng-container *ngIf="selectedCategory === 'goalieGaa'">
+              <ng-container *ngIf="selectedCategory === 'goalieWins'">
                 <td class="stat-column">
                   {{ getGaa(player) }}
                 </td>

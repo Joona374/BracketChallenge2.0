@@ -17,7 +17,7 @@ type PredictionCategory =
   | "goals"
   | "defensePoints"
   | "U23Points"
-  | "goalieGaa"
+  | "goalieWins"
   | "finnishPoints";
 
 interface PlayerBase {
@@ -52,7 +52,7 @@ export class PredictionsComponent implements OnInit {
     goals: [],
     defensePoints: [],
     U23Points: [],
-    goalieGaa: [],
+    goalieWins: [],
     finnishPoints: []
   };
 
@@ -61,10 +61,10 @@ export class PredictionsComponent implements OnInit {
     connSmythe: "Conn Smythe -voittaja",
     penaltyMinutes: "Jäähypörssi",
     goals: "Maalipörssi",
-    defensePoints: "Puolustajien pistepörssi",
-    U23Points: "U23 pistepörssi",
-    goalieGaa: "Paras GAA -maalivahti",
-    finnishPoints: "Suomalaisten pistepörssi"
+    defensePoints: "Puolustajien Pistepörssi",
+    U23Points: "U23 Pistepörssi",
+    goalieWins: "Eniten Voittoja - MV",
+    finnishPoints: "Suomalaisten Pistepörssi"
   };
 
   // Update these initial values at the class level
@@ -113,7 +113,7 @@ export class PredictionsComponent implements OnInit {
       case "U23Points":
         result = this.players.filter(p => p.isU23 === true);
         break;
-      case "goalieGaa":
+      case "goalieWins":
         result = this.goalies;
         break;
       case "finnishPoints":

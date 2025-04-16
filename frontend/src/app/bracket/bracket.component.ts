@@ -5,6 +5,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { environment } from "../../environments/environment";
 import { DeadlineService } from "../services/deadline.service";
+import { TooltipComponent } from "../tooltip/tooltip.component";
 
 interface Matchups {
   west: any[];
@@ -18,7 +19,7 @@ interface RoundPicks {
 @Component({
   selector: "app-bracket",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TooltipComponent],
   templateUrl: "./bracket.component.html",
   styleUrls: ["./bracket.component.css"],
 })

@@ -1,4 +1,11 @@
-<h2>NHL Bracket Challenge 2025</h2>
+<h2 style="gap: 8px">
+  NHL Bracket Challenge 2025
+  <app-tooltip
+    [text]="
+      'Valitse voittajat jokaisesta otteluparista klikkaamalla joukkuetta. Arvaa myös montako ottelua sarja kestää. Voit muuttaa valintojasi ennen määräajan umpeutumista.'
+    "
+  ></app-tooltip>
+</h2>
 
 <!-- Deadline status indicator -->
 <div *ngIf="deadlinePassed" class="deadline-notice">

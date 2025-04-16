@@ -2,6 +2,19 @@ from db import db_engine as db
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 
+class Setting(db.Model):
+    __tablename__ = 'settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=False)
+    description = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<Setting {self.key}>"
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -160,6 +173,7 @@ class Player(db.Model):
     is_U23 = db.Column(db.Boolean, default=False)
     price = db.Column(db.Integer, default=1)
     initial_price = db.Column(db.Integer, default=1)
+    last_price_update_game_id = db.Column(db.String(32), nullable=True)
     
     # Regular season stats
     reg_gp = db.Column(db.Integer, default=0)
@@ -167,12 +181,14 @@ class Player(db.Model):
     reg_assists = db.Column(db.Integer, default=0)
     reg_points = db.Column(db.Integer, default=0)
     reg_plus_minus = db.Column(db.Integer, default=0)
+    reg_penalty_minutes = db.Column(db.Integer, default=0)
     
-    # Playoff stats (set as placeholders until available)
+    # Playoff stats
     playoff_goals = db.Column(db.Integer, default=0)
     playoff_assists = db.Column(db.Integer, default=0)
     playoff_points = db.Column(db.Integer, default=0)
     playoff_plus_minus = db.Column(db.Integer, default=0)
+    playoff_penalty_minutes = db.Column(db.Integer, default=0)
     
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
@@ -195,6 +211,7 @@ class Goalie(db.Model):
     is_U23 = db.Column(db.Boolean, default=False)
     price = db.Column(db.Integer, default=1)
     initial_price = db.Column(db.Integer, default=1)
+    last_price_update_game_id = db.Column(db.String(32), nullable=True)
     
     # Regular season goalie stats
     reg_gp = db.Column(db.Integer, default=0)  # Games played
@@ -261,6 +278,13 @@ class UserPoints(db.Model):
     # Game 3: Category Predictions
     predictions_total_points = db.Column(db.Integer, default=0) # Total points from predictions game
     
+    # Prediction points per round
+    predictions_r1_points = db.Column(db.Integer, default=0)
+    predictions_r2_points = db.Column(db.Integer, default=0)
+    predictions_r3_points = db.Column(db.Integer, default=0)
+    predictions_final_points = db.Column(db.Integer, default=0)
+    predictions_total_points = db.Column(db.Integer, default=0)
+    
     # Overall total
     total_points = db.Column(db.Integer, default=0)             # Sum of all game points
     
@@ -272,15 +296,17 @@ class UserPoints(db.Model):
     
     def update_total_points(self):
         """Update the total points by summing all game points"""
-        self.bracket_total_points = (self.bracket_round1_points + 
-                                     self.bracket_round2_points + 
-                                     self.bracket_round3_points + 
-                                     self.bracket_final_points)
-                                     
-        self.total_points = (self.bracket_total_points + 
-                            self.lineup_total_points + 
-                            self.predictions_total_points)
-        
+        self.bracket_total_points = (
+            (self.bracket_round1_points or 0) +
+            (self.bracket_round2_points or 0) +
+            (self.bracket_round3_points or 0) +
+            (self.bracket_final_points or 0)
+        )
+        self.total_points = (
+            (self.bracket_total_points or 0) +
+            (self.lineup_total_points or 0) +
+            (self.predictions_total_points or 0)
+        )
         self.updated_at = datetime.now(timezone.utc)
     
     def __repr__(self):
@@ -293,6 +319,7 @@ class LineupHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     player_id = db.Column(db.Integer, db.ForeignKey('players.id'), nullable=False)
+    player_out_id = db.Column(db.Integer, nullable=True)  # New: outgoing player id
     slot = db.Column(db.String(2), nullable=False)  # L, C, R, LD, RD, G
     added_at = db.Column(db.DateTime, nullable=False)
     removed_at = db.Column(db.DateTime, nullable=True)  # Null if player is still in lineup
@@ -313,3 +340,34 @@ class Headline(db.Model):
     def __repr__(self):
         team_info = f"for {self.team_name}" if self.team_name else "global"
         return f'<Headline {self.id}: {self.headline} ({team_info})>'
+
+class GameLog(db.Model):
+    __tablename__ = 'game_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer, nullable=False)  # Player or Goalie DB id
+    api_id = db.Column(db.Integer, nullable=False)     # NHL API playerId
+    is_goalie = db.Column(db.Boolean, default=False)
+    game_id = db.Column(db.String(32), nullable=False)
+    game_date = db.Column(db.DateTime, nullable=False)
+    team = db.Column(db.String(10), nullable=False)
+    opponent = db.Column(db.String(10), nullable=False)
+    home = db.Column(db.Boolean, default=False)
+    player_name = db.Column(db.String(80), nullable=False)  # Full name for easier queries
+    # Skater stats
+    goals = db.Column(db.Integer, default=0)
+    assists = db.Column(db.Integer, default=0)
+    points = db.Column(db.Integer, default=0)
+    plus_minus = db.Column(db.Integer, default=0)
+    # Goalie stats
+    wins = db.Column(db.Integer, default=0)
+    shutouts = db.Column(db.Integer, default=0)
+    saves = db.Column(db.Integer, default=0)
+    shots = db.Column(db.Integer, default=0)
+    goals_against = db.Column(db.Integer, default=0)
+    # Game start time in UTC
+    start_time_utc = db.Column(db.DateTime, nullable=True)
+    # ... add more as needed ...
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    def __repr__(self):
+        return f'<GameLog {self.api_id} {self.game_id}>'

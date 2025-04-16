@@ -80,6 +80,10 @@ export class LeaderboardComponent implements OnInit {
 
       if (valA < valB) return this.sortAsc ? -1 : 1;
       if (valA > valB) return this.sortAsc ? 1 : -1;
+
+      // If values are equal, use rank as a tiebreaker (lower rank is better)
+      if (a.rank < b.rank) return -1;
+      if (a.rank > b.rank) return 1;
       return 0;
     });
   }
@@ -214,15 +218,10 @@ export class LeaderboardComponent implements OnInit {
     this.updateRanks();
   }
 
+  // updateRanks is no longer needed because the backend now provides correct ranks, including ties.
+  // This method is now a no-op.
   updateRanks(): void {
-    // Update rank based on totalPoints (regardless of current sort)
-    const ranked = [...this.leaderboardEntries].sort((a, b) => b.totalPoints - a.totalPoints);
-    ranked.forEach((entry, index) => {
-      const targetEntry = this.leaderboardEntries.find(e => e.id === entry.id);
-      if (targetEntry) {
-        targetEntry.rank = index + 1;
-      }
-    });
+    // No action needed; backend provides correct rank field.
   }
 
   isCurrentUser(id: number): boolean {

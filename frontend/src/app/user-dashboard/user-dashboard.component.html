@@ -164,6 +164,63 @@
               </div>
             </div>
           </div>
+
+          <!-- Matchup Comparison Tables -->
+          <div class="bracket-matchups-section">
+            <h4 class="table-title">Ottelut</h4>
+
+            <div
+              class="round-matchups"
+              *ngFor="let round of bracketSummary.roundMatchups"
+            >
+              <div class="round-title">{{ round.name }}</div>
+
+              <table class="matchup-table">
+                <thead>
+                  <tr>
+                    <th>Valinta</th>
+                    <th>Tulos</th>
+                    <th>Enn. Pelit</th>
+                    <th>Tot. Pelit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let matchup of round.matchups"
+                    [class.correct-pick]="matchup.userCorrect"
+                  >
+                    <td class="team-cell">
+                      <span
+                        class="team-abbr {{
+                          matchup.userPickedTeam.toLowerCase()
+                        }}"
+                      >
+                        {{ matchup.userPickedTeam }}
+                      </span>
+                    </td>
+                    <td class="team-cell">
+                      <span
+                        class="team-abbr {{
+                          matchup.actualWinner.toLowerCase()
+                        }}"
+                      >
+                        {{ matchup.actualWinner }}
+                      </span>
+                    </td>
+                    <td class="games-cell">
+                      {{ matchup.userPickedGames }}
+                    </td>
+                    <td
+                      class="games-cell"
+                      [class.correct]="matchup.gamesCorrect"
+                    >
+                      {{ matchup.actualGames > 0 ? matchup.actualGames : "-" }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div class="card-stats">
@@ -290,7 +347,7 @@
       <div class="card-content">
         <div class="stat-categories">
           <div class="category-header">
-            <div class="category-title">Kategoria</div>
+            <div class="category-title">Tämän hetkiset johtajat</div>
             <div class="prediction-results">
               <span>Oikein</span> / <span>Yhteensä</span>
             </div>
@@ -301,12 +358,13 @@
             *ngFor="let category of predictionsSummary.categories"
           >
             <div class="category-header-row">
-              <div class="category-name">{{ category.name }}</div>
+              <div class="category-name">
+                {{ getCategoryLabel(category.name) }}
+              </div>
               <div class="category-score">
-                <span [class.highlight]="category.correctPicks > 0">{{
-                  category.correctPicks
-                }}</span>
-                / 3
+                <span [class.highlight]="category.correctPicks > 0">
+                  {{ category.correctPicks }}/3
+                </span>
               </div>
             </div>
 
@@ -316,9 +374,11 @@
                 <div
                   class="player-pick"
                   *ngFor="let player of category.userPicks"
-                  [class.matching-pick]="category.currentTop3.includes(player)"
+                  [class.matching-pick]="
+                    isPlayerInList(player, category.currentTop3)
+                  "
                 >
-                  {{ player }}
+                  {{ player.firstName }} {{ player.lastName }}
                 </div>
                 <div
                   class="player-pick empty"
@@ -333,9 +393,11 @@
                 <div
                   class="player-pick"
                   *ngFor="let player of category.currentTop3"
-                  [class.matching-pick]="category.userPicks.includes(player)"
+                  [class.matching-pick]="
+                    isPlayerInList(player, category.userPicks)
+                  "
                 >
-                  {{ player }}
+                  {{ player.firstName }} {{ player.lastName }}
                 </div>
               </div>
             </div>
@@ -344,10 +406,34 @@
 
         <div class="prediction-summary">
           <div class="summary-stat">
-            <span class="summary-label">Yhteensä oikein:</span>
+            <span class="summary-label">Yhteensä oikein tällä hetkellä:</span>
             <span class="summary-value"
               >{{ predictionsSummary.totalCorrect }}/18</span
             >
+          </div>
+        </div>
+
+        <div class="prediction-details">
+          <h4 class="section-title">Ennustuspisteet kierroksittain</h4>
+          <div class="rounds-points">
+            <div class="round-point">
+              <span class="round-label">K1:</span>
+              <span class="round-value">{{ points.predictionsR1 || 0 }}</span>
+            </div>
+            <div class="round-point">
+              <span class="round-label">K2:</span>
+              <span class="round-value">{{ points.predictionsR2 || 0 }}</span>
+            </div>
+            <div class="round-point">
+              <span class="round-label">K3:</span>
+              <span class="round-value">{{ points.predictionsR3 || 0 }}</span>
+            </div>
+            <div class="round-point">
+              <span class="round-label">Finaali:</span>
+              <span class="round-value">{{
+                points.predictionsFinal || 0
+              }}</span>
+            </div>
           </div>
         </div>
 
