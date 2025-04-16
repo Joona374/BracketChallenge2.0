@@ -127,7 +127,6 @@
         <th
           (click)="sortBy('firstName')"
           [class.sorted]="sortKey === 'firstName'"
-          class="hide-on-mobile"
         >
           Etunimi
           <span *ngIf="sortKey === 'firstName'">{{ sortAsc ? "▲" : "▼" }}</span>
@@ -154,7 +153,7 @@
         <th
           (click)="sortBy('reg_gp')"
           [class.sorted]="sortKey === 'reg_gp'"
-          class="stat-column hide-on-mobile"
+          class="stat-column"
         >
           Pelattu
           <span *ngIf="sortKey === 'reg_gp'">{{ sortAsc ? "▲" : "▼" }}</span>
@@ -195,7 +194,7 @@
           <th
             (click)="sortBy('reg_plus_minus')"
             [class.sorted]="sortKey === 'reg_plus_minus'"
-            class="stat-column hide-on-mobile"
+            class="stat-column"
           >
             +/-
             <span *ngIf="sortKey === 'reg_plus_minus'">{{
@@ -219,7 +218,7 @@
           <th
             (click)="sortBy('reg_shutouts')"
             [class.sorted]="sortKey === 'reg_shutouts'"
-            class="stat-column hide-on-mobile"
+            class="stat-column"
           >
             Nollapelit
             <span *ngIf="sortKey === 'reg_shutouts'">{{
@@ -261,11 +260,11 @@
         class="player-row"
       >
         <td>{{ entity?.position || "" }}</td>
-        <td class="hide-on-mobile">{{ entity?.firstName || "" }}</td>
+        <td>{{ entity?.firstName || "" }}</td>
         <td>{{ entity?.lastName || "" }}</td>
         <td>{{ entity?.team || "" }}</td>
         <td class="hide-on-mobile">{{ entity?.isU23 ? "✓" : "❌" }}</td>
-        <td class="stat-column hide-on-mobile">{{ entity?.reg_gp || 0 }}</td>
+        <td class="stat-column">{{ entity?.reg_gp || 0 }}</td>
 
         <!-- Player-specific stats -->
         <ng-container *ngIf="!isGoalieSlotSelected()">
@@ -277,7 +276,7 @@
             {{ getPlayerStats(entity, "reg_points") }}
           </td>
           <td
-            class="stat-column hide-on-mobile"
+            class="stat-column"
             [class.positive]="getPlayerStats(entity, 'reg_plus_minus') > 0"
             [class.negative]="getPlayerStats(entity, 'reg_plus_minus') < 0"
           >
@@ -289,7 +288,7 @@
         <!-- Goalie-specific stats -->
         <ng-container *ngIf="isGoalieSlotSelected()">
           <td class="stat-column">{{ getGoalieStats(entity, "reg_wins") }}</td>
-          <td class="stat-column hide-on-mobile">
+          <td class="stat-column">
             {{ getGoalieStats(entity, "reg_shutouts") }}
           </td>
           <td

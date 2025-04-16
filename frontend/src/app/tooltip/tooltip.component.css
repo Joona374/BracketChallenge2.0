@@ -50,10 +50,12 @@
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .tooltip-text {
-    width: 90%; /* Adjust width to 90% of the screen */
+    width: 250px; /* Adjust width to 90% of the screen */
     left: 5%; /* Align to the left with a 5% margin */
+
     transform: translateX(0); /* Remove translateX */
-    margin-left: 0; /* Remove the negative margin */
+
+    margin-left: -200px; /* Remove the negative margin */
     font-size: 14px; /* Reduce font size for better readability */
   }
 }

@@ -89,6 +89,40 @@
   color: #fff;
 }
 
+/* Mobile Category Dropdown */
+.category-dropdown {
+  display: none;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.category-select {
+  width: 100%;
+  padding: 12px;
+  background-color: #222;
+  color: #fff;
+  border: 2px solid #ff4444;
+  border-radius: 8px;
+  font-family: "Orbitron", monospace;
+  font-size: 16px;
+  appearance: none;
+  cursor: pointer;
+  text-align-last: center;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 10px) center;
+}
+
+.category-select option {
+  background-color: #333;
+  padding: 8px;
+}
+
+.category-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.5);
+}
+
 /* Adjust content layout to use flex-grow */
 .predictions-content {
   display: flex;
@@ -701,6 +735,71 @@ button[disabled] {
   }
 }
 
+@media (max-width: 760px) {
+  .predictions-content {
+    flex-direction: column;
+    overflow: visible;
+    min-height: auto;
+  }
+
+  /* Show dropdown, hide tabs on mobile */
+  .category-tabs {
+    display: none;
+  }
+
+  .category-dropdown {
+    display: block;
+  }
+
+  .current-picks-panel {
+    max-width: none;
+    width: 100%;
+    margin-bottom: 20px;
+    min-height: 200px;
+    display: block;
+    overflow: visible;
+  }
+
+  .player-selection-panel {
+    width: 100%;
+    max-height: 350px;
+  }
+
+  /* Make buttons display horizontally on mobile */
+  .action-buttons-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  /* Simplified button text for mobile */
+  .prediction-button {
+    padding: 10px;
+    font-size: 14px;
+    min-width: 30%;
+  }
+
+  .prediction-button .desktop-text {
+    display: none;
+  }
+
+  .prediction-button .mobile-text {
+    display: inline;
+  }
+}
+
+@media (min-width: 761px) {
+  .prediction-button .desktop-text {
+    display: inline;
+  }
+
+  .prediction-button .mobile-text {
+    display: none;
+  }
+}
+
 @media (max-width: 600px) {
   .category-tab {
     font-size: 12px;
@@ -711,5 +810,94 @@ button[disabled] {
   .player-table td {
     padding: 8px 3px;
     font-size: 14px;
+  }
+}
+
+/* Enhanced mobile styles */
+@media (max-width: 480px) {
+  .predictions-container {
+    padding: 0 5px;
+    height: auto;
+    min-height: calc(100vh - 150px);
+    overflow: visible;
+  }
+
+  .category-tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .category-tab {
+    width: 90%;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+  .player-table
+    thead
+    th:not(:nth-child(1)):not(:nth-child(3)):not(:nth-child(4)):not(
+      :nth-child(5)
+    ):not(:nth-child(8)) {
+    display: none; /* Hide less important columns on mobile */
+  }
+
+  .player-table
+    tbody
+    td:not(:nth-child(1)):not(:nth-child(3)):not(:nth-child(4)):not(
+      :nth-child(5)
+    ):not(:nth-child(8)) {
+    display: none;
+  }
+
+  .player-table {
+    font-size: 12px;
+  }
+
+  .player-selection-panel {
+    padding: 0;
+  }
+
+  .prediction-button {
+    width: 32%;
+    padding: 10px 5px;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  /* Improve touch targets for mobile */
+  .player-row {
+    height: 48px;
+  }
+
+  .remove-pick {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Fix pick item display on small screens */
+  .pick-item {
+    padding: 10px 8px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .player-table tr {
+    min-height: 50px; /* Larger touch targets */
+  }
+
+  .category-tab {
+    padding: 12px;
+  }
+
+  .prediction-button:active,
+  .category-tab:active,
+  .player-row:active {
+    opacity: 0.7;
+  }
+
+  .remove-pick {
+    min-width: 36px;
+    min-height: 36px;
   }
 }

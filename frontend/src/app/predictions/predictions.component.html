@@ -16,6 +16,24 @@
 <p class="section-subheader">Valitse 3 pelaajaa jokaiseen kategoriaan</p>
 
 <div class="predictions-container">
+  <!-- Mobile Category Dropdown -->
+  <div class="category-dropdown">
+    <select
+      class="category-select"
+      [(ngModel)]="selectedCategory"
+      [disabled]="deadlinePassed"
+    >
+      <option
+        *ngFor="let cat of predictions | keyvalue"
+        [value]="cat.key"
+        [disabled]="deadlinePassed"
+      >
+        {{ categoryLabels[castToPredictionCategory(cat.key)] }}
+        ({{ cat.value.length }}/3)
+      </option>
+    </select>
+  </div>
+
   <!-- Category selection tabs -->
   <div class="category-tabs">
     <div
@@ -300,7 +318,10 @@
       (click)="savePredictions()"
       [disabled]="deadlinePassed"
     >
-      <span *ngIf="!deadlinePassed">💾 Tallenna kaikki veikkaukset</span>
+      <span *ngIf="!deadlinePassed">
+        <span class="desktop-text">💾 Tallenna kaikki veikkaukset</span>
+        <span class="mobile-text">💾 Tallenna</span>
+      </span>
       <span *ngIf="deadlinePassed">🔒 Veikkaukset lukittu</span>
     </button>
     <button
@@ -308,14 +329,16 @@
       (click)="resetPredictions()"
       [disabled]="deadlinePassed"
     >
-      🔄 Nollaa veikkaukset
+      <span class="desktop-text">🔄 Nollaa veikkaukset</span>
+      <span class="mobile-text">🔄 Nollaa</span>
     </button>
     <button
       class="prediction-button load"
       (click)="loadPredictions()"
       [disabled]="deadlinePassed"
     >
-      📂 Lataa tallennetut veikkaukset
+      <span class="desktop-text">📂 Lataa tallennetut veikkaukset</span>
+      <span class="mobile-text">📂 Lataa</span>
     </button>
   </div>
 </div>

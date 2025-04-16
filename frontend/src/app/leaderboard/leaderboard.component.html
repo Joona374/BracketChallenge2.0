@@ -114,7 +114,7 @@
             (click)="sortBy('lineupPoints')"
             [class.sorted]="sortKey === 'lineupPoints'"
           >
-            Lineup
+            Kokoonpano
             <span *ngIf="sortKey === 'lineupPoints'">{{
               sortAsc ? "▲" : "▼"
             }}</span>
@@ -124,7 +124,7 @@
             (click)="sortBy('predictionsPoints')"
             [class.sorted]="sortKey === 'predictionsPoints'"
           >
-            Predictions
+            Top 3
             <span *ngIf="sortKey === 'predictionsPoints'">{{
               sortAsc ? "▲" : "▼"
             }}</span>
