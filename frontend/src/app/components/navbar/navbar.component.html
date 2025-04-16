@@ -121,6 +121,13 @@
 
     <ng-template #guestLinks>
       <a
+        routerLink="/"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeDropdown()"
+        >Etusivu</a
+      >
+      <a
         routerLink="/rules"
         routerLinkActive="active-link"
         (click)="closeDropdown()"

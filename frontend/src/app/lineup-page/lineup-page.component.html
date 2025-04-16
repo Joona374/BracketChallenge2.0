@@ -119,7 +119,7 @@
         <th
           (click)="sortBy('position')"
           [class.sorted]="sortKey === 'position'"
-          style="width: 110px"
+          style="width: 75px"
         >
           Pelip.
           <span *ngIf="sortKey === 'position'">{{ sortAsc ? "▲" : "▼" }}</span>
@@ -127,6 +127,7 @@
         <th
           (click)="sortBy('firstName')"
           [class.sorted]="sortKey === 'firstName'"
+          class="hide-on-mobile"
         >
           Etunimi
           <span *ngIf="sortKey === 'firstName'">{{ sortAsc ? "▲" : "▼" }}</span>
@@ -142,14 +143,18 @@
           Joukkue
           <span *ngIf="sortKey === 'team'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
-        <th (click)="sortBy('isU23')" [class.sorted]="sortKey === 'isU23'">
+        <th
+          (click)="sortBy('isU23')"
+          [class.sorted]="sortKey === 'isU23'"
+          class="hide-on-mobile"
+        >
           U23
           <span *ngIf="sortKey === 'isU23'">{{ sortAsc ? "▲" : "▼" }}</span>
         </th>
         <th
           (click)="sortBy('reg_gp')"
           [class.sorted]="sortKey === 'reg_gp'"
-          class="stat-column"
+          class="stat-column hide-on-mobile"
         >
           Pelattu
           <span *ngIf="sortKey === 'reg_gp'">{{ sortAsc ? "▲" : "▼" }}</span>
@@ -190,7 +195,7 @@
           <th
             (click)="sortBy('reg_plus_minus')"
             [class.sorted]="sortKey === 'reg_plus_minus'"
-            class="stat-column"
+            class="stat-column hide-on-mobile"
           >
             +/-
             <span *ngIf="sortKey === 'reg_plus_minus'">{{
@@ -214,7 +219,7 @@
           <th
             (click)="sortBy('reg_shutouts')"
             [class.sorted]="sortKey === 'reg_shutouts'"
-            class="stat-column"
+            class="stat-column hide-on-mobile"
           >
             Nollapelit
             <span *ngIf="sortKey === 'reg_shutouts'">{{
@@ -253,13 +258,14 @@
       <tr
         *ngFor="let entity of availablePlayers"
         (click)="assignPlayerToSlot(entity)"
+        class="player-row"
       >
         <td>{{ entity?.position || "" }}</td>
-        <td>{{ entity?.firstName || "" }}</td>
+        <td class="hide-on-mobile">{{ entity?.firstName || "" }}</td>
         <td>{{ entity?.lastName || "" }}</td>
         <td>{{ entity?.team || "" }}</td>
-        <td>{{ entity?.isU23 ? "✓" : "❌" }}</td>
-        <td class="stat-column">{{ entity?.reg_gp || 0 }}</td>
+        <td class="hide-on-mobile">{{ entity?.isU23 ? "✓" : "❌" }}</td>
+        <td class="stat-column hide-on-mobile">{{ entity?.reg_gp || 0 }}</td>
 
         <!-- Player-specific stats -->
         <ng-container *ngIf="!isGoalieSlotSelected()">
@@ -271,7 +277,7 @@
             {{ getPlayerStats(entity, "reg_points") }}
           </td>
           <td
-            class="stat-column"
+            class="stat-column hide-on-mobile"
             [class.positive]="getPlayerStats(entity, 'reg_plus_minus') > 0"
             [class.negative]="getPlayerStats(entity, 'reg_plus_minus') < 0"
           >
@@ -283,7 +289,7 @@
         <!-- Goalie-specific stats -->
         <ng-container *ngIf="isGoalieSlotSelected()">
           <td class="stat-column">{{ getGoalieStats(entity, "reg_wins") }}</td>
-          <td class="stat-column">
+          <td class="stat-column hide-on-mobile">
             {{ getGoalieStats(entity, "reg_shutouts") }}
           </td>
           <td

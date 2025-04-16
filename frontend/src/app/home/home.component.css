@@ -493,6 +493,11 @@
     flex-direction: column;
     gap: 15px;
   }
+
+  .main-title {
+    animation: none !important;
+    text-shadow: 0 0 10px rgba(255, 50, 50, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+  }
 }
 
 @media (max-width: 480px) {

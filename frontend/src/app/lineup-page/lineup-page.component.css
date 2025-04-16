@@ -551,38 +551,106 @@
 @media (max-width: 800px) {
   .lineup-top-container {
     flex-direction: column;
+    align-items: center;
   }
 
   .lineup-wrapper {
     margin-bottom: 15px;
+    width: 100%;
   }
 
   .lineup-side-panel {
     max-width: 100%;
+    width: 100%;
+  }
+
+  /* Improve budget and trades panels */
+  .budget-display,
+  .trades-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  /* Make buttons more touch-friendly */
+  .lineup-button {
+    padding: 12px 16px;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  /* Improve slot layout on smaller screens */
+  .slot {
+    width: 240px;
+    font-size: 14px;
+  }
+
+  /* Table improvements */
+  .player-table-container {
+    margin-top: 10px;
   }
 }
 
 @media (max-width: 620px) {
-  .lineup-wrapper {
+  .slot-container {
+    width: 100%;
+  }
+
+  .slot {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px;
+    margin: 4px auto;
+    font-size: 14px;
+  }
+
+  .lineup-row {
+    width: 100%;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
   }
 
-  .search-box {
-    width: 100%;
-    font-size: 12px;
+  .lineup-row.defenders .spacer,
+  .lineup-row.goalie .spacer {
+    display: none;
   }
 
+  /* Improve player table for mobile */
   .player-table-container {
-    max-height: 300px;
-    width: 100%;
+    max-height: 350px;
+    overflow-x: auto;
+  }
+
+  .player-table {
+    width: max-content;
+    min-width: 100%;
   }
 
   .player-table thead th,
   .player-table td {
     font-size: 13px;
-    padding: 6px;
+    padding: 10px 8px;
+  }
+
+  /* Make touch targets larger */
+  .player-table tr {
+    height: 48px;
+  }
+
+  .search-box {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  /* Sticky bottom controls for mobile */
+  .controls {
+    position: sticky;
+    bottom: 0;
+    background-color: rgba(34, 34, 34, 0.95);
+    padding: 10px 0;
+    z-index: 10;
+    border-top: 1px solid #444;
   }
 }
 
@@ -613,5 +681,61 @@
   .player-table td {
     font-size: 12px;
     padding: 5px;
+  }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .section-header {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Hide less important columns on smallest screens */
+  .player-table .hide-on-mobile {
+    display: none;
+  }
+
+  .player-table thead th,
+  .player-table td {
+    font-size: 12px;
+    padding: 8px 4px;
+    white-space: nowrap;
+  }
+
+  /* Vertical budget and trades display for smallest screens */
+  .budget-display,
+  .trades-display {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .budget-label,
+  .trades-label {
+    margin-right: 0;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .player-table tr {
+    min-height: 52px; /* Larger touch targets */
+  }
+
+  .player-table td,
+  .player-table th {
+    padding: 12px 8px;
+  }
+
+  .lineup-button,
+  .slot {
+    min-height: 48px;
+  }
+
+  /* Active state for touch */
+  .slot:active {
+    background-color: #444;
   }
 }
