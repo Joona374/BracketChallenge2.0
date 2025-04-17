@@ -9,7 +9,7 @@
           : "Valitse Aloituskokoonpano"
       }}
       <app-tooltip
-        text="Valitse 6 pelaajan kokoonpano: 3 hyökkääjää (VL, KH, OL), 2 puolustajaa (VP, OP) ja maalivahti (MV). Kokonaisbudjetti on $2,000,000. Ennen deadlinea voit vaihtaa pelaajia vapaasti. Deadlinen jälkeen sinulla on käytössäsi 9 vaihtoa kokoonpanon muokkaamiseen."
+        text="Valitse 6 pelaajan kokoonpano: 3 hyökkääjää (VL, KH, OL), 2 puolustajaa (VP, OP) ja maalivahti (MV). Kokonaisbudjetti on $2,000,000. Ennen deadlinea voit vaihtaa pelaajia vapaasti. Deadlinen jälkeen kokoonpano lukittuu."
       ></app-tooltip>
     </h2>
 
@@ -70,24 +70,6 @@
       </span>
     </div>
 
-    <!-- Trade counter display -->
-    <div class="trades-display" *ngIf="lineupLocked">
-      <span class="trades-label">Vaihtoja Jäljellä:</span>
-      <span
-        class="trades-value"
-        [ngClass]="{ 'trades-warning': effectiveRemainingTrades < 3 }"
-      >
-        {{ effectiveRemainingTrades }}/{{ maxTrades }}
-      </span>
-    </div>
-
-    <!-- Grace period notice -->
-    <div *ngIf="gracePeriodActive" class="deadline-notice">
-      ⚠️ Kokoonpanon vaihdot on estetty ensimmäisen 4 päivän aikana.<br />
-      Vaihdot sallitaan uudelleen
-      {{ gracePeriodEnd | date : "dd.MM.yyyy HH:mm" }} (UTC+3) jälkeen.
-    </div>
-
     <!-- Controls -->
     <div class="controls">
       <button class="lineup-button save" (click)="saveLineup()">
@@ -98,14 +80,7 @@
         class="lineup-button clear"
         (click)="clearLineup()"
       >
-        🧹 Tyhennä Kokoonpano
-      </button>
-      <button
-        *ngIf="lineupLocked"
-        class="lineup-button reset"
-        (click)="resetLineup()"
-      >
-        ↺ Palauta Kokoonpano
+        🧹 Tyhjennä Kokoonpano
       </button>
       <input
         type="text"

@@ -491,6 +491,12 @@
   border-left: 4px solid #ce1126;
 }
 
+.team.winner.team-stl {
+  background-color: #002f87;
+  color: #fff;
+  border-left: 4px solid #fcb514;
+}
+
 /* New York Islanders */
 .team.winner.team-pit {
   background-color: #000;
@@ -517,12 +523,6 @@
   background-color: #f74902;
   color: #fff;
   border-left: 4px solid #000;
-}
-
-.team.winner.team-stl {
-  background-color: #002f87;
-  color: #fff;
-  border-left: 4px solid #fcb514;
 }
 
 .team.winner.team-cgy {
@@ -1481,6 +1481,14 @@
   color: #fff;
 }
 
+.team-ott {
+  border-left-color: #da1a32;
+}
+.team-ott .player-team-badge {
+  background-color: #da1a32;
+  color: #fff;
+}
+
 .team-vgk {
   border-left-color: #b4975a;
 }
@@ -1582,10 +1590,6 @@
 }
 
 /* Responsive adjustments */
-.predictions-categories {
-  flex-direction: column;
-  gap: 10px;
-}
 
 .player-prediction-card {
   display: flex;
@@ -1697,6 +1701,46 @@
 }
 .team-wpg .player-team-badge {
   background-color: #041e42;
+  color: #fff;
+}
+
+.team-lak {
+  border-left-color: #111;
+}
+.team-lak .player-team-badge {
+  background-color: #111;
+  color: #fff;
+}
+
+.team-mtl {
+  border-left-color: #af1e2d;
+}
+.team-mtl .player-team-badge {
+  background-color: #af1e2d;
+  color: #fff;
+}
+
+.team-cbj {
+  border-left-color: #002654;
+}
+.team-cbj .player-team-badge {
+  background-color: #002654;
+  color: #fff;
+}
+
+.team-stl {
+  border-left-color: #002f87;
+}
+.team-stl .player-team-badge {
+  background-color: #002f87;
+  color: #fff;
+}
+
+.team-ott {
+  border-left-color: #da1a32;
+}
+.team-ott .player-team-badge {
+  background-color: #da1a32;
   color: #fff;
 }
 

@@ -126,7 +126,6 @@ class LineupPick(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     lineup_json = db.Column(db.Text, nullable=False)  # JSON format of selected players
-    remaining_trades = db.Column(db.Integer, default=9)
     unused_budget = db.Column(db.Integer, default=2000000)  # Initial budget
     total_value = db.Column(db.Integer, default=0)  # Sum of player prices
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -312,21 +311,6 @@ class UserPoints(db.Model):
     def __repr__(self):
         return f'<UserPoints for User {self.user_id}: {self.total_points} total points>'
     
-
-class LineupHistory(db.Model):
-    __tablename__ = 'lineup_history'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id'), nullable=False)
-    player_out_id = db.Column(db.Integer, nullable=True)  # New: outgoing player id
-    slot = db.Column(db.String(2), nullable=False)  # L, C, R, LD, RD, G
-    added_at = db.Column(db.DateTime, nullable=False)
-    removed_at = db.Column(db.DateTime, nullable=True)  # Null if player is still in lineup
-    price_at_time = db.Column(db.Integer, nullable=False)  # Player's price when added
-    
-    user = db.relationship('User', backref='lineup_histories')
-    player = db.relationship('Player', backref='lineup_appearances')
 
 class Headline(db.Model):
     __tablename__ = 'headlines'

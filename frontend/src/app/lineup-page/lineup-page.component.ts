@@ -43,16 +43,7 @@ export class LineupPageComponent implements OnInit {
   searchTerm: string = "";
   totalsBudget: number = 2000000;
 
-  // Trade and lineup lock properties
   lineupLocked: boolean = false;
-  remainingTrades: number = 9;
-  maxTrades: number = 9;
-
-  // Properties for the original lineup
-  private originalLineup: Record<SlotKey, Player | Goalie | null> = {
-    L: null, C: null, R: null, LD: null, RD: null, G: null
-  };
-  private pendingTradeSlots: Set<SlotKey> = new Set();
 
   // Sorting properties
   sortKey: string | null = 'price';
@@ -60,8 +51,6 @@ export class LineupPageComponent implements OnInit {
 
   // Deadline property
   deadlinePassed: boolean = false;
-  gracePeriodActive: boolean = false;
-  gracePeriodEnd: string = '';
 
   constructor(
     private playerService: PlayerService,
@@ -71,17 +60,14 @@ export class LineupPageComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Check deadline and grace period status
+    // Check deadline status only
     this.deadlineService.getDeadlineStatus().subscribe({
       next: (status) => {
         this.deadlinePassed = status.deadline_passed;
-        this.gracePeriodActive = !!status.grace_period_active;
-        this.gracePeriodEnd = status.grace_period_end || '';
       },
       error: (err) => {
         console.error('Error checking deadline status:', err);
         this.deadlinePassed = false;
-        this.gracePeriodActive = false;
       }
     });
 
@@ -169,17 +155,6 @@ export class LineupPageComponent implements OnInit {
                 }
               }
             });
-
-            // Store the original lineup state
-            Object.keys(this.slotMap).forEach(slot => {
-              this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
-            });
-
-            this.pendingTradeSlots.clear();
-
-            // Update budget and trades info
-            this.totalsBudget = res.effectiveBudget;
-            this.remainingTrades = res.remainingTrades;
 
             // Check if all slots are filled to determine if lineup is locked
             const filledSlots = Object.values(this.slotMap).filter(player => player !== null).length;
@@ -313,43 +288,13 @@ export class LineupPageComponent implements OnInit {
     });
   }
 
-  // Get actual remaining trades
-  get effectiveRemainingTrades(): number {
-    if (!this.deadlinePassed) {
-      return this.maxTrades; // Always return max trades before deadline
-    }
-
-    // After deadline, count used trades
-    const pendingTrades = this.slotKeys.reduce((count, slot) => {
-      const originalPlayer = this.originalLineup[slot];
-      const currentPlayer = this.slotMap[slot];
-      return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
-    }, 0);
-    return this.remainingTrades - pendingTrades;
-  }
-
   onSlotClick(slot: SlotKey): void {
-    if (this.gracePeriodActive) {
-      alert('Kokoonpanon vaihdot on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
+    if (this.deadlinePassed) {
+      alert('Et voi enää muuttaa kokoonpanoa deadlinen jälkeen.');
       return;
     }
 
-    // If deadline has passed, use trade system
-    if (this.deadlinePassed) {
-      if (this.slotMap[slot] &&
-        this.slotMap[slot] !== this.originalLineup[slot] &&
-        this.effectiveRemainingTrades <= 0) {
-        alert('Sinulla ei ole enää vaihtoja jäljellä.');
-        return;
-      }
-      if (this.slotMap[slot]) {
-        this.slotMap[slot] = null;
-      }
-      this.selectedSlot = slot;
-    } else {
-      // Before deadline, allow free switches
-      this.selectedSlot = this.selectedSlot === slot ? null : slot;
-    }
+    this.selectedSlot = this.selectedSlot === slot ? null : slot;
   }
 
   private formatPlayerForDisplay(player: Player | Goalie | null): string {
@@ -358,13 +303,8 @@ export class LineupPageComponent implements OnInit {
   }
 
   assignPlayerToSlot(entity: Player | Goalie): void {
-    if (this.gracePeriodActive) {
-      alert('Kokoonpanon vaihdot on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
-      return;
-    }
-
-    if (this.deadlinePassed && this.effectiveRemainingTrades <= 0) {
-      alert('Sinulla ei ole enää vaihtoja jäljellä.');
+    if (this.deadlinePassed) {
+      alert('Et voi enää muuttaa kokoonpanoa deadlinen jälkeen.');
       return;
     }
 
@@ -384,25 +324,6 @@ export class LineupPageComponent implements OnInit {
     }
 
     if (this.selectedSlot) {
-      const currentPlayer = this.slotMap[this.selectedSlot];
-
-      // If after deadline and making a change, show confirmation
-      if (this.deadlinePassed && currentPlayer && entity.id !== currentPlayer.id) {
-        const confirmed = confirm(
-          `Vahvista vaihto:\n\n` +
-          `${this.formatPlayerForDisplay(currentPlayer)} →\n` +
-          `${this.formatPlayerForDisplay(entity)}\n\n` +
-          `Sinulla on ${this.effectiveRemainingTrades} vaihtoa jäljellä.\n` +
-          `Haluatko jatkaa?`
-        );
-
-        if (!confirmed) return;
-
-        if (entity !== this.originalLineup[this.selectedSlot]) {
-          this.pendingTradeSlots.add(this.selectedSlot);
-        }
-      }
-
       this.slotMap[this.selectedSlot] = entity;
       this.selectedSlot = null;
       return;
@@ -425,7 +346,6 @@ export class LineupPageComponent implements OnInit {
       }
     }
 
-    // Optional: alert user if no matching slot is available
     alert(`No empty slot available for position ${entity.position}`);
   }
 
@@ -468,14 +388,8 @@ export class LineupPageComponent implements OnInit {
   }
 
   clearLineup(): void {
-    if (this.gracePeriodActive) {
-      alert('Kokoonpanon tyhjennys on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
-      return;
-    }
-
-    // Don't allow clearing lineup after deadline
     if (this.deadlinePassed) {
-      alert("Lineup clearing is disabled after the deadline. You can only make trades by replacing individual players.");
+      alert('Et voi enää muuttaa kokoonpanoa deadlinen jälkeen.');
       return;
     }
     this.slotKeys.forEach((key) => (this.slotMap[key] = null));
@@ -483,20 +397,10 @@ export class LineupPageComponent implements OnInit {
   }
 
   resetLineup(): void {
-    // Restore original lineup
-    Object.keys(this.originalLineup).forEach(slot => {
-      this.slotMap[slot as SlotKey] = this.originalLineup[slot as SlotKey];
-    });
-    this.pendingTradeSlots.clear();
-    this.selectedSlot = null;
+    return;
   }
 
   saveLineup(): void {
-    if (this.gracePeriodActive) {
-      alert('Kokoonpanon tallennus on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
-      return;
-    }
-
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     if (!user?.id) {
       alert("You must be logged in to save your lineup.");
@@ -510,30 +414,9 @@ export class LineupPageComponent implements OnInit {
       return;
     }
 
-    // If after deadline, show confirmation for all trades
     if (this.deadlinePassed) {
-      const trades = this.slotKeys
-        .filter(slot => {
-          const originalPlayer = this.originalLineup[slot];
-          const currentPlayer = this.slotMap[slot];
-          return originalPlayer?.id !== currentPlayer?.id;
-        })
-        .map(slot => {
-          const originalPlayer = this.originalLineup[slot];
-          const currentPlayer = this.slotMap[slot];
-          return `${this.formatPlayerForDisplay(originalPlayer)} → ${this.formatPlayerForDisplay(currentPlayer)}`;
-        });
-
-      if (trades.length > 0) {
-        const confirmed = confirm(
-          `Vahvista seuraavat vaihdot:\n\n${trades.join('\n')}\n\n` +
-          `Yhteensä ${trades.length} vaihto${trades.length > 1 ? 'a' : ''}.\n` +
-          `Sinulla on ${this.effectiveRemainingTrades} vaihtoa jäljellä tämän jälkeen.\n\n` +
-          `Haluatko jatkaa?`
-        );
-
-        if (!confirmed) return;
-      }
+      alert('Et voi enää tallentaa kokoonpanoa deadlinen jälkeen.');
+      return;
     }
 
     const lineupPayload = Object.entries(this.slotMap).reduce(
@@ -544,35 +427,13 @@ export class LineupPageComponent implements OnInit {
       {} as Record<SlotKey, number | null>
     );
 
-    // Only count trades after deadline
-    const tradesUsed = this.deadlinePassed ?
-      this.slotKeys.reduce((count, slot) => {
-        const originalPlayer = this.originalLineup[slot];
-        const currentPlayer = this.slotMap[slot];
-        return count + (originalPlayer?.id !== currentPlayer?.id ? 1 : 0);
-      }, 0) : 0;
-
     this.http.post(`${environment.apiUrl}/lineup/save`, {
       user_id: user.id,
       lineup: lineupPayload,
-      tradesUsed: tradesUsed,
       unusedBudget: this.remainingBudget
     }).subscribe({
       next: (res: any) => {
-        if (!this.deadlinePassed) {
-          // Store the newly saved lineup as original
-          Object.keys(this.slotMap).forEach(slot => {
-            this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
-          });
-          alert('✅ Kokoonpano tallennettu! Voit muokata sitä vapaasti deadlineen asti.');
-        } else {
-          // Update remaining trades and original lineup
-          this.remainingTrades -= tradesUsed;
-          Object.keys(this.slotMap).forEach(slot => {
-            this.originalLineup[slot as SlotKey] = this.slotMap[slot as SlotKey];
-          });
-          alert(`✅ ${tradesUsed} vaihto${tradesUsed > 1 ? 'a' : ''} tehty! Sinulla on ${this.effectiveRemainingTrades} vaihtoa jäljellä.`);
-        }
+        alert('✅ Kokoonpano tallennettu! Voit muokata sitä vapaasti deadlineen asti.');
       },
       error: (err) => {
         console.error("Lineup save error:", err);

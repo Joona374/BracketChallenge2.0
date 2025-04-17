@@ -8,7 +8,7 @@ import random
 
 from config import Config
 from db import db_engine as db
-from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, LineupHistory, ResetCode, Headline, Setting
+from models import User, RegistrationCode, Matchup, Pick, Player, Goalie, LineupPick, Prediction, Vote, MatchupResult, Team, UserPoints, ResetCode, Headline, Setting
 from score_module import calculate_bracket_points
 from stats_module import get_current_standings
 
@@ -23,6 +23,7 @@ DEFAULT_DEADLINE = datetime(2025, 4, 20, 0, 0, 0, tzinfo=timezone.utc)
 
 # --- Grace period logic ---
 GRACE_PERIOD_END = datetime(2025, 4, 24, 4, 0, 0, tzinfo=timezone.utc)  # 24.4.2025 07:00 UTC+3 == 04:00 UTC
+
 
 def is_grace_period_active():
     """Return True if now is after the deadline but before the grace period end."""
@@ -408,127 +409,44 @@ def get_goalies():
 @app.route("/api/lineup/save", methods=["POST"])
 def save_lineup():
     data = request.json
-
     user_id = data.get("user_id")
     lineup = data.get("lineup")
-    trades_used = data.get("tradesUsed", 0)
-
     if not user_id or not lineup:
         return jsonify({"error": "Missing user_id or lineup"}), 400
-
-    # Block all lineup changes during grace period
     if is_grace_period_active():
         return jsonify({"error": "Lineup changes are disabled during the grace period (until 24.4.2025 07:00 UTC+3)."}), 403
-
     try:
-        with db.session.begin():
-            # Get existing lineup if any
-            existing = LineupPick.query.filter_by(user_id=user_id).first()
-            
-            # Check if the deadline has passed
-            deadline_passed = is_deadline_passed()
-            
-            # If this is a new lineup and the deadline has passed, reject it
-            if not existing and deadline_passed:
-                return jsonify({
-                    "error": "Lineup submission deadline has passed. New lineups cannot be created."
-                }), 403
-            
-            # If this is an existing lineup, the deadline has passed, and they're trying to use more trades than remaining
-            if existing and deadline_passed and trades_used > existing.remaining_trades:
-                return jsonify({
-                    "error": f"You only have {existing.remaining_trades} trades remaining."
-                }), 403
-                
-            old_lineup = json.loads(existing.lineup_json) if existing else {}
-            
-            # Calculate current value of lineup
-            total_value = 0
-            current_time = datetime.now(timezone.utc)
-            
-            # Process each slot in the new lineup
-            for slot, player_id in lineup.items():
-                if player_id:
-                    # Determine if it's a goalie slot
-                    if slot == 'G':
-                        goalie = Goalie.query.get(player_id)
-                        if goalie:
-                            print(f"Processing goalie: {goalie.first_name} {goalie.last_name}, Slot: {slot}, ID: {player_id}, Price: {goalie.price}")
-                            total_value += goalie.price
-
-                            # If this is a new goalie in this slot
-                            if not old_lineup.get(slot) == player_id:
-                                # Get the old player's ID before closing the history entry
-                                old_player_id = old_lineup.get(slot)
-                                
-                                # Close out old goalie's history
-                                if old_player_id:
-                                    db.session.query(LineupHistory)\
-                                        .filter_by(user_id=user_id, slot=slot, removed_at=None)\
-                                        .update({"removed_at": current_time})
-                                
-                                # Add new goalie history
-                                history = LineupHistory(
-                                    user_id=user_id,
-                                    player_id=player_id,
-                                    player_out_id=old_player_id,  # Record the replaced player's ID
-                                    slot=slot,
-                                    added_at=current_time,
-                                    price_at_time=goalie.price
-                                )
-                                db.session.add(history)
-                    else:
-                        player = Player.query.get(player_id)
-                        if player:
-                            print(f"Processing player: {player.first_name} {player.last_name}, Slot: {slot}, ID: {player_id}, Price: {player.price}")
-                            total_value += player.price
-                            
-                            # If this is a new player in this slot
-                            if not old_lineup.get(slot) == player_id:
-                                # Get the old player's ID before closing the history entry
-                                old_player_id = old_lineup.get(slot)
-                                
-                                # Close out old player's history
-                                if old_player_id:
-                                    db.session.query(LineupHistory)\
-                                        .filter_by(user_id=user_id, slot=slot, removed_at=None)\
-                                        .update({"removed_at": current_time})
-                                
-                                # Add new player history
-                                history = LineupHistory(
-                                    user_id=user_id,
-                                    player_id=player_id,
-                                    player_out_id=old_player_id,  # Record the replaced player's ID
-                                    slot=slot,
-                                    added_at=current_time,
-                                    price_at_time=player.price
-                                )
-                                db.session.add(history)
-
-            if existing:
-                # Update existing lineup
-                existing.lineup_json = json.dumps(lineup)
-                existing.remaining_trades -= trades_used
-                existing.unused_budget = data.get("unusedBudget", 0)
-                existing.total_value = total_value
-                existing.updated_at = current_time
-            else:
-                # Create new lineup
-                new_lineup = LineupPick(
-                    user_id=user_id,
-                    lineup_json=json.dumps(lineup),
-                    remaining_trades=9 - trades_used,
-                    unused_budget=data.get("unusedBudget", 0),
-                    total_value=total_value,
-                    created_at=current_time
-                )
-                db.session.add(new_lineup)
-
-        return jsonify({
-            "message": "Lineup saved successfully",
-            "totalValue": total_value
-        }), 200
-
+        existing = LineupPick.query.filter_by(user_id=user_id).first()
+        deadline_passed = is_deadline_passed()
+        if not existing and deadline_passed:
+            return jsonify({"error": "Lineup submission deadline has passed. New lineups cannot be created."}), 403
+        total_value = 0
+        for slot, player_id in lineup.items():
+            if player_id:
+                if slot == 'G':
+                    goalie = Goalie.query.get(player_id)
+                    if goalie:
+                        total_value += goalie.price
+                else:
+                    player = Player.query.get(player_id)
+                    if player:
+                        total_value += player.price
+        if existing:
+            existing.lineup_json = json.dumps(lineup)
+            existing.unused_budget = data.get("unusedBudget", 0)
+            existing.total_value = total_value
+            existing.updated_at = datetime.now(timezone.utc)
+        else:
+            new_lineup = LineupPick(
+                user_id=user_id,
+                lineup_json=json.dumps(lineup),
+                unused_budget=data.get("unusedBudget", 0),
+                total_value=total_value,
+                created_at=datetime.now(timezone.utc)
+            )
+            db.session.add(new_lineup)
+        db.session.commit()
+        return jsonify({"message": "Lineup saved successfully", "totalValue": total_value}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -536,19 +454,13 @@ def save_lineup():
 @app.route("/api/lineup/get", methods=["GET"])
 def get_lineup():
     user_id = request.args.get("user_id")
-
     if not user_id:
         return jsonify({"error": "Missing user_id"}), 400
-
     try:
         lineup_pick = LineupPick.query.filter_by(user_id=user_id).first()
-
         if not lineup_pick:
             return jsonify({"error": "No lineup found for this user"}), 404
-
         lineup_data = json.loads(lineup_pick.lineup_json)
-        
-        # Calculate current total value
         total_value = 0
         for slot, player_id in lineup_data.items():
             if player_id:
@@ -560,77 +472,15 @@ def get_lineup():
                     player = Player.query.get(player_id)
                     if player:
                         total_value += player.price
-
         return jsonify({
             "lineup": lineup_data,
-            "remainingTrades": lineup_pick.remaining_trades,
             "unusedBudget": lineup_pick.unused_budget,
             "totalValue": total_value,
             "effectiveBudget": total_value + lineup_pick.unused_budget
         }), 200
-
     except Exception as e:
-        print("Error getting lineup:", e)  # Add logging
-        # Handle JSON parsing errors
+        print("Error getting lineup:", e)
         return jsonify({"error": "Failed to parse lineup", "details": str(e)}), 500
-
-@app.route('/api/lineup/history', methods=['GET'])
-def get_lineup_history():
-    """
-    Returns the trade (lineup) history for a user, sorted by added_at.
-    Query param: user_id
-    """
-    user_id = request.args.get('user_id', type=int)
-    if not user_id:
-        return jsonify({"error": "Missing user_id"}), 400
-    from models import LineupHistory, Player, Goalie
-    history = LineupHistory.query.filter_by(user_id=user_id).order_by(LineupHistory.added_at).all()
-    trades = []
-    for h in history:
-        # Find the player being added
-        if h.slot == "G":
-            player_in = Goalie.query.get(h.player_id)
-        else:
-            player_in = Player.query.get(h.player_id)
-        player_in_name = f"{player_in.first_name} {player_in.last_name}" if player_in else "Unknown"
-        position_in = h.slot
-        
-        # Find the player being removed (if any)
-        player_out_name = None
-        position_out = None
-        player_out_id = h.player_out_id
-        
-        # If we have a player_out_id, use it directly to get the player details
-        if player_out_id:
-            if h.slot == "G":
-                player_out = Goalie.query.get(player_out_id)
-            else:
-                player_out = Player.query.get(player_out_id)
-            if player_out:
-                player_out_name = f"{player_out.first_name} {player_out.last_name}"
-                position_out = position_in  # Same position as the incoming player
-        # Fallback to old logic if player_out_id is not set
-        elif h.removed_at:
-            # Find the next history entry for this slot (if any)
-            prev = LineupHistory.query.filter_by(user_id=user_id, slot=h.slot, removed_at=h.added_at).first()
-            if prev:
-                player_out = Player.query.get(prev.player_id) or Goalie.query.get(prev.player_id)
-                player_out_name = f"{player_out.first_name} {player_out.last_name}" if player_out else "Unknown"
-                position_out = prev.slot
-                player_out_id = prev.player_id
-        
-        # Use Finnish date format
-        date_str = h.added_at.strftime('%d.%m.%Y') if h.added_at else ""
-        trades.append({
-            "playerOut": player_out_name or "-",
-            "playerOutId": player_out_id,
-            "playerIn": player_in_name,
-            "playerInId": h.player_id,
-            "positionOut": position_out or position_in,
-            "positionIn": position_in,
-            "date": date_str
-        })
-    return jsonify(trades), 200
 
 @app.route('/api/predictions/save', methods=['POST'])
 def save_predictions():
@@ -1895,17 +1745,18 @@ def generate_headline():
     language = data.get('language', 'en')
     
     prompt = f"""Write a sarcastic, cocky, and darkly humorous news headlines about a fantasy hockey team called "{team_name}" that just joined an NHL Bracket Challenge.
-    The tone should be full of trash talk — the kind of humor you'd use to roast your best friends.
+    The tone should be trash talk — the kind of humor you'd use to roast your best friends.
     It should vaguely feel like its been written by a sports writer for tsn  etc.
-    If you can think of a zinger to make fun of their ridiculous team name thats great. You can also roast how bad they are going to do.
-    Use hockey terms, NHL clichés, and lean into the chaos. If you can make fun of the name in any way thats always great!
-    Do not hold back. No politeness, no filters. Make it sound like something you'd post in the group chat to make everyone laugh and cry.
+    If you can think of a zinger to make fun of their ridiculous team name thats great. Dont just call the name stupid, but try and make a smart joke about it. You can also roast how bad their bracket and player picks are going to be.
+    Use hockey terms and NHL clichés, and lean into the chaos. If you can make fun of the name in any way thats always great!
+    If the name is in finnish, you can try and translate it to english and make fun of it.
+    Do not hold back. No politeness, no filters.
     Also try and use random funny hashtags related to the headline.
     Keep it under 200 characters."""
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a witty sports journalist writing humorous NHL headlines."},
                 {"role": "user", "content": prompt}
