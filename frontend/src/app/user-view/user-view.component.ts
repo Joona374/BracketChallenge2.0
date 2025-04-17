@@ -109,7 +109,6 @@ export class UserViewComponent implements OnInit {
 
     this.loadPlayers();
     this.loadGoalies();
-    this.loadLineupSummary();
   }
 
   loadUserData(teamName: string): void {
@@ -117,6 +116,7 @@ export class UserViewComponent implements OnInit {
     this.error = null;
 
     const encodedTeamName = encodeURIComponent(teamName);
+    console.log('Encoded team name:', encodedTeamName);
 
     this.http.get(`${environment.apiUrl}/user/by-team-name?teamName=${encodedTeamName}`).subscribe({
       next: (response: any) => {
@@ -141,7 +141,7 @@ export class UserViewComponent implements OnInit {
         this.loadPredictions(userId, onRequestComplete);
         this.loadUserStats(userId);
         this.loadPlayers();
-        this.loadLineupSummary();
+        this.loadLineupSummary(userId);
       },
       error: (err) => {
         console.error('Error finding user by team name', err);
@@ -249,7 +249,6 @@ export class UserViewComponent implements OnInit {
           price: player.price,
           isU23: player.is_U23,
         }));
-        this.loadLineupSummary();
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -285,7 +284,6 @@ export class UserViewComponent implements OnInit {
           playoff_shutouts: goalie.playoff_shutouts,
           playoff_wins: goalie.playoff_wins
         }));
-        this.loadLineupSummary();
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -294,15 +292,13 @@ export class UserViewComponent implements OnInit {
     });
   }
 
-  loadLineupSummary(): void {
+  loadLineupSummary(userId: Number): void {
     // Use logged-in user id if not viewing another user
-    let userId = this.userData?.userId;
     if (!userId) {
-      const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-      userId = user.id;
+      console.log('User ID not found. Please log in again.');
     }
 
-    if (!userId) return;
+
 
     this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
       next: (data: any) => {
