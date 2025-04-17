@@ -506,15 +506,16 @@
 }
 
 .pie-segment.first {
-  background-color: #ff4444;
+  /* Gold color */
+  background-color: #ffd700;
 }
 
 .pie-segment.second {
-  background-color: #44ff44;
+  background-color: #c0c0c0;
 }
 
 .pie-segment.third {
-  background-color: #4444ff;
+  background-color: #cd7f32;
 }
 
 .pie-legend {
@@ -536,15 +537,15 @@
 }
 
 .legend-color.first {
-  background-color: #ff4444;
+  background-color: #ffd700;
 }
 
 .legend-color.second {
-  background-color: #44ff44;
+  background-color: #c0c0c0;
 }
 
 .legend-color.third {
-  background-color: #4444ff;
+  background-color: #cd7f32;
 }
 
 /* Submit button */

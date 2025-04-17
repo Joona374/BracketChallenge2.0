@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from "../../environments/environment";
-
+import { Player } from '../models/player.model';
+import { Goalie } from '../models/goalie.model';
 
 interface Matchups {
   west: any[];
@@ -41,8 +42,44 @@ export class UserViewComponent implements OnInit {
 
   private matchupsByRoundCache: { [key: string]: any[] } = {};
   private teamWinnerCache: { [key: string]: boolean } = {};
+  private matchupData: any = null;
 
   logoUrl: string | null = null;
+
+  lineupSummary: any = {
+    lineup: {},
+    remainingTrades: 0,
+    unusedBudget: 0,
+    totalValue: 0,
+    tradeHistory: []
+  };
+  allPlayers: Player[] = [];
+  allGoalies: Goalie[] = [];
+
+  // Position name mapping
+  positionNames: { [key: string]: string } = {
+    'L': 'Vasen laitahyökkääjä',
+    'C': 'Keskushyökkääjä',
+    'R': 'Oikea laitahyökkääjä',
+    'LD': 'Vasen puolustaja',
+    'RD': 'Oikea puolustaja',
+    'G': 'Maalivahti',
+    'VL': 'Vasen laitahyökkääjä',
+    'KH': 'Keskushyökkääjä',
+    'OL': 'Oikea laitahyökkääjä',
+    'VP': 'Vasen puolustaja',
+    'OP': 'Oikea puolustaja',
+    'MV': 'Maalivahti'
+  };
+
+  positionMapping = {
+    'L': 'VL',
+    'C': 'KH',
+    'R': 'OL',
+    'LD': 'VP',
+    'RD': 'OP',
+    'G': 'MV'
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -56,6 +93,7 @@ export class UserViewComponent implements OnInit {
       if (this.teamName) {
         this.http.get<Matchups>(`${environment.apiUrl}/bracket/matchups`).subscribe({
           next: (matchups) => {
+            console.log(matchups);
             this.initialMatchups = matchups;
             if (this.teamName) {
               this.loadUserData(this.teamName);
@@ -68,6 +106,10 @@ export class UserViewComponent implements OnInit {
         });
       }
     });
+
+    this.loadPlayers();
+    this.loadGoalies();
+    this.loadLineupSummary();
   }
 
   loadUserData(teamName: string): void {
@@ -92,10 +134,14 @@ export class UserViewComponent implements OnInit {
           }
         };
 
+        console.log('User ID:', userId);
+
         this.loadBracket(userId, onRequestComplete);
         this.loadLineup(userId, onRequestComplete);
         this.loadPredictions(userId, onRequestComplete);
         this.loadUserStats(userId);
+        this.loadPlayers();
+        this.loadLineupSummary();
       },
       error: (err) => {
         console.error('Error finding user by team name', err);
@@ -141,6 +187,7 @@ export class UserViewComponent implements OnInit {
   loadLineup(userId: number, onComplete: () => void): void {
     this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
       next: (res: any) => {
+        console.log('Lineup data:', res);
         this.userData.lineup = res.lineup;
       },
       error: (err) => {
@@ -186,6 +233,107 @@ export class UserViewComponent implements OnInit {
         console.error('Error loading user stats', err);
         // Use placeholder stats if request fails
         this.loadMockData();
+      }
+    });
+  }
+
+  loadPlayers(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/players`).subscribe({
+      next: (data) => {
+        this.allPlayers = data.map(player => ({
+          id: player.id,
+          firstName: player.first_name,
+          lastName: player.last_name,
+          position: player.position,
+          team: player.team_abbr,
+          price: player.price,
+          isU23: player.is_U23,
+        }));
+        this.loadLineupSummary();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.allPlayers = [];
+      }
+    });
+  }
+
+  loadGoalies(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/goalies`).subscribe({
+      next: (data) => {
+        this.allGoalies = data.map(goalie => ({
+          id: goalie.id,
+          api_id: goalie.api_id,
+          firstName: goalie.first_name,
+          lastName: goalie.last_name,
+          position: goalie.position,
+          team: goalie.team_abbr,
+          price: goalie.price,
+          isU23: goalie.is_U23,
+          jersey_number: goalie.jersey_number,
+          birth_country: goalie.birth_country,
+          birth_year: goalie.birth_year,
+          headshot: goalie.headshot,
+          reg_gp: goalie.reg_gp,
+          reg_gaa: goalie.reg_gaa,
+          reg_save_pct: goalie.reg_save_pct,
+          reg_shutouts: goalie.reg_shutouts,
+          reg_wins: goalie.reg_wins,
+          playoff_gp: goalie.playoff_gp,
+          playoff_gaa: goalie.playoff_gaa,
+          playoff_save_pct: goalie.playoff_save_pct,
+          playoff_shutouts: goalie.playoff_shutouts,
+          playoff_wins: goalie.playoff_wins
+        }));
+        this.loadLineupSummary();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.allGoalies = [];
+      }
+    });
+  }
+
+  loadLineupSummary(): void {
+    // Use logged-in user id if not viewing another user
+    let userId = this.userData?.userId;
+    if (!userId) {
+      const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+      userId = user.id;
+    }
+
+    if (!userId) return;
+
+    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
+      next: (data: any) => {
+        if (data) {
+          this.lineupSummary.lineup = data.lineup || {};
+          this.lineupSummary.remainingTrades = data.remainingTrades || 0;
+          this.lineupSummary.unusedBudget = data.unusedBudget || 0;
+          this.lineupSummary.totalValue = data.totalValue || 0;
+
+          // Fetch trade history
+          this.http.get<any[]>(`${environment.apiUrl}/lineup/history?user_id=${userId}`).subscribe({
+            next: (trades: any[]) => {
+              this.lineupSummary.tradeHistory = trades || [];
+              console.log('Trade history:', trades);
+            },
+            error: () => {
+              this.lineupSummary.tradeHistory = [];
+            }
+          });
+
+          this.cdr.markForCheck();
+        }
+      },
+      error: () => {
+        this.lineupSummary = {
+          lineup: {},
+          remainingTrades: 0,
+          unusedBudget: 0,
+          totalValue: 0,
+          tradeHistory: []
+        };
       }
     });
   }
@@ -266,84 +414,108 @@ export class UserViewComponent implements OnInit {
     const matchups = [];
 
     if (round === 'round1') {
-      // Define the first round matchups based on the E1, E2, W1, W2, etc. format
-      // This is a mapping of the codes to the actual team matchups
-      const firstRoundTeams = {
-        // Western Conference (first 4 matchups)
-        'W1': { team1: 'OTT', team2: 'FLA' },
-        'W2': { team1: 'PIT', team2: 'NYR' },
-        'W3': { team1: 'BUF', team2: 'TBL' },
-        'W4': { team1: 'PHI', team2: 'CAR' },
-        // Eastern Conference (second 4 matchups)
-        'E1': { team1: 'STL', team2: 'COL' },
-        'E2': { team1: 'TBL', team2: 'VGK' },
-        'E3': { team1: 'CAR', team2: 'EDM' },
-        'E4': { team1: 'NYR', team2: 'VAN' }
-      };
+      // For round 1, use the initial matchups that were loaded on component init
+      const westMatchups = this.initialMatchups.west || [];
+      const eastMatchups = this.initialMatchups.east || [];
 
-      // Process Western Conference matchups (first 4)
-      const westCodes = ['W1', 'W2', 'W3', 'W4'];
-      westCodes.forEach(code => {
-        if (this.userData.bracket.round1[code]) {
-          matchups.push({
-            id: code,
-            team1: firstRoundTeams[code as keyof typeof firstRoundTeams].team1,
-            team2: firstRoundTeams[code as keyof typeof firstRoundTeams].team2,
-            winner: this.userData.bracket.round1[code]
-          });
-        }
+      // Process Western Conference matchups
+      westMatchups.forEach((m: any) => {
+        matchups.push({
+          id: m.matchupCode,
+          team1: m.team1,
+          team2: m.team2,
+          winner: this.userData.bracket.round1[m.matchupCode] || ''
+        });
       });
 
-      // Process Eastern Conference matchups (second 4)
-      const eastCodes = ['E1', 'E2', 'E3', 'E4'];
-      eastCodes.forEach(code => {
-        if (this.userData.bracket.round1[code]) {
-          matchups.push({
-            id: code,
-            team1: firstRoundTeams[code as keyof typeof firstRoundTeams].team1,
-            team2: firstRoundTeams[code as keyof typeof firstRoundTeams].team2,
-            winner: this.userData.bracket.round1[code]
-          });
-        }
+      // Process Eastern Conference matchups
+      eastMatchups.forEach((m: any) => {
+        matchups.push({
+          id: m.matchupCode,
+          team1: m.team1,
+          team2: m.team2,
+          winner: this.userData.bracket.round1[m.matchupCode] || ''
+        });
       });
     } else if (round === 'round2') {
-      // Existing code for round2
-      const keys = ['w-semi', 'w-semi2', 'e-semi', 'e-semi2'];
-
-      for (const key of keys) {
-        if (this.userData.bracket.round2[key] && Array.isArray(this.userData.bracket.round2[key])) {
-          const teams = this.userData.bracket.round2[key];
-          const winner = this.userData.bracket.round2[`${key}-winner`];
-
-          matchups.push({
-            id: key,
-            team1: teams[0] || 'TBD',
-            team2: teams[1] || 'TBD',
-            winner: winner
-          });
-        }
+      const bracketData = this.userData.bracket;
+      // Round 2 west matchups
+      if (bracketData.round2['w-semi']) {
+        matchups.push({
+          id: 'w-semi',
+          team1: bracketData.round2['w-semi'][0] || '',
+          team2: bracketData.round2['w-semi'][1] || '',
+          winner: bracketData.round2['w-semi-winner'] || ''
+        });
+      }
+      if (bracketData.round2['w-semi2']) {
+        matchups.push({
+          id: 'w-semi2',
+          team1: bracketData.round2['w-semi2'][0] || '',
+          team2: bracketData.round2['w-semi2'][1] || '',
+          winner: bracketData.round2['w-semi2-winner'] || ''
+        });
+      }
+      // Round 2 east matchups
+      if (bracketData.round2['e-semi']) {
+        matchups.push({
+          id: 'e-semi',
+          team1: bracketData.round2['e-semi'][0] || '',
+          team2: bracketData.round2['e-semi'][1] || '',
+          winner: bracketData.round2['e-semi-winner'] || ''
+        });
+      }
+      if (bracketData.round2['e-semi2']) {
+        matchups.push({
+          id: 'e-semi2',
+          team1: bracketData.round2['e-semi2'][0] || '',
+          team2: bracketData.round2['e-semi2'][1] || '',
+          winner: bracketData.round2['e-semi2-winner'] || ''
+        });
       }
     } else if (round === 'round3') {
-      // Existing code for round3
-      const keys = ['west-final', 'east-final'];
-
-      for (const key of keys) {
-        if (this.userData.bracket.round3[key] && Array.isArray(this.userData.bracket.round3[key])) {
-          const teams = this.userData.bracket.round3[key];
-          const winner = this.userData.bracket.round3[`${key}-winner`];
-
-          matchups.push({
-            id: key,
-            team1: teams[0] || 'TBD',
-            team2: teams[1] || 'TBD',
-            winner: winner
-          });
-        }
+      const bracketData = this.userData.bracket;
+      // Conference Finals
+      if (bracketData.round3['west-final']) {
+        matchups.push({
+          id: 'west-final',
+          team1: bracketData.round3['west-final'][0] || '',
+          team2: bracketData.round3['west-final'][1] || '',
+          winner: bracketData.round3['west-final-winner'] || ''
+        });
+      }
+      if (bracketData.round3['east-final']) {
+        matchups.push({
+          id: 'east-final',
+          team1: bracketData.round3['east-final'][0] || '',
+          team2: bracketData.round3['east-final'][1] || '',
+          winner: bracketData.round3['east-final-winner'] || ''
+        });
+      }
+    } else if (round === 'final') {
+      const bracketData = this.userData.bracket;
+      if (bracketData.final['cup']) {
+        matchups.push({
+          id: 'cup',
+          team1: bracketData.final['cup'][0] || '',
+          team2: bracketData.final['cup'][1] || '',
+          winner: bracketData.final['cup-winner'] || ''
+        });
       }
     }
 
     this.matchupsByRoundCache[round] = matchups;
     return matchups;
+  }
+
+  private getRoundNumber(round: string): number {
+    switch (round) {
+      case 'round1': return 1;
+      case 'round2': return 2;
+      case 'round3': return 3;
+      case 'final': return 4;
+      default: return 1;
+    }
   }
 
   isTeamWinner(matchupId: string | number, team: string): boolean {
@@ -415,23 +587,38 @@ export class UserViewComponent implements OnInit {
     return 4250000;
   }
 
-  formatBudget(amount: number): string {
-    return '$' + amount.toLocaleString();
+  formatBudget(value: number): string {
+    return new Intl.NumberFormat('fi-FI', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0
+    }).format(value);
   }
 
-  getPlayerByPosition(position: string): any {
-    if (!this.userData.lineup) return null;
+  getPlayerByPosition(position: string): Player | Goalie | null {
+    // Map UI slot to backend slot
+    let slot = position;
+    if (position === 'MV') slot = 'G';
+    if (position === 'OL') slot = 'R';
+    if (position === 'KH') slot = 'C';
+    if (position === 'VL') slot = 'L';
+    if (position === 'VP') slot = 'LD';
+    if (position === 'OP') slot = 'RD';
 
-    const mockPlayers: { [key: string]: { id: number; firstName: string; lastName: string; position: string; team: string; price: number } } = {
-      'L': { id: 1, firstName: 'Connor', lastName: 'McDavid', position: 'L', team: 'EDM', price: 950000 },
-      'C': { id: 2, firstName: 'Nathan', lastName: 'MacKinnon', position: 'C', team: 'COL', price: 930000 },
-      'R': { id: 3, firstName: 'David', lastName: 'Pastrnak', position: 'R', team: 'BOS', price: 890000 },
-      'LD': { id: 4, firstName: 'Cale', lastName: 'Makar', position: 'D', team: 'COL', price: 870000 },
-      'RD': { id: 5, firstName: 'Roman', lastName: 'Josi', position: 'D', team: 'NSH', price: 820000 },
-      'G': { id: 6, firstName: 'Andrei', lastName: 'Vasilevskiy', position: 'G', team: 'TBL', price: 790000 }
-    };
+    if (!this.lineupSummary.lineup) return null;
+    const playerId = this.lineupSummary.lineup[slot];
+    if (!playerId) return null;
 
-    return null;
+    // Check if this is a goalie position
+    if (slot === 'G') {
+      return this.allGoalies.find(g => g.id === playerId) || null;
+    } else {
+      return this.allPlayers.find(p => p.id === playerId) || null;
+    }
+  }
+
+  getPositionName(positionCode: string): string {
+    return this.positionNames[positionCode] || positionCode;
   }
 
   getPlayerName(position: string): string {
@@ -513,5 +700,9 @@ export class UserViewComponent implements OnInit {
     }
 
     return classes;
+  }
+
+  formatPosition(positionCode: string): string {
+    return this.positionMapping[positionCode as keyof typeof this.positionMapping] || positionCode;
   }
 }

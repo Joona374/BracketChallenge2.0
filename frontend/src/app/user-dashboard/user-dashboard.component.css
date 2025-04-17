@@ -722,6 +722,7 @@
 .bracket-table-section {
   display: flex;
   flex-direction: column;
+  border-bottom: 5px solid rgba(255, 50, 50, 0.2);
 }
 
 .table-title {

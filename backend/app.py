@@ -575,7 +575,10 @@ def get_lineup_history():
     trades = []
     for h in history:
         # Find the player being added
-        player_in = Player.query.get(h.player_id) or Goalie.query.get(h.player_id)
+        if h.slot == "G":
+            player_in = Goalie.query.get(h.player_id)
+        else:
+            player_in = Player.query.get(h.player_id)
         player_in_name = f"{player_in.first_name} {player_in.last_name}" if player_in else "Unknown"
         position_in = h.slot
         
@@ -586,7 +589,10 @@ def get_lineup_history():
         
         # If we have a player_out_id, use it directly to get the player details
         if player_out_id:
-            player_out = Player.query.get(player_out_id) or Goalie.query.get(player_out_id)
+            if h.slot == "G":
+                player_out = Goalie.query.get(player_out_id)
+            else:
+                player_out = Player.query.get(player_out_id)
             if player_out:
                 player_out_name = f"{player_out.first_name} {player_out.last_name}"
                 position_out = position_in  # Same position as the incoming player

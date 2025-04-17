@@ -59,6 +59,11 @@
   width: 280px;
 }
 
+.slot:hover {
+  background-color: #3a3a3a;
+  border-color: #555;
+}
+
 .slot.active {
   border-color: #ff4444;
   font-weight: bold;

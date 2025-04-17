@@ -348,7 +348,7 @@ export class VoteComponent implements OnInit, OnDestroy {
       return {
         'clip-path': `polygon(50% 50%, 50% 0%, ${percentage > 50 ? '100% 0%, 100% 100%, 50% 50%' : '${50 + 50 * Math.sin(Math.PI * 2 * percentage / 100)}% ${50 - 50 * Math.cos(Math.PI * 2 * percentage / 100)}%'})`,
         'transform': 'rotate(0deg)',
-        'background-color': '#ff4444',
+        'background-color': '#ffd700',
         'height': '100%',
         'width': '100%',
         'position': 'absolute'
@@ -359,7 +359,7 @@ export class VoteComponent implements OnInit, OnDestroy {
       return {
         'transform': `rotate(${startAngle}deg)`,
         'clip-path': `polygon(50% 50%, 50% 0%, ${percentage > 50 ? '100% 0%, 100% 100%, 50% 50%' : '${50 + 50 * Math.sin(Math.PI * 2 * percentage / 100)}% ${50 - 50 * Math.cos(Math.PI * 2 * percentage / 100)}%'})`,
-        'background-color': '#44ff44',
+        'background-color': '#c0c0c0',
         'height': '100%',
         'width': '100%',
         'position': 'absolute'
@@ -370,7 +370,7 @@ export class VoteComponent implements OnInit, OnDestroy {
       return {
         'transform': `rotate(${startAngle}deg)`,
         'clip-path': `polygon(50% 50%, 50% 0%, ${percentage > 50 ? '100% 0%, 100% 100%, 50% 50%' : '${50 + 50 * Math.sin(Math.PI * 2 * percentage / 100)}% ${50 - 50 * Math.cos(Math.PI * 2 * percentage / 100)}%'})`,
-        'background-color': '#4444ff',
+        'background-color': '#cd7f32',
         'height': '100%',
         'width': '100%',
         'position': 'absolute'
@@ -386,9 +386,9 @@ export class VoteComponent implements OnInit, OnDestroy {
 
     return {
       'background': `conic-gradient(
-        #ff4444 0% ${first}%, 
-        #44ff44 ${first}% ${first + second}%, 
-        #4444ff ${first + second}% 100%
+        #ffd700 0% ${first}%, 
+        #c0c0c0 ${first}% ${first + second}%, 
+        #cd7f32 ${first + second}% 100%
       )`
     };
   }

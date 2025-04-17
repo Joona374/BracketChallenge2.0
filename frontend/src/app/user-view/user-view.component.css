@@ -117,8 +117,13 @@
 .points-value {
   font-size: 2.5rem;
   font-weight: 900;
-  color: #ff4444;
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.7);
+  background: linear-gradient(45deg, #ff4444, #ff6666);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2px;
+  font-family: "Orbitron", monospace;
 }
 
 .points-label {
@@ -135,10 +140,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 12px;
+  padding: 5px 7px;
+  min-width: 100px;
   border-radius: 5px;
-  background: #2a0000;
-  border: 1px solid #ff3232;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.2);
 }
 
 .category-name {
@@ -149,7 +155,7 @@
 .category-points {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #ff6666;
+  color: #ff4444;
 }
 
 .rank-display {
@@ -162,7 +168,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(45deg, #ff3232, #990000);
+  background: linear-gradient(45deg, #ff4444, #990000);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -525,6 +531,27 @@
   border-left: 4px solid #000;
 }
 
+/* Minnesota Wild */
+.team.winner.team-min {
+  background-color: #154734;
+  color: #ddcba4;
+  border-left: 4px solid #a6192e;
+}
+
+/* New Jersey Devils */
+.team.winner.team-njd {
+  background-color: #ce1126;
+  color: #fff;
+  border-left: 4px solid #000;
+}
+
+/* Seattle Kraken */
+.team.winner.team-sea {
+  background-color: #001628;
+  color: #99d9d9;
+  border-left: 4px solid #e9072b;
+}
+
 /* For non-winners or unknown teams, use default styling */
 .team:not(.winner) {
   background-color: #555;
@@ -656,6 +683,27 @@
   border-left: 4px solid #f47d30;
 }
 
+/* Minnesota Wild */
+.champion.team-min {
+  background-color: #154734;
+  color: #ddcba4;
+  border-left: 4px solid #a6192e;
+}
+
+/* New Jersey Devils */
+.champion.team-njd {
+  background-color: #ce1126;
+  color: #fff;
+  border-left: 4px solid #000;
+}
+
+/* Seattle Kraken */
+.champion.team-sea {
+  background-color: #001628;
+  color: #99d9d9;
+  border-left: 4px solid #e9072b;
+}
+
 /* Default champion style if no team class is applied */
 .champion:not([class*="team-"]) {
   background-color: #555;
@@ -757,6 +805,140 @@
   .conference-bracket {
     width: 100%;
   }
+
+  .user-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .points-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .points-breakdown {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bracket-summary {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .player-card {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .bracket-view h3 {
+    font-size: 1.2rem;
+    margin: 5px 0 15px;
+  }
+
+  .compact-bracket-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
+  }
+
+  .conference-bracket {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .conference-header {
+    font-size: 1rem;
+    padding: 8px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: 6px;
+    margin: 10px 0;
+  }
+
+  .rounds-container,
+  .rounds-container.east {
+    height: auto;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bracket-round {
+    min-width: 100%;
+    height: auto;
+  }
+
+  .matchups-column {
+    gap: 8px;
+    padding: 0 !important;
+  }
+
+  .matchup-card.small {
+    margin: 0;
+  }
+
+  .team {
+    min-height: 35px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .series-games {
+    padding: 4px 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  /* Cup final section mobile styles */
+  .cup-final-section {
+    height: auto;
+    padding: 15px 10px;
+    margin: 10px 0;
+    background: rgba(255, 204, 0, 0.05);
+    border-radius: 8px;
+  }
+
+  .cup-icon.large {
+    font-size: 24px;
+    margin: 5px 0;
+  }
+
+  .matchup-card.cup-center {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+
+  .series-games {
+    font-size: 0.7rem;
+  }
+
+  .round-title {
+    font-size: 0.8rem;
+    background: rgba(255, 68, 68, 0.1);
+    padding: 4px;
+    border-radius: 4px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .team {
+    min-height: 44px;
+  }
+
+  .team:active {
+    transform: scale(0.98);
+  }
 }
 
 /* Lineup View */
@@ -816,18 +998,6 @@
 .player-card.empty {
   background-color: #1a1a1a;
   border: 1px dashed #444;
-}
-
-.position-label {
-  position: absolute;
-  top: -10px;
-  left: 10px;
-  background-color: #ff4444;
-  color: #000;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: bold;
 }
 
 .player-info {
@@ -968,6 +1138,33 @@
   color: #f47d30;
 }
 
+/* Minnesota Wild */
+.team-min {
+  border-left-color: #154734;
+}
+.team-min .player-team-badge {
+  background-color: #154734;
+  color: #ddcba4;
+}
+
+/* New Jersey Devils */
+.team-njd {
+  border-left-color: #ce1126;
+}
+.team-njd .player-team-badge {
+  background-color: #ce1126;
+  color: #fff;
+}
+
+/* Seattle Kraken */
+.team-sea {
+  border-left-color: #001628;
+}
+.team-sea .player-team-badge {
+  background-color: #001628;
+  color: #99d9d9;
+}
+
 /* Team text colors for predictions */
 .team-text-col {
   color: #c8102e;
@@ -1018,6 +1215,21 @@
   color: #f47d30;
 }
 
+/* Minnesota Wild */
+.team-text-min {
+  color: #154734;
+}
+
+/* New Jersey Devils */
+.team-text-njd {
+  color: #ce1126;
+}
+
+/* Seattle Kraken */
+.team-text-sea {
+  color: #99d9d9;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .user-header {
@@ -1061,6 +1273,46 @@
   text-shadow: 0 0 1px #ff4444;
 }
 
+.user-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.points-container {
+  flex-direction: column;
+  gap: 15px;
+}
+
+.points-breakdown {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bracket-summary {
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.player-card {
+  width: 100%;
+  max-width: 200px;
+}
+
+/* Predictions Section Styles */
+.predictions-view {
+  padding: 20px 0;
+}
+
+.predictions-view h3 {
+  text-align: center;
+  font-family: "Orbitron", monospace;
+  color: #fff;
+  margin-bottom: 20px;
+  text-shadow: 0 0 1px #ff4444;
+}
+
 .predictions-categories {
   display: flex;
   flex-wrap: wrap;
@@ -1072,7 +1324,7 @@
   background-color: #222;
   border-radius: 8px;
   padding: 15px;
-  width: 300px;
+  width: 250px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -1302,51 +1554,566 @@
   color: #c8102e;
 }
 
+/* Minnesota Wild */
+.team-min {
+  border-left-color: #154734;
+}
+.team-min .player-team-badge {
+  background-color: #154734;
+  color: #ddcba4;
+}
+
+/* New Jersey Devils */
+.team-njd {
+  border-left-color: #ce1126;
+}
+.team-njd .player-team-badge {
+  background-color: #ce1126;
+  color: #fff;
+}
+
+/* Seattle Kraken */
+.team-sea {
+  border-left-color: #001628;
+}
+.team-sea .player-team-badge {
+  background-color: #001628;
+  color: #99d9d9;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .predictions-categories {
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .player-prediction-card {
+    display: flex;
     align-items: center;
+    background-color: #333;
+    border-radius: 6px;
+    padding: 10px;
+    border-left: 6px solid #555; /* Default border color */
+    transition: transform 0.2s ease;
   }
 
-  .prediction-category {
-    width: 100%;
-    max-width: 350px;
+  .player-prediction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .player-prediction-card.empty {
+    background-color: #2a2a2a;
+    border-left-color: #444;
+    opacity: 0.7;
+  }
+
+  .prediction-rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: #ff4444;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  .prediction-rank.empty-rank {
+    background-color: #555;
+  }
+
+  .prediction-content {
+    flex-grow: 1;
+  }
+
+  .player-name {
+    font-weight: bold;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .player-name.empty {
+    color: #777;
+    font-style: italic;
+  }
+
+  .player-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #ccc;
+  }
+
+  .player-position {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .empty-position {
+    width: 10px;
+    display: inline-block;
+  }
+
+  .player-team-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  /* Team Colors */
+  /* Western Conference Teams */
+  .team-min {
+    border-left-color: #154734;
+  }
+  .team-min .player-team-badge {
+    background-color: #154734;
+    color: #eee;
+  }
+
+  .team-col {
+    border-left-color: #6f263d;
+  }
+  .team-col .player-team-badge {
+    background-color: #6f263d;
+    color: #a2aaad;
+  }
+
+  .team-dal {
+    border-left-color: #00843d;
+  }
+  .team-dal .player-team-badge {
+    background-color: #00843d;
+    color: white;
+  }
+
+  .team-wpg {
+    border-left-color: #041e42;
+  }
+  .team-wpg .player-team-badge {
+    background-color: #041e42;
+    color: #fff;
+  }
+
+  .team-nsh {
+    border-left-color: #ffb81c;
+  }
+  .team-nsh .player-team-badge {
+    background-color: #ffb81c;
+    color: #041e42;
+  }
+
+  .team-edm {
+    border-left-color: #ff4c00;
+  }
+  .team-edm .player-team-badge {
+    background-color: #ff4c00;
+    color: #041e42;
+  }
+
+  .team-van {
+    border-left-color: #00843d;
+  }
+  .team-van .player-team-badge {
+    background-color: #00843d;
+    color: #fff;
+  }
+
+  .team-vgk {
+    border-left-color: #b4975a;
+  }
+  .team-vgk .player-team-badge {
+    background-color: #b4975a;
+    color: #333;
+  }
+
+  /* Eastern Conference Teams */
+  .team-fla {
+    border-left-color: #c8102e;
+  }
+  .team-fla .player-team-badge {
+    background-color: #c8102e;
+    color: #fff;
+  }
+
+  .team-bos {
+    border-left-color: #ffb81c;
+  }
+  .team-bos .player-team-badge {
+    background-color: #000;
+    color: #ffb81c;
+  }
+
+  .team-tor {
+    border-left-color: #00205b;
+  }
+  .team-tor .player-team-badge {
+    background-color: #00205b;
+    color: #fff;
+  }
+
+  .team-nyr {
+    border-left-color: #0038a8;
+  }
+  .team-nyr .player-team-badge {
+    background-color: #0038a8;
+    color: #fff;
+  }
+
+  .team-car {
+    border-left-color: #ce1126;
+  }
+  .team-car .player-team-badge {
+    background-color: #ce1126;
+    color: #fff;
+  }
+
+  .team-tbl {
+    border-left-color: #002868;
+  }
+  .team-tbl .player-team-badge {
+    background-color: #002868;
+    color: #fff;
+  }
+
+  .team-nyi {
+    border-left-color: #00539b;
+  }
+  .team-nyi .player-team-badge {
+    background-color: #00539b;
+    color: #f47d30;
+  }
+
+  .team-wsh {
+    border-left-color: #041e42;
+  }
+  .team-wsh .player-team-badge {
+    background-color: #041e42;
+    color: #c8102e;
+  }
+
+  /* Minnesota Wild */
+  .team-min {
+    border-left-color: #154734;
+  }
+  .team-min .player-team-badge {
+    background-color: #154734;
+    color: #ddcba4;
+  }
+
+  /* New Jersey Devils */
+  .team-njd {
+    border-left-color: #ce1126;
+  }
+  .team-njd .player-team-badge {
+    background-color: #ce1126;
+    color: #fff;
+  }
+
+  /* Seattle Kraken */
+  .team-sea {
+    border-left-color: #001628;
+  }
+  .team-sea .player-team-badge {
+    background-color: #001628;
+    color: #99d9d9;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .predictions-categories {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .prediction-category {
+      width: 100%;
+      max-width: 350px;
+    }
+  }
+
+  /* Enhanced Matchup Cards */
+  .matchup-card.small {
+    background: #2a2a2a;
+    border-radius: 6px;
+    padding: 10px;
+    border: 1px solid #333;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Team styling */
+  .series-teams {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .team {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background-color: #333;
+    color: #ccc;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  /* Lineup View Container */
+  .lineup-view {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 15px;
+  }
+
+  /* Lineup Card Styles */
+  .dashboard-card.lineup-card {
+    flex: 1;
+    min-width: 300px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.15);
+    margin: 0;
+    padding: 20px;
+  }
+
+  .card-header h3 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: #ff4444;
+    font-family: "Orbitron", monospace;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+  }
+
+  .lineup-info {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .budget-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 12px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+  }
+
+  .detail-label {
+    font-size: 0.9rem;
+    color: #999;
+  }
+
+  .detail-value {
+    font-weight: bold;
+    color: #ff9e40; /* Warm orange color for budget values */
+    font-size: 1.1rem;
+    font-family: "Orbitron", monospace;
+  }
+
+  .player-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .player-slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #222;
+    border: 1px solid rgba(255, 68, 68, 0.15);
+    transition: all 0.2s ease;
+  }
+
+  .player-slot:hover {
+    background: #333;
+    border-color: rgba(255, 68, 68, 0.3);
+    transform: translateX(2px);
+  }
+
+  .position-name {
+    font-size: 0.85rem;
+    color: #aaa;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .player-name {
+    color: #fff;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-price {
+    color: #ff9e40; /* Warm orange color to match budget values */
+    font-size: 0.95rem;
+    margin-top: 5px;
+    font-family: "Orbitron", monospace;
+  }
+
+  .empty-slot {
+    color: #666;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  /* Trade History Styles */
+  .trade-history {
+    flex: 1;
+    min-width: 300px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.15);
+  }
+
+  .section-title {
+    color: #ff4444;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    font-family: "Orbitron", monospace;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+  }
+
+  .trade-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+
+  .trade-column-header {
+    color: #888;
+    font-size: 0.9rem;
+    font-family: "Orbitron", monospace;
+  }
+
+  .trade-column-header:last-child {
+    text-align: right;
+  }
+
+  .trade-arrow {
+    color: #ff4444;
+    text-align: center;
+  }
+
+  .trade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .trade-item {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    background: #222;
+    padding: 12px 16px;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .trade-item:hover {
+    background: #333;
+  }
+
+  .trade-date {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: #888;
+    background: #1a1d2b;
+    padding: 0 8px;
+    border-radius: 4px;
+  }
+
+  .player-out {
+    color: #ff6b6b;
+  }
+
+  .player-in {
+    color: #66ff66;
+    text-align: right;
+  }
+
+  .position-badge {
+    display: inline-block;
+    margin-left: 6px;
+    color: #66ff66;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(102, 255, 102, 0.2);
+  }
+
+  .no-trades {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .lineup-view {
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .dashboard-card.lineup-card,
+    .trade-history {
+      min-width: 100%;
+      margin: 0 0 20px 0;
+      padding: 15px;
+    }
+
+    .player-grid {
+      gap: 6px;
+    }
+
+    .player-slot {
+      padding: 8px;
+    }
+
+    .position-name {
+      font-size: 0.75rem;
+      margin-bottom: 1px;
+    }
+
+    .trade-list {
+      max-height: 300px;
+    }
   }
 }
-
-/* Enhanced Matchup Cards */
-.matchup-card.small {
-  background: #2a2a2a;
-  border-radius: 6px;
-  padding: 10px;
-  border: 1px solid #333;
-  margin-bottom: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Team styling */
-.series-teams {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.team {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 8px;
-  border-radius: 4px;
-  background-color: #333;
-  color: #ccc;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-/* Add more team-specific styles if needed */

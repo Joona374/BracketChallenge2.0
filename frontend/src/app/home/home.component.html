@@ -40,7 +40,7 @@
       <div *ngIf="loggedInUser" class="welcome-panel">
         <div class="user-card">
           <p class="welcome-message">
-            Welcome back, <strong>{{ loggedInUser }}</strong
+            Tervetuloa takaisin <strong>{{ loggedInUser }}</strong
             >!
           </p>
 
@@ -62,8 +62,11 @@
               }}</span>
             </div>
             <div class="user-actions">
-              <button class="action-button bracket-btn" routerLink="/bracket">
-                MY BRACKET
+              <button
+                class="action-button bracket-btn"
+                routerLink="/leaderboard"
+              >
+                Sarjataulukko
               </button>
               <button class="action-button logout-btn" (click)="logout()">
                 Kirjaudu ulos
