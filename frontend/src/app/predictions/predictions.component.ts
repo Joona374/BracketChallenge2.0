@@ -107,6 +107,10 @@ export class PredictionsComponent implements OnInit {
 
     // Apply category filters
     switch (this.selectedCategory) {
+      case "connSmythe":
+        // Show both players and goalies
+        result = [...this.players, ...this.goalies];
+        break;
       case "defensePoints":
         result = this.players.filter(p => p.position === "D");
         break;

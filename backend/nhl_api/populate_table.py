@@ -89,17 +89,26 @@ def fetch_and_store_players_for_team(abbr):
             landing_response = requests.get(landing_url)
             if landing_response.status_code == 200:
                 landing_data = landing_response.json()
-                stats = landing_data.get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
-                reg_gp = stats.get("gamesPlayed", 0)
-                reg_goals = stats.get("goals", 0)
-                reg_assists = stats.get("assists", 0)
-                reg_points = stats.get("points", 0)
-                reg_plus_minus = stats.get("plusMinus", 0)
+                reg_stats = landing_data.get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
+                reg_gp = reg_stats.get("gamesPlayed", 0)
+                reg_goals = reg_stats.get("goals", 0)
+                reg_assists = reg_stats.get("assists", 0)
+                reg_points = reg_stats.get("points", 0)
+                reg_plus_minus = reg_stats.get("plusMinus", 0)
+                reg_penalty_minutes = reg_stats.get("pim", 0)
+
+                playoff_stats = landing_data.get("featuredStats", {}).get("playoffs", {}).get("subSeason", {})
+                playoff_gp = playoff_stats.get("gamesPlayed", 0)
+                playoff_goals = playoff_stats.get("goals", 0)
+                playoff_assists = playoff_stats.get("assists", 0)
+                playoff_points = playoff_stats.get("points", 0)
+                playoff_plus_minus = playoff_stats.get("plusMinus", 0)
+                playoff_penalty_minutes = playoff_stats.get("pim", 0)
             else:
                 reg_gp = reg_goals = reg_assists = reg_points = reg_plus_minus = 0
+                playoff_goals = playoff_assists = playoff_points = playoff_plus_minus = 0
             
-            # Use placeholders for playoff stats (update later when available)
-            playoff_goals = playoff_assists = playoff_points = playoff_plus_minus = 0
+
 
             if birth_year and 2025 - birth_year <= 23:
                 is_U23 = True
@@ -126,10 +135,12 @@ def fetch_and_store_players_for_team(abbr):
                 reg_assists=reg_assists,
                 reg_points=reg_points,
                 reg_plus_minus=reg_plus_minus,
+                reg_penalty_minutes=reg_penalty_minutes,
                 playoff_goals=playoff_goals,
                 playoff_assists=playoff_assists,
                 playoff_points=playoff_points,
-                playoff_plus_minus=playoff_plus_minus
+                playoff_plus_minus=playoff_plus_minus,
+                playoff_penalty_minutes=playoff_penalty_minutes
             )
             db.session.add(new_player)
             print(f"Added player: {first_name} {last_name} ({abbr})")
@@ -162,15 +173,20 @@ def fetch_and_store_players_for_team(abbr):
             headshot = goalie.get("headshot", "")
             
             # Get stats via the landing endpoint
-            stats = goalie_data.get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
-            reg_gp = stats.get("gamesPlayed", 0)
-            reg_gaa = stats.get("goalsAgainstAvg", 0.0)
-            reg_save_pct = stats.get("savePctg", 0.0)
-            reg_shutouts = stats.get("shutouts", 0)
-            reg_wins = stats.get("wins", 0)
+            reg_stats = goalie_data.get("featuredStats", {}).get("regularSeason", {}).get("subSeason", {})
+            reg_gp = reg_stats.get("gamesPlayed", 0)
+            reg_gaa = reg_stats.get("goalsAgainstAvg", 0.0)
+            reg_save_pct = reg_stats.get("savePctg", 0.0)
+            reg_shutouts = reg_stats.get("shutouts", 0)
+            reg_wins = reg_stats.get("wins", 0)
             
-            # Use placeholders for playoff stats (update later when available)
-            playoff_gp = playoff_gaa = playoff_save_pct = playoff_shutouts = playoff_wins = 0
+            playoff_stats = goalie_data.get("featuredStats", {}).get("playoffs", {}).get("subSeason", {})
+            playoff_gp = playoff_stats.get("gamesPlayed", 0)
+            playoff_gaa = playoff_stats.get("goalsAgainstAvg", 0.0)
+            playoff_save_pct = playoff_stats.get("savePctg", 0.0)
+            playoff_shutouts = playoff_stats.get("shutouts", 0)
+            playoff_wins = playoff_stats.get("wins", 0)
+            
 
             if birth_year and 2025 - birth_year <= 23:
                 is_U23 = True

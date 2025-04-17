@@ -8,6 +8,8 @@ export interface DeadlineStatus {
     deadline_passed: boolean;
     time_remaining: string;
     deadline_timestamp: string;
+    grace_period_active?: boolean;
+    grace_period_end?: string;
 }
 
 @Injectable({
@@ -37,7 +39,9 @@ export class DeadlineService {
                     return of({
                         deadline_passed: false,
                         time_remaining: 'Unknown',
-                        deadline_timestamp: new Date().toISOString()
+                        deadline_timestamp: new Date().toISOString(),
+                        grace_period_active: false,
+                        grace_period_end: ''
                     });
                 }),
                 // Cache the response for a short time
@@ -53,6 +57,24 @@ export class DeadlineService {
     isDeadlinePassed(): Observable<boolean> {
         return this.getDeadlineStatus().pipe(
             map(status => status.deadline_passed)
+        );
+    }
+
+    /**
+     * Check if the grace period is active
+     */
+    isGracePeriodActive(): Observable<boolean> {
+        return this.getDeadlineStatus().pipe(
+            map(status => !!status.grace_period_active)
+        );
+    }
+
+    /**
+     * Get the grace period end timestamp
+     */
+    getGracePeriodEnd(): Observable<string> {
+        return this.getDeadlineStatus().pipe(
+            map(status => status.grace_period_end || '')
         );
     }
 

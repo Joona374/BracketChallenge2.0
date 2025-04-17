@@ -60,6 +60,8 @@ export class LineupPageComponent implements OnInit {
 
   // Deadline property
   deadlinePassed: boolean = false;
+  gracePeriodActive: boolean = false;
+  gracePeriodEnd: string = '';
 
   constructor(
     private playerService: PlayerService,
@@ -69,14 +71,17 @@ export class LineupPageComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Check deadline status
-    this.deadlineService.isDeadlinePassed().subscribe({
-      next: (passed) => {
-        this.deadlinePassed = passed;
+    // Check deadline and grace period status
+    this.deadlineService.getDeadlineStatus().subscribe({
+      next: (status) => {
+        this.deadlinePassed = status.deadline_passed;
+        this.gracePeriodActive = !!status.grace_period_active;
+        this.gracePeriodEnd = status.grace_period_end || '';
       },
       error: (err) => {
         console.error('Error checking deadline status:', err);
         this.deadlinePassed = false;
+        this.gracePeriodActive = false;
       }
     });
 
@@ -324,6 +329,11 @@ export class LineupPageComponent implements OnInit {
   }
 
   onSlotClick(slot: SlotKey): void {
+    if (this.gracePeriodActive) {
+      alert('Kokoonpanon vaihdot on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
+      return;
+    }
+
     // If deadline has passed, use trade system
     if (this.deadlinePassed) {
       if (this.slotMap[slot] &&
@@ -348,6 +358,11 @@ export class LineupPageComponent implements OnInit {
   }
 
   assignPlayerToSlot(entity: Player | Goalie): void {
+    if (this.gracePeriodActive) {
+      alert('Kokoonpanon vaihdot on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
+      return;
+    }
+
     if (this.deadlinePassed && this.effectiveRemainingTrades <= 0) {
       alert('Sinulla ei ole enää vaihtoja jäljellä.');
       return;
@@ -453,6 +468,11 @@ export class LineupPageComponent implements OnInit {
   }
 
   clearLineup(): void {
+    if (this.gracePeriodActive) {
+      alert('Kokoonpanon tyhjennys on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
+      return;
+    }
+
     // Don't allow clearing lineup after deadline
     if (this.deadlinePassed) {
       alert("Lineup clearing is disabled after the deadline. You can only make trades by replacing individual players.");
@@ -472,6 +492,11 @@ export class LineupPageComponent implements OnInit {
   }
 
   saveLineup(): void {
+    if (this.gracePeriodActive) {
+      alert('Kokoonpanon tallennus on estetty alkuvaiheen aikana (24.4.2025 07:00 UTC+3 asti).');
+      return;
+    }
+
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     if (!user?.id) {
       alert("You must be logged in to save your lineup.");

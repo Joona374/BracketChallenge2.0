@@ -21,6 +21,15 @@ from dotenv import load_dotenv
 # Default deadline (will be used only if not in database)
 DEFAULT_DEADLINE = datetime(2025, 4, 20, 0, 0, 0, tzinfo=timezone.utc)
 
+# --- Grace period logic ---
+GRACE_PERIOD_END = datetime(2025, 4, 24, 4, 0, 0, tzinfo=timezone.utc)  # 24.4.2025 07:00 UTC+3 == 04:00 UTC
+
+def is_grace_period_active():
+    """Return True if now is after the deadline but before the grace period end."""
+    now = datetime.now(timezone.utc)
+    deadline = get_deadline_from_db()
+    return deadline <= now < GRACE_PERIOD_END
+
 def get_deadline_from_db():
     """Get the playoff deadline from the database settings table"""
     setting = Setting.query.filter_by(key='playoff_deadline').first()
@@ -406,6 +415,10 @@ def save_lineup():
 
     if not user_id or not lineup:
         return jsonify({"error": "Missing user_id or lineup"}), 400
+
+    # Block all lineup changes during grace period
+    if is_grace_period_active():
+        return jsonify({"error": "Lineup changes are disabled during the grace period (until 24.4.2025 07:00 UTC+3)."}), 403
 
     try:
         with db.session.begin():
@@ -1834,7 +1847,7 @@ def update_headline(headline_id):
             headline.is_active = data['is_active']
         
         db.session.commit()
-        
+        print(f"Updated headline: {headline.headline} (ID: {headline.id})")
         return jsonify({
             "message": "Headline updated successfully",
             "headline": {
@@ -1923,11 +1936,14 @@ def get_deadline_status():
     """
     deadline_passed = is_deadline_passed()
     time_remaining = get_time_until_deadline()
-    
+    grace_period_active = is_grace_period_active()
+    grace_period_end = GRACE_PERIOD_END.isoformat()
     return jsonify({
         "deadline_passed": deadline_passed,
         "time_remaining": time_remaining,
-        "deadline_timestamp": get_deadline_from_db().isoformat()
+        "deadline_timestamp": get_deadline_from_db().isoformat(),
+        "grace_period_active": grace_period_active,
+        "grace_period_end": grace_period_end
     }), 200
 
 @app.route('/api/admin/settings/deadline', methods=['PUT'])

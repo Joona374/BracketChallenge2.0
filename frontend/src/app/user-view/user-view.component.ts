@@ -93,7 +93,6 @@ export class UserViewComponent implements OnInit {
       if (this.teamName) {
         this.http.get<Matchups>(`${environment.apiUrl}/bracket/matchups`).subscribe({
           next: (matchups) => {
-            console.log(matchups);
             this.initialMatchups = matchups;
             if (this.teamName) {
               this.loadUserData(this.teamName);
@@ -116,7 +115,6 @@ export class UserViewComponent implements OnInit {
     this.error = null;
 
     const encodedTeamName = encodeURIComponent(teamName);
-    console.log('Encoded team name:', encodedTeamName);
 
     this.http.get(`${environment.apiUrl}/user/by-team-name?teamName=${encodedTeamName}`).subscribe({
       next: (response: any) => {
@@ -134,7 +132,6 @@ export class UserViewComponent implements OnInit {
           }
         };
 
-        console.log('User ID:', userId);
 
         this.loadBracket(userId, onRequestComplete);
         this.loadLineup(userId, onRequestComplete);
@@ -165,7 +162,7 @@ export class UserViewComponent implements OnInit {
     };
     this.userRank = 4;
     // You could add more mock data here if needed
-    console.log("Mock data loaded:", this.userPoints, this.userRank);
+    // console.log("Mock data loaded:", this.userPoints, this.userRank);
   }
 
   loadBracket(userId: number, onComplete: () => void): void {
@@ -187,7 +184,6 @@ export class UserViewComponent implements OnInit {
   loadLineup(userId: number, onComplete: () => void): void {
     this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
       next: (res: any) => {
-        console.log('Lineup data:', res);
         this.userData.lineup = res.lineup;
       },
       error: (err) => {
@@ -295,7 +291,7 @@ export class UserViewComponent implements OnInit {
   loadLineupSummary(userId: Number): void {
     // Use logged-in user id if not viewing another user
     if (!userId) {
-      console.log('User ID not found. Please log in again.');
+      // console.log('User ID not found. Please log in again.');
     }
 
 
@@ -312,7 +308,6 @@ export class UserViewComponent implements OnInit {
           this.http.get<any[]>(`${environment.apiUrl}/lineup/history?user_id=${userId}`).subscribe({
             next: (trades: any[]) => {
               this.lineupSummary.tradeHistory = trades || [];
-              console.log('Trade history:', trades);
             },
             error: () => {
               this.lineupSummary.tradeHistory = [];

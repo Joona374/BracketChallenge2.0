@@ -5,43 +5,43 @@ import json
 def get_penalty_leaders():
     """Get the current playoff penalty minute leaders"""
     print("Fetching penalty leaders...")
-    players = Player.query.order_by(Player.reg_penalty_minutes.desc()).limit(3).all()
-    print(f"Found penalty leaders: {[f'{p.first_name} {p.last_name} ({p.reg_penalty_minutes} PIM)' for p in players]}")
+    players = Player.query.order_by(Player.playoff_penalty_minutes.desc()).limit(3).all()
+    print(f"Found penalty leaders: {[f'{p.first_name} {p.last_name} ({p.playoff_penalty_minutes} PIM)' for p in players]}")
     return players
 
 def get_goal_leaders():
     """Get the current playoff goal leaders"""
     print("Fetching goal leaders...")
-    players = Player.query.order_by(Player.reg_goals.desc()).limit(3).all()
-    print(f"Found goal leaders: {[f'{p.first_name} {p.last_name} ({p.reg_goals} goals)' for p in players]}")
+    players = Player.query.order_by(Player.playoff_goals.desc()).limit(3).all()
+    print(f"Found goal leaders: {[f'{p.first_name} {p.last_name} ({p.playoff_goals} goals)' for p in players]}")
     return players
 
 def get_defense_point_leaders():
     """Get the current playoff point leaders among defensemen"""
     print("Fetching defense point leaders...")
-    defensemen = Player.query.filter_by(position='D').order_by(Player.reg_points.desc()).limit(3).all()
-    print(f"Found defense leaders: {[f'{p.first_name} {p.last_name} ({p.reg_points} points)' for p in defensemen]}")
+    defensemen = Player.query.filter_by(position='D').order_by(Player.playoff_points.desc()).limit(3).all()
+    print(f"Found defense leaders: {[f'{p.first_name} {p.last_name} ({p.playoff_points} points)' for p in defensemen]}")
     return defensemen
 
 def get_u23_point_leaders():
     """Get the current playoff point leaders among U23 players"""
     print("Fetching U23 point leaders...")
-    young_players = Player.query.filter_by(is_U23=True).order_by(Player.reg_points.desc()).limit(3).all()
-    print(f"Found U23 leaders: {[f'{p.first_name} {p.last_name} ({p.reg_points} points)' for p in young_players]}")
+    young_players = Player.query.filter_by(is_U23=True).order_by(Player.playoff_points.desc()).limit(3).all()
+    print(f"Found U23 leaders: {[f'{p.first_name} {p.last_name} ({p.playoff_points} points)' for p in young_players]}")
     return young_players
 
 def get_goalie_win_leaders():
     """Get the current playoff win leaders among goalies"""
     print("Fetching goalie win leaders...")
-    goalies = Goalie.query.order_by(Goalie.reg_wins.desc()).limit(3).all()
-    print(f"Found goalie leaders: {[f'{g.first_name} {g.last_name} ({g.reg_wins} wins)' for g in goalies]}")
+    goalies = Goalie.query.order_by(Goalie.playoff_wins.desc()).limit(3).all()
+    print(f"Found goalie leaders: {[f'{g.first_name} {g.last_name} ({g.playoff_wins} wins)' for g in goalies]}")
     return goalies
 
 def get_finnish_point_leaders():
     """Get the current playoff point leaders among Finnish players"""
     print("Fetching Finnish point leaders...")
-    finns = Player.query.filter_by(birth_country='FIN').order_by(Player.reg_points.desc()).limit(3).all()
-    print(f"Found Finnish leaders: {[f'{p.first_name} {p.last_name} ({p.reg_points} points)' for p in finns]}")
+    finns = Player.query.filter_by(birth_country='FIN').order_by(Player.playoff_points.desc()).limit(3).all()
+    print(f"Found Finnish leaders: {[f'{p.first_name} {p.last_name} ({p.playoff_points} points)' for p in finns]}")
     return finns
 
 def get_current_standings():

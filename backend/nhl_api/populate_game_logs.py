@@ -22,7 +22,7 @@ def fetch_and_store_game_logs():
         for idx, player in enumerate(players, 1):
             print(f"Processing player {idx}/{total_players}: {player.first_name} {player.last_name}")
             api_id = player.api_id
-            url = f"https://api-web.nhle.com/v1/player/{api_id}/game-log/20232024/3"
+            url = f"https://api-web.nhle.com/v1/player/{api_id}/game-log/20242025/3"
             try:
                 resp = requests.get(url)
                 if resp.status_code == 200:
@@ -84,7 +84,7 @@ def fetch_and_store_game_logs():
         for idx, goalie in enumerate(goalies, 1):
             print(f"Processing goalie {idx}/{total_goalies}: {goalie.first_name} {goalie.last_name}")
             api_id = goalie.api_id
-            url = f"https://api-web.nhle.com/v1/player/{api_id}/game-log/20232024/3"
+            url = f"https://api-web.nhle.com/v1/player/{api_id}/game-log/20242025/3"
             try:
                 resp = requests.get(url)
                 if resp.status_code == 200:

@@ -26,7 +26,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.userSubscription = this.authService.currentUser$.subscribe((user: User | null) => {
       this.loggedInUser = user ? user.username : null;
       this.userLogo = user?.logoUrl || null;
-      console.log('HomeComponent Auth State Updated:', { loggedInUser: this.loggedInUser, userLogo: this.userLogo });
     });
 
     // Add listener for logo updates

@@ -1532,6 +1532,10 @@
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.2);
 }
 
+.category-name {
+  font-size: 0.7rem;
+}
+
 .matchup-table {
   width: 100%;
   border-collapse: collapse;

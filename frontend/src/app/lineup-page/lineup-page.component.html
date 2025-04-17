@@ -81,6 +81,13 @@
       </span>
     </div>
 
+    <!-- Grace period notice -->
+    <div *ngIf="gracePeriodActive" class="deadline-notice">
+      ⚠️ Kokoonpanon vaihdot on estetty ensimmäisen 4 päivän aikana.<br />
+      Vaihdot sallitaan uudelleen
+      {{ gracePeriodEnd | date : "dd.MM.yyyy HH:mm" }} (UTC+3) jälkeen.
+    </div>
+
     <!-- Controls -->
     <div class="controls">
       <button class="lineup-button save" (click)="saveLineup()">
