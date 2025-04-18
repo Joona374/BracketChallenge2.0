@@ -353,7 +353,6 @@ export class UserDashboardComponent implements OnInit {
     this.loadUserFromStorage();
     this.loadUserStats();
     this.loadBracketSummary();
-    this.loadLineupSummary();
     this.loadPredictionsSummary();
     this.loadPlayers();
   }
@@ -616,50 +615,6 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  loadLineupSummary(): void {
-    const userId = this.user?.id;
-    if (!userId) return;
-
-    // Fetch lineup summary as before
-    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
-      next: (data: any) => {
-        if (data) {
-          // Fetch trade history from backend
-          this.http.get<any[]>(`${environment.apiUrl}/lineup/history?user_id=${userId}`).subscribe({
-            next: (trades: any[]) => {
-              this.lineupSummary = {
-                lineup: data.lineup || {},
-                remainingTrades: data.remainingTrades || 9,
-                unusedBudget: data.unusedBudget || 0,
-                totalValue: data.totalValue || 0,
-                tradeHistory: trades || []
-              };
-            },
-            error: (err) => {
-              // Fallback to no trade history if error
-              this.lineupSummary = {
-                lineup: data.lineup || {},
-                remainingTrades: data.remainingTrades || 9,
-                unusedBudget: data.unusedBudget || 0,
-                totalValue: data.totalValue || 0,
-                tradeHistory: []
-              };
-            }
-          });
-        }
-      },
-      error: (err) => {
-        console.error("Failed to load lineup summary", err);
-        this.lineupSummary = {
-          lineup: {},
-          remainingTrades: 9,
-          unusedBudget: 2000000,
-          totalValue: 0,
-          tradeHistory: []
-        };
-      }
-    });
-  }
 
   loadPlayers(): void {
     this.http.get<any[]>(`${environment.apiUrl}/players`).subscribe({

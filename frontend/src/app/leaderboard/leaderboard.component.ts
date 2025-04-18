@@ -13,7 +13,6 @@ interface LeaderboardEntry {
   logoUrl?: string; // Add optional logoUrl field
   totalPoints: number;
   bracketPoints: number;
-  lineupPoints: number;
   predictionsPoints: number;
 }
 
@@ -98,7 +97,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/boston-bruins.svg',
         totalPoints: 87,
         bracketPoints: 45,
-        lineupPoints: 32,
         predictionsPoints: 10
       },
       {
@@ -109,7 +107,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/toronto-maple-leafs.svg',
         totalPoints: 76,
         bracketPoints: 30,
-        lineupPoints: 36,
         predictionsPoints: 10
       },
       {
@@ -120,7 +117,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/boston-bruins.svg',
         totalPoints: 70,
         bracketPoints: 40,
-        lineupPoints: 20,
         predictionsPoints: 10
       },
       {
@@ -131,7 +127,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/pittsburgh-penguins.svg',
         totalPoints: 65,
         bracketPoints: 25,
-        lineupPoints: 30,
         predictionsPoints: 10
       },
       {
@@ -142,7 +137,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/montreal-canadiens.svg',
         totalPoints: 60,
         bracketPoints: 25,
-        lineupPoints: 20,
         predictionsPoints: 15
       },
       {
@@ -153,7 +147,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/new-york-rangers.svg',
         totalPoints: 55,
         bracketPoints: 20,
-        lineupPoints: 25,
         predictionsPoints: 10
       },
       {
@@ -164,7 +157,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/tampa-bay-lightning.svg',
         totalPoints: 50,
         bracketPoints: 20,
-        lineupPoints: 20,
         predictionsPoints: 10
       },
       {
@@ -175,7 +167,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/vegas-golden-knights.svg',
         totalPoints: 45,
         bracketPoints: 15,
-        lineupPoints: 20,
         predictionsPoints: 10
       },
       {
@@ -186,7 +177,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/nashville-predators.svg',
         totalPoints: 40,
         bracketPoints: 15,
-        lineupPoints: 15,
         predictionsPoints: 10
       },
       {
@@ -197,7 +187,6 @@ export class LeaderboardComponent implements OnInit {
         logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/edmonton-oilers.svg',
         totalPoints: 35,
         bracketPoints: 10,
-        lineupPoints: 15,
         predictionsPoints: 10
       }
     ];
@@ -244,7 +233,6 @@ export class LeaderboardComponent implements OnInit {
         teamName: 'No Team',
         totalPoints: 0,
         bracketPoints: 0,
-        lineupPoints: 0,
         predictionsPoints: 0
       });
     }

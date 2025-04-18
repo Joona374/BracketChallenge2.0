@@ -94,7 +94,7 @@
             (click)="sortBy('totalPoints')"
             [class.sorted]="sortKey === 'totalPoints'"
           >
-            PTS
+            YHT
             <span *ngIf="sortKey === 'totalPoints'">{{
               sortAsc ? "▲" : "▼"
             }}</span>
@@ -106,16 +106,6 @@
           >
             Bracket
             <span *ngIf="sortKey === 'bracketPoints'">{{
-              sortAsc ? "▲" : "▼"
-            }}</span>
-          </th>
-          <th
-            class="points-column"
-            (click)="sortBy('lineupPoints')"
-            [class.sorted]="sortKey === 'lineupPoints'"
-          >
-            Kokoonpano
-            <span *ngIf="sortKey === 'lineupPoints'">{{
               sortAsc ? "▲" : "▼"
             }}</span>
           </th>
@@ -153,7 +143,6 @@
           </td>
           <td class="points-column total-points">{{ entry.totalPoints }}</td>
           <td class="points-column">{{ entry.bracketPoints }}</td>
-          <td class="points-column">{{ entry.lineupPoints }}</td>
           <td class="points-column">{{ entry.predictionsPoints }}</td>
         </tr>
       </tbody>

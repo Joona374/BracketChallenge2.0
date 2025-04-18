@@ -23,20 +23,18 @@ export class UserViewComponent implements OnInit {
   teamName: string | null = null;
   userData: any = {
     bracket: null,
-    lineup: null,
     predictions: null
   };
   userRank: number | null = null;
   userPoints = {
     total: 0,
     bracket: 0,
-    lineup: 0,
     predictions: 0
   };
 
   loading: boolean = true;
   error: string | null = null;
-  activeTab: 'bracket' | 'lineup' | 'predictions' = 'bracket';
+  activeTab: 'bracket' | 'predictions' = 'bracket';
 
   initialMatchups: Matchups = { west: [], east: [] };
 
@@ -46,13 +44,6 @@ export class UserViewComponent implements OnInit {
 
   logoUrl: string | null = null;
 
-  lineupSummary: any = {
-    lineup: {},
-    remainingTrades: 0,
-    unusedBudget: 0,
-    totalValue: 0,
-    tradeHistory: []
-  };
   allPlayers: Player[] = [];
   allGoalies: Goalie[] = [];
 
@@ -122,7 +113,7 @@ export class UserViewComponent implements OnInit {
         this.logoUrl = response.logoUrl; // Store the logo URL
 
         // Keep track of loading requests
-        let pendingRequests = 3; // bracket, lineup, predictions
+        let pendingRequests = 2; // bracket, predictions
         const onRequestComplete = () => {
           pendingRequests--;
           if (pendingRequests <= 0) {
@@ -132,13 +123,10 @@ export class UserViewComponent implements OnInit {
           }
         };
 
-
         this.loadBracket(userId, onRequestComplete);
-        this.loadLineup(userId, onRequestComplete);
         this.loadPredictions(userId, onRequestComplete);
         this.loadUserStats(userId);
         this.loadPlayers();
-        this.loadLineupSummary(userId);
       },
       error: (err) => {
         console.error('Error finding user by team name', err);
@@ -157,7 +145,6 @@ export class UserViewComponent implements OnInit {
     this.userPoints = {
       total: 65,
       bracket: 30,
-      lineup: 25,
       predictions: 10
     };
     this.userRank = 4;
@@ -174,22 +161,6 @@ export class UserViewComponent implements OnInit {
         console.error('Error loading bracket data', err);
         this.loadMockData();
         this.userData.bracket = {}; // Set empty default
-      },
-      complete: () => {
-        onComplete(); // Just call onComplete, remove checkLoadingComplete call
-      }
-    });
-  }
-
-  loadLineup(userId: number, onComplete: () => void): void {
-    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
-      next: (res: any) => {
-        this.userData.lineup = res.lineup;
-      },
-      error: (err) => {
-        console.error('Error loading lineup data', err);
-        this.loadMockData();
-        this.userData.lineup = {}; // Set empty default
       },
       complete: () => {
         onComplete(); // Just call onComplete, remove checkLoadingComplete call
@@ -288,47 +259,6 @@ export class UserViewComponent implements OnInit {
     });
   }
 
-  loadLineupSummary(userId: Number): void {
-    // Use logged-in user id if not viewing another user
-    if (!userId) {
-      // console.log('User ID not found. Please log in again.');
-    }
-
-
-
-    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
-      next: (data: any) => {
-        if (data) {
-          this.lineupSummary.lineup = data.lineup || {};
-          this.lineupSummary.remainingTrades = data.remainingTrades || 0;
-          this.lineupSummary.unusedBudget = data.unusedBudget || 0;
-          this.lineupSummary.totalValue = data.totalValue || 0;
-
-          // Fetch trade history
-          this.http.get<any[]>(`${environment.apiUrl}/lineup/history?user_id=${userId}`).subscribe({
-            next: (trades: any[]) => {
-              this.lineupSummary.tradeHistory = trades || [];
-            },
-            error: () => {
-              this.lineupSummary.tradeHistory = [];
-            }
-          });
-
-          this.cdr.markForCheck();
-        }
-      },
-      error: () => {
-        this.lineupSummary = {
-          lineup: {},
-          remainingTrades: 0,
-          unusedBudget: 0,
-          totalValue: 0,
-          tradeHistory: []
-        };
-      }
-    });
-  }
-
   checkLoadingComplete(): void {
     // Mark loading as complete regardless of whether data exists
     // This fixes the issue where the page would get stuck loading if no data was found
@@ -336,7 +266,7 @@ export class UserViewComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  setActiveTab(tab: 'bracket' | 'lineup' | 'predictions'): void {
+  setActiveTab(tab: 'bracket' | 'predictions'): void {
     this.activeTab = tab;
     this.matchupsByRoundCache = {}; // Clear cache on tab change
     this.teamWinnerCache = {};
@@ -348,11 +278,6 @@ export class UserViewComponent implements OnInit {
 
   getBracketPoints(): number {
     return this.userPoints.bracket;
-  }
-
-  getLineupPoints(): number {
-
-    return this.userPoints.lineup;
   }
 
   getPredictionsPoints(): number {
@@ -572,68 +497,12 @@ export class UserViewComponent implements OnInit {
     return this.userData.bracket.final.cup;
   }
 
-  getUsedBudget(): number {
-    if (!this.userData.lineup) return 0;
-
-    return 4250000;
-  }
-
   formatBudget(value: number): string {
     return new Intl.NumberFormat('fi-FI', {
       style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 0
     }).format(value);
-  }
-
-  getPlayerByPosition(position: string): Player | Goalie | null {
-    // Map UI slot to backend slot
-    let slot = position;
-    if (position === 'MV') slot = 'G';
-    if (position === 'OL') slot = 'R';
-    if (position === 'KH') slot = 'C';
-    if (position === 'VL') slot = 'L';
-    if (position === 'VP') slot = 'LD';
-    if (position === 'OP') slot = 'RD';
-
-    if (!this.lineupSummary.lineup) return null;
-    const playerId = this.lineupSummary.lineup[slot];
-    if (!playerId) return null;
-
-    // Check if this is a goalie position
-    if (slot === 'G') {
-      return this.allGoalies.find(g => g.id === playerId) || null;
-    } else {
-      return this.allPlayers.find(p => p.id === playerId) || null;
-    }
-  }
-
-  getPositionName(positionCode: string): string {
-    return this.positionNames[positionCode] || positionCode;
-  }
-
-  getPlayerName(position: string): string {
-    const player = this.getPlayerByPosition(position);
-    if (!player) return '';
-    return `${player.firstName} ${player.lastName}`;
-  }
-
-  getPlayerTeam(position: string): string {
-    const player = this.getPlayerByPosition(position);
-    if (!player) return '';
-    return player.team;
-  }
-
-  getPlayerPrice(position: string): number {
-    const player = this.getPlayerByPosition(position);
-    if (!player) return 0;
-    return player.price;
-  }
-
-  getPlayerTeamClass(position: string): string {
-    const player = this.getPlayerByPosition(position);
-    if (!player) return '';
-    return player.team.toLowerCase();
   }
 
   getPredictionCategories(): string[] {

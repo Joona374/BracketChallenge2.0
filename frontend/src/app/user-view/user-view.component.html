@@ -36,10 +36,6 @@
                 <span class="category-name">Bracket</span>
                 <span class="category-points">{{ getBracketPoints() }}</span>
               </div>
-              <div class="point-category" *ngIf="getLineupPoints() >= 0">
-                <span class="category-name">Kokoonpano</span>
-                <span class="category-points">{{ getLineupPoints() }}</span>
-              </div>
               <div class="point-category" *ngIf="getPredictionsPoints() >= 0">
                 <span class="category-name">Top 3</span>
                 <span class="category-points">{{
@@ -66,13 +62,6 @@
         (click)="setActiveTab('bracket')"
       >
         Bracket
-      </button>
-      <button
-        class="tab-button"
-        [class.active]="activeTab === 'lineup'"
-        (click)="setActiveTab('lineup')"
-      >
-        Kokoonpano
       </button>
       <button
         class="tab-button"
@@ -335,101 +324,6 @@
         </div>
       </div>
 
-      <!-- Lineup Tab -->
-      <div *ngIf="activeTab === 'lineup'">
-        <div class="lineup-view">
-          <!-- Player Lineup Card -->
-          <div class="dashboard-card lineup-card">
-            <div class="card-header">
-              <h3>Käyttäjän kokoonpano</h3>
-            </div>
-            <div class="card-content">
-              <div class="lineup-info">
-                <div class="budget-detail">
-                  <span class="detail-label">Kokonaisarvo:</span>
-                  <span class="detail-value">{{
-                    formatBudget(
-                      lineupSummary.totalValue + lineupSummary.unusedBudget
-                    )
-                  }}</span>
-                </div>
-                <div class="budget-detail">
-                  <span class="detail-label">Budjetti Jäljellä:</span>
-                  <span class="detail-value">{{
-                    formatBudget(lineupSummary.unusedBudget)
-                  }}</span>
-                </div>
-                <div class="budget-detail">
-                  <span class="detail-label">Vaihtoja Jäljellä:</span>
-                  <span class="detail-value">{{
-                    lineupSummary.remainingTrades
-                  }}</span>
-                </div>
-              </div>
-              <div class="player-grid">
-                <div
-                  *ngFor="let position of ['VL', 'KH', 'OL', 'VP', 'OP', 'MV']"
-                  class="player-slot"
-                >
-                  <span
-                    class="player-name"
-                    *ngIf="getPlayerByPosition(position) as player"
-                  >
-                    <span
-                      class="position-name"
-                      style="font-weight: bold; margin-bottom: 2px"
-                      >{{ getPositionName(position) }}:
-                    </span>
-                    {{ player.firstName }}
-                    {{ player.lastName }}
-                    <span class="player-price">{{
-                      formatBudget(player.price)
-                    }}</span>
-                  </span>
-                  <span
-                    class="empty-slot"
-                    *ngIf="!getPlayerByPosition(position)"
-                    >Tyhjä</span
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Trade History Card -->
-          <div class="trade-history">
-            <h4 class="section-title">Vaihtohistoria</h4>
-            <div class="trade-header">
-              <div class="trade-column-header">Pois</div>
-              <div class="trade-arrow">-</div>
-              <div class="trade-column-header">Sisään</div>
-            </div>
-            <div class="trade-list">
-              <div
-                class="trade-item"
-                *ngFor="let trade of lineupSummary.tradeHistory"
-              >
-                <div class="trade-date">
-                  {{ trade.date }}
-                  <span class="position-badge">{{
-                    formatPosition(trade.positionOut)
-                  }}</span>
-                </div>
-                <div class="player-out">{{ trade.playerOut }}</div>
-                <div class="trade-arrow">→</div>
-                <div class="player-in">{{ trade.playerIn }}</div>
-              </div>
-              <div
-                class="no-trades"
-                *ngIf="!lineupSummary.tradeHistory?.length"
-              >
-                Ei vaihtoja vielä
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Predictions Tab -->
       <div
         *ngIf="activeTab === 'predictions' && userData.predictions"
@@ -494,10 +388,6 @@
       <!-- No data messages remain unchanged -->
       <div *ngIf="activeTab === 'bracket' && !userData.bracket" class="no-data">
         No bracket data available for this user
-      </div>
-
-      <div *ngIf="activeTab === 'lineup' && !userData.lineup" class="no-data">
-        No lineup data available for this user
       </div>
 
       <div
