@@ -90,7 +90,7 @@ export class UserViewComponent implements OnInit {
             }
           },
           error: (err) => {
-            console.error('Failed to load initial matchups', err);
+            // // console.error('Failed to load initial matchups', err);
             this.error = 'Failed to load initial matchup data';
           }
         });
@@ -129,27 +129,16 @@ export class UserViewComponent implements OnInit {
         this.loadPlayers();
       },
       error: (err) => {
-        console.error('Error finding user by team name', err);
+        // // console.error('Error finding user by team name', err);
         this.error = 'Could not find user with this team name';
         this.loading = false;
-
-        // Load mock data even if user lookup fails
-        this.loadMockData();
+        // Set default values if user lookup fails
+        this.userPoints = { total: 0, bracket: 0, predictions: 0 };
+        this.userRank = null;
+        this.userData = { bracket: null, predictions: null };
         this.cdr.markForCheck();
       }
     });
-  }
-
-  loadMockData(): void {
-    // Placeholder data to show when API requests fail
-    this.userPoints = {
-      total: 65,
-      bracket: 30,
-      predictions: 10
-    };
-    this.userRank = 4;
-    // You could add more mock data here if needed
-    // console.log("Mock data loaded:", this.userPoints, this.userRank);
   }
 
   loadBracket(userId: number, onComplete: () => void): void {
@@ -158,9 +147,9 @@ export class UserViewComponent implements OnInit {
         this.userData.bracket = res.picks;
       },
       error: (err) => {
-        console.error('Error loading bracket data', err);
-        this.loadMockData();
-        this.userData.bracket = {}; // Set empty default
+        // console.error('Error loading bracket data', err);
+        // Set empty/default values if bracket data fails to load
+        this.userData.bracket = {};
       },
       complete: () => {
         onComplete(); // Just call onComplete, remove checkLoadingComplete call
@@ -174,9 +163,9 @@ export class UserViewComponent implements OnInit {
         this.userData.predictions = res.predictions;
       },
       error: (err) => {
-        console.error('Error loading predictions data', err);
-        this.loadMockData();
-        this.userData.predictions = {}; // Set empty default
+        // console.error('Error loading predictions data', err);
+        // Set empty/default values if predictions data fails to load
+        this.userData.predictions = {};
       },
       complete: () => {
         onComplete(); // Just call onComplete, remove checkLoadingComplete call
@@ -189,17 +178,22 @@ export class UserViewComponent implements OnInit {
       next: (res: any) => {
         if (res && res.rank) {
           this.userRank = res.rank;
+        } else {
+          this.userRank = null;
         }
         if (res && res.points) {
           this.userPoints = res.points;
+        } else {
+          this.userPoints = { total: 0, bracket: 0, predictions: 0 };
         }
         this.loading = false;
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Error loading user stats', err);
-        // Use placeholder stats if request fails
-        this.loadMockData();
+        // console.error('Error loading user stats', err);
+        // Use default stats if request fails
+        this.userPoints = { total: 0, bracket: 0, predictions: 0 };
+        this.userRank = null;
       }
     });
   }
@@ -446,15 +440,14 @@ export class UserViewComponent implements OnInit {
 
     if (typeof matchupId === 'string' && (matchupId.startsWith('E') || matchupId.startsWith('W')) &&
       !matchupId.includes('semi') && !matchupId.includes('final')) {
-      // Handle new round 1 format with codes like E1, W1, etc.
-      result = this.userData.bracket.round1[matchupId] === team;
+      result = this.userData.bracket.round1?.[matchupId] === team;
     } else if (typeof matchupId === 'string') {
       if (matchupId.includes('semi')) {
-        result = this.userData.bracket.round2[`${matchupId}-winner`] === team;
+        result = this.userData.bracket.round2?.[`${matchupId}-winner`] === team;
       } else if (matchupId.includes('final') && !matchupId.includes('cup')) {
-        result = this.userData.bracket.round3[`${matchupId}-winner`] === team;
+        result = this.userData.bracket.round3?.[`${matchupId}-winner`] === team;
       } else if (matchupId === 'cup') {
-        result = this.userData.bracket.final['cup-winner'] === team;
+        result = this.userData.bracket.final?.['cup-winner'] === team;
       }
     }
 

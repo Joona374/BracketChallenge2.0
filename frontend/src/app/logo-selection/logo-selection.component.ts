@@ -46,7 +46,7 @@ export class LogoSelectionComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error fetching logo options:', err);
+        // console.error('Error fetching logo options:', err);
         this.error = 'Logo vaihtoehtojen lataus epäonnistui. Yritä uudelleen myöhemmin.';
         this.loading = false;
       }
@@ -86,7 +86,7 @@ export class LogoSelectionComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error saving logo selection:', err);
+        // console.error('Error saving logo selection:', err);
         this.error = 'Failed to save your logo selection. Please try again.';
       }
     });
@@ -100,7 +100,7 @@ export class LogoSelectionComponent implements OnInit {
       const user = JSON.parse(storedUser);
       return user.id;
     } catch (e) {
-      console.error('Error parsing user from localStorage:', e);
+      // console.error('Error parsing user from localStorage:', e);
       return null;
     }
   }
@@ -114,7 +114,7 @@ export class LogoSelectionComponent implements OnInit {
       user.logoUrl = logoUrl;
       localStorage.setItem('loggedInUser', JSON.stringify(user));
     } catch (e) {
-      console.error('Error updating user logo in localStorage:', e);
+      // console.error('Error updating user logo in localStorage:', e);
     }
   }
 

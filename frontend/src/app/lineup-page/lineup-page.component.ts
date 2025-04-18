@@ -66,7 +66,7 @@ export class LineupPageComponent implements OnInit {
         this.deadlinePassed = status.deadline_passed;
       },
       error: (err) => {
-        console.error('Error checking deadline status:', err);
+        // console.error('Error checking deadline status:', err);
         this.deadlinePassed = false;
       }
     });
@@ -168,7 +168,7 @@ export class LineupPageComponent implements OnInit {
           if (err.status === 404) {
             console.log("No saved lineup found for this user");
           } else {
-            console.error("Failed to load saved lineup", err);
+            // console.error("Failed to load saved lineup", err);
           }
         }
       });
@@ -436,7 +436,7 @@ export class LineupPageComponent implements OnInit {
         alert('✅ Kokoonpano tallennettu! Voit muokata sitä vapaasti deadlineen asti.');
       },
       error: (err) => {
-        console.error("Lineup save error:", err);
+        // console.error("Lineup save error:", err);
         alert("❌ Kentällisen tallennus epäonnistui.");
       },
     });

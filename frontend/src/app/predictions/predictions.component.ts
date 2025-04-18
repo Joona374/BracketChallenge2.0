@@ -85,7 +85,7 @@ export class PredictionsComponent implements OnInit {
         this.deadlinePassed = passed;
       },
       error: (err) => {
-        console.error('Error checking deadline status:', err);
+        // console.error('Error checking deadline status:', err);
         // Default to false to allow operations if we can't check the deadline
         this.deadlinePassed = false;
       }
@@ -255,7 +255,7 @@ export class PredictionsComponent implements OnInit {
           if (err.status === 403) {
             alert("❌ Veikkausten tallentaminen ei ole enää mahdollista, koska aikaraja on umpeutunut (20.4.2025 00:00).");
           } else {
-            console.error("Veikkausten tallentaminen epäonnistui:", err);
+            // console.error("Veikkausten tallentaminen epäonnistui:", err);
             alert("❌ Virhe veikkauksia tallentaessa. Yritä uudelleen.");
           }
         }
@@ -317,7 +317,7 @@ export class PredictionsComponent implements OnInit {
           if (err.status === 404) {
             console.log("No predictions have been saved yet");
           } else {
-            console.error("Failed to load predictions:", err);
+            // console.error("Failed to load predictions:", err);
           }
         }
       });

@@ -132,114 +132,114 @@ export class UserDashboardComponent implements OnInit {
     rounds: [
       {
         name: 'First Round',
-        correct: 6,
-        avgCorrect: 5.2,
-        bestCorrect: 8,
-        points: 12,
-        avgPoints: 10.4,
-        bestPoints: 16
+        correct: 0,
+        avgCorrect: 0,
+        bestCorrect: 0,
+        points: 0,
+        avgPoints: 0,
+        bestPoints: 0
       },
       {
         name: 'Second Round',
-        correct: 2,
-        avgCorrect: 2.5,
-        bestCorrect: 4,
-        points: 8,
-        avgPoints: 10,
-        bestPoints: 16
+        correct: 0,
+        avgCorrect: 0,
+        bestCorrect: 0,
+        points: 0,
+        avgPoints: 0,
+        bestPoints: 0
       },
       {
         name: 'Conference Finals',
-        correct: 1,
-        avgCorrect: 0.8,
-        bestCorrect: 2,
-        points: 10,
-        avgPoints: 8,
-        bestPoints: 20
+        correct: 0,
+        avgCorrect: 0,
+        bestCorrect: 0,
+        points: 0,
+        avgPoints: 0,
+        bestPoints: 0
       },
       {
         name: 'Stanley Cup Final',
         correct: 0,
-        avgCorrect: 0.3,
-        bestCorrect: 1,
+        avgCorrect: 0,
+        bestCorrect: 0,
         points: 0,
-        avgPoints: 3,
-        bestPoints: 10
+        avgPoints: 0,
+        bestPoints: 0
       }
     ],
-    totalCorrect: 9,
-    avgTotalCorrect: 8.8,
-    bestTotalCorrect: 15,
-    avgTotalPoints: 31.4,
-    bestTotalPoints: 62,
-    completed: 12,
-    total: 15,
+    totalCorrect: 0,
+    avgTotalCorrect: 0,
+    bestTotalCorrect: 0,
+    avgTotalPoints: 0,
+    bestTotalPoints: 0,
+    completed: 0,
+    total: 0,
     roundMatchups: [
       {
         name: 'Ensimmäinen kierros',
         matchups: [
           {
-            userPickedTeam: "BOS",
-            actualWinner: "BOS",
-            userPickedGames: 6,
-            actualGames: 7,
-            userCorrect: true,
-            gamesCorrect: false
-          },
-          {
-            userPickedTeam: "FLA",
-            actualWinner: "FLA",
-            userPickedGames: 5,
-            actualGames: 5,
-            userCorrect: true,
-            gamesCorrect: true
-          },
-          {
-            userPickedTeam: "NYR",
-            actualWinner: "NYR",
-            userPickedGames: 4,
-            actualGames: 5,
-            userCorrect: true,
-            gamesCorrect: false
-          },
-          {
-            userPickedTeam: "CAR",
-            actualWinner: "CAR",
-            userPickedGames: 6,
-            actualGames: 6,
-            userCorrect: true,
-            gamesCorrect: true
-          },
-          {
-            userPickedTeam: "DAL",
-            actualWinner: "VGK",
-            userPickedGames: 7,
-            actualGames: 6,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
             userCorrect: false,
             gamesCorrect: false
           },
           {
-            userPickedTeam: "COL",
-            actualWinner: "COL",
-            userPickedGames: 6,
-            actualGames: 5,
-            userCorrect: true,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
             gamesCorrect: false
           },
           {
-            userPickedTeam: "EDM",
-            actualWinner: "EDM",
-            userPickedGames: 5,
-            actualGames: 5,
-            userCorrect: true,
-            gamesCorrect: true
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
           },
           {
-            userPickedTeam: "VAN",
-            actualWinner: "VAN",
-            userPickedGames: 7,
-            actualGames: 5,
-            userCorrect: true,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
             gamesCorrect: false
           }
         ]
@@ -248,36 +248,36 @@ export class UserDashboardComponent implements OnInit {
         name: 'Toinen kierros',
         matchups: [
           {
-            userPickedTeam: "BOS",
-            actualWinner: "FLA",
-            userPickedGames: 7,
-            actualGames: 7,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
             userCorrect: false,
-            gamesCorrect: true
-          },
-          {
-            userPickedTeam: "CAR",
-            actualWinner: "NYR",
-            userPickedGames: 6,
-            actualGames: 6,
-            userCorrect: false,
-            gamesCorrect: true
-          },
-          {
-            userPickedTeam: "COL",
-            actualWinner: "COL",
-            userPickedGames: 7,
-            actualGames: 6,
-            userCorrect: true,
             gamesCorrect: false
           },
           {
-            userPickedTeam: "EDM",
-            actualWinner: "EDM",
-            userPickedGames: 6,
-            actualGames: 6,
-            userCorrect: true,
-            gamesCorrect: true
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
+          },
+          {
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
+            userCorrect: false,
+            gamesCorrect: false
           }
         ]
       },
@@ -285,18 +285,18 @@ export class UserDashboardComponent implements OnInit {
         name: 'Konferenssifinaalit',
         matchups: [
           {
-            userPickedTeam: "NYR",
-            actualWinner: "FLA",
-            userPickedGames: 7,
-            actualGames: 6,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
             userCorrect: false,
             gamesCorrect: false
           },
           {
-            userPickedTeam: "COL",
-            actualWinner: "EDM",
-            userPickedGames: 7,
-            actualGames: 6,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
+            actualGames: 0,
             userCorrect: false,
             gamesCorrect: false
           }
@@ -306,9 +306,9 @@ export class UserDashboardComponent implements OnInit {
         name: 'Stanley Cup Finaali',
         matchups: [
           {
-            userPickedTeam: "EDM",
-            actualWinner: "Kesken",
-            userPickedGames: 6,
+            userPickedTeam: "-",
+            actualWinner: "-",
+            userPickedGames: 0,
             actualGames: 0,
             userCorrect: false,
             gamesCorrect: false
@@ -353,6 +353,7 @@ export class UserDashboardComponent implements OnInit {
     this.loadUserFromStorage();
     this.loadUserStats();
     this.loadBracketSummary();
+    this.loadLineupSummary();
     this.loadPredictionsSummary();
     this.loadPlayers();
   }
@@ -363,7 +364,7 @@ export class UserDashboardComponent implements OnInit {
       try {
         this.user = JSON.parse(storedUser);
       } catch (e) {
-        console.error('Error parsing user from localStorage:', e);
+        // console.error('Error parsing user from localStorage:', e);
         this.user = null;
       }
     } else {
@@ -395,7 +396,7 @@ export class UserDashboardComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Failed to load user stats", err);
+        // console.error("Failed to load user stats", err);
         this.points = {
           total: 0,
           bracket: 0,
@@ -421,119 +422,119 @@ export class UserDashboardComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Failed to load bracket summary", err);
+        // console.error("Failed to load bracket summary", err);
         this.bracketSummary = {
           rounds: [
             {
               name: 'Ensimmäinen kierros',
-              correct: 6,
-              avgCorrect: 5.2,
-              bestCorrect: 8,
-              points: 12,
-              avgPoints: 10.4,
-              bestPoints: 16
+              correct: 0,
+              avgCorrect: 0,
+              bestCorrect: 0,
+              points: 0,
+              avgPoints: 0,
+              bestPoints: 0
             },
             {
               name: 'Toinen kierros',
-              correct: 2,
-              avgCorrect: 2.5,
-              bestCorrect: 4,
-              points: 8,
-              avgPoints: 10,
-              bestPoints: 16
+              correct: 0,
+              avgCorrect: 0,
+              bestCorrect: 0,
+              points: 0,
+              avgPoints: 0,
+              bestPoints: 0
             },
             {
               name: 'Konferenssi finaalit',
-              correct: 1,
-              avgCorrect: 0.8,
-              bestCorrect: 2,
-              points: 10,
-              avgPoints: 8,
-              bestPoints: 20
+              correct: 0,
+              avgCorrect: 0,
+              bestCorrect: 0,
+              points: 0,
+              avgPoints: 0,
+              bestPoints: 0
             },
             {
               name: 'Stanley Cup Finaali',
               correct: 0,
-              avgCorrect: 0.3,
-              bestCorrect: 1,
+              avgCorrect: 0,
+              bestCorrect: 0,
               points: 0,
-              avgPoints: 3,
-              bestPoints: 10
+              avgPoints: 0,
+              bestPoints: 0
             }
           ],
-          totalCorrect: 9,
-          avgTotalCorrect: 8.8,
-          bestTotalCorrect: 15,
-          avgTotalPoints: 31.4,
-          bestTotalPoints: 62,
-          completed: 12,
-          total: 15,
+          totalCorrect: 0,
+          avgTotalCorrect: 0,
+          bestTotalCorrect: 0,
+          avgTotalPoints: 0,
+          bestTotalPoints: 0,
+          completed: 0,
+          total: 0,
           roundMatchups: [
             {
               name: 'Ensimmäinen kierros',
               matchups: [
                 {
-                  userPickedTeam: "BOS",
-                  actualWinner: "BOS",
-                  userPickedGames: 6,
-                  actualGames: 7,
-                  userCorrect: true,
-                  gamesCorrect: false
-                },
-                {
-                  userPickedTeam: "FLA",
-                  actualWinner: "FLA",
-                  userPickedGames: 5,
-                  actualGames: 5,
-                  userCorrect: true,
-                  gamesCorrect: true
-                },
-                {
-                  userPickedTeam: "NYR",
-                  actualWinner: "NYR",
-                  userPickedGames: 4,
-                  actualGames: 5,
-                  userCorrect: true,
-                  gamesCorrect: false
-                },
-                {
-                  userPickedTeam: "CAR",
-                  actualWinner: "CAR",
-                  userPickedGames: 6,
-                  actualGames: 6,
-                  userCorrect: true,
-                  gamesCorrect: true
-                },
-                {
-                  userPickedTeam: "DAL",
-                  actualWinner: "VGK",
-                  userPickedGames: 7,
-                  actualGames: 6,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
                   userCorrect: false,
                   gamesCorrect: false
                 },
                 {
-                  userPickedTeam: "COL",
-                  actualWinner: "COL",
-                  userPickedGames: 6,
-                  actualGames: 5,
-                  userCorrect: true,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
                   gamesCorrect: false
                 },
                 {
-                  userPickedTeam: "EDM",
-                  actualWinner: "EDM",
-                  userPickedGames: 5,
-                  actualGames: 5,
-                  userCorrect: true,
-                  gamesCorrect: true
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
                 },
                 {
-                  userPickedTeam: "VAN",
-                  actualWinner: "VAN",
-                  userPickedGames: 7,
-                  actualGames: 5,
-                  userCorrect: true,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
                   gamesCorrect: false
                 }
               ]
@@ -542,36 +543,36 @@ export class UserDashboardComponent implements OnInit {
               name: 'Toinen kierros',
               matchups: [
                 {
-                  userPickedTeam: "BOS",
-                  actualWinner: "FLA",
-                  userPickedGames: 7,
-                  actualGames: 7,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
                   userCorrect: false,
-                  gamesCorrect: true
-                },
-                {
-                  userPickedTeam: "CAR",
-                  actualWinner: "NYR",
-                  userPickedGames: 6,
-                  actualGames: 6,
-                  userCorrect: false,
-                  gamesCorrect: true
-                },
-                {
-                  userPickedTeam: "COL",
-                  actualWinner: "COL",
-                  userPickedGames: 7,
-                  actualGames: 6,
-                  userCorrect: true,
                   gamesCorrect: false
                 },
                 {
-                  userPickedTeam: "EDM",
-                  actualWinner: "EDM",
-                  userPickedGames: 6,
-                  actualGames: 6,
-                  userCorrect: true,
-                  gamesCorrect: true
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
+                },
+                {
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
+                  userCorrect: false,
+                  gamesCorrect: false
                 }
               ]
             },
@@ -579,18 +580,18 @@ export class UserDashboardComponent implements OnInit {
               name: 'Konferenssifinaalit',
               matchups: [
                 {
-                  userPickedTeam: "NYR",
-                  actualWinner: "FLA",
-                  userPickedGames: 7,
-                  actualGames: 6,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
                   userCorrect: false,
                   gamesCorrect: false
                 },
                 {
-                  userPickedTeam: "COL",
-                  actualWinner: "EDM",
-                  userPickedGames: 7,
-                  actualGames: 6,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
+                  actualGames: 0,
                   userCorrect: false,
                   gamesCorrect: false
                 }
@@ -600,9 +601,9 @@ export class UserDashboardComponent implements OnInit {
               name: 'Stanley Cup Finaali',
               matchups: [
                 {
-                  userPickedTeam: "EDM",
-                  actualWinner: "Kesken",
-                  userPickedGames: 6,
+                  userPickedTeam: "-",
+                  actualWinner: "-",
+                  userPickedGames: 0,
                   actualGames: 0,
                   userCorrect: false,
                   gamesCorrect: false
@@ -615,6 +616,50 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
+  loadLineupSummary(): void {
+    const userId = this.user?.id;
+    if (!userId) return;
+
+    // Fetch lineup summary as before
+    this.http.get(`${environment.apiUrl}/lineup/get?user_id=${userId}`).subscribe({
+      next: (data: any) => {
+        if (data) {
+          // Fetch trade history from backend
+          this.http.get<any[]>(`${environment.apiUrl}/lineup/history?user_id=${userId}`).subscribe({
+            next: (trades: any[]) => {
+              this.lineupSummary = {
+                lineup: data.lineup || {},
+                remainingTrades: data.remainingTrades || 9,
+                unusedBudget: data.unusedBudget || 0,
+                totalValue: data.totalValue || 0,
+                tradeHistory: trades || []
+              };
+            },
+            error: (err) => {
+              // Fallback to no trade history if error
+              this.lineupSummary = {
+                lineup: data.lineup || {},
+                remainingTrades: data.remainingTrades || 9,
+                unusedBudget: data.unusedBudget || 0,
+                totalValue: data.totalValue || 0,
+                tradeHistory: []
+              };
+            }
+          });
+        }
+      },
+      error: (err) => {
+        // console.error("Failed to load lineup summary", err);
+        this.lineupSummary = {
+          lineup: {},
+          remainingTrades: 9,
+          unusedBudget: 2000000,
+          totalValue: 0,
+          tradeHistory: []
+        };
+      }
+    });
+  }
 
   loadPlayers(): void {
     this.http.get<any[]>(`${environment.apiUrl}/players`).subscribe({
@@ -630,7 +675,7 @@ export class UserDashboardComponent implements OnInit {
         }));
       },
       error: (err) => {
-        console.error("Failed to load players", err);
+        // console.error("Failed to load players", err);
         this.allPlayers = [];
       }
     });
@@ -660,7 +705,7 @@ export class UserDashboardComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Failed to load predictions summary", err);
+        // console.error("Failed to load predictions summary", err);
         this.predictionsSummary = {
           completed: 0,
           totalToComplete: 3,

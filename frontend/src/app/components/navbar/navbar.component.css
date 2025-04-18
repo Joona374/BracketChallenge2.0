@@ -163,7 +163,7 @@
   width: 43px;
   height: 43px;
   border-radius: 50%;
-  background: linear-gradient(45deg, #ff3232, #990000);
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,7 +275,7 @@
 .dropdown-menu a.active-link {
   color: #ff4444;
   background-color: rgba(255, 68, 68, 0.1);
-  margin-left: 30px;
+  margin-left: 10px;
 }
 
 @keyframes fadeIn {

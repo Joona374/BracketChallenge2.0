@@ -33,7 +33,7 @@ export class DeadlineService {
             this.cachedStatus = this.http.get<DeadlineStatus>(this.apiUrl).pipe(
                 tap(status => this.deadlineStatusSubject.next(status)),
                 catchError(error => {
-                    console.error('Error fetching deadline status:', error);
+                    // console.error('Error fetching deadline status:', error);
 
                     // Return a fallback status if the API call fails
                     return of({

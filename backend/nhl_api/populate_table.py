@@ -384,6 +384,5 @@ if __name__ == '__main__':
         #     populate_db()
         # else:
         #     # By default, just recalculate prices for existing players
-        calculate_prices()
-        # populate_db()
+        populate_db()
         # fetch_and_store_players_for_team("VGK")

@@ -144,7 +144,7 @@ export class VoteComponent implements OnInit, OnDestroy {
         this.showVotingStats = true;
       },
       error: (error) => {
-        console.error('Error loading voting data:', error);
+        // console.error('Error loading voting data:', error);
       }
     });
   }
@@ -170,11 +170,11 @@ export class VoteComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error checking user vote:', error);
+          // console.error('Error checking user vote:', error);
         }
       });
     } catch (e) {
-      console.error('Error parsing user data:', e);
+      // console.error('Error parsing user data:', e);
     }
   }
 

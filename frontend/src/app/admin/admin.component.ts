@@ -211,7 +211,7 @@ export class AdminComponent implements OnInit {
         if (err.status === 404) {
           console.log('No matchups found. Using defaults.');
         } else {
-          console.error('Error loading matchups:', err);
+          // console.error('Error loading matchups:', err);
         }
       }
     });
@@ -234,7 +234,7 @@ export class AdminComponent implements OnInit {
         alert('Initial matchups saved successfully!');
       },
       error: (err) => {
-        console.error('Error saving matchups:', err);
+        // console.error('Error saving matchups:', err);
         alert('Failed to save matchups. Please try again.');
       }
     });
@@ -281,7 +281,7 @@ export class AdminComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error(`Error loading round ${this.selectedRound} matchups:`, err);
+        // console.error(`Error loading round ${this.selectedRound} matchups:`, err);
       }
     });
   }
@@ -433,7 +433,7 @@ export class AdminComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Error saving results:', err);
+        // console.error('Error saving results:', err);
         alert('Failed to save results. Please try again.');
       }
     });
@@ -462,7 +462,7 @@ export class AdminComponent implements OnInit {
         this.teams = data;
       },
       error: (err) => {
-        console.error('Error loading teams:', err);
+        // console.error('Error loading teams:', err);
       }
     });
   }
@@ -514,7 +514,7 @@ export class AdminComponent implements OnInit {
         this.registrationCodes = data;
       },
       error: (err) => {
-        console.error('Error loading registration codes:', err);
+        // console.error('Error loading registration codes:', err);
         this.codeError = 'Failed to load registration codes';
       }
     });
@@ -541,7 +541,7 @@ export class AdminComponent implements OnInit {
         this.loadRegistrationCodes();
       },
       error: (err) => {
-        console.error('Error generating registration codes:', err);
+        // console.error('Error generating registration codes:', err);
         this.codeError = err.error?.message || 'Failed to generate registration codes';
       }
     });
@@ -556,7 +556,7 @@ export class AdminComponent implements OnInit {
         this.logoFormData = {}; // Reset form
       },
       error: (err) => {
-        console.error('Error loading users:', err);
+        // console.error('Error loading users:', err);
         this.logoError = 'Failed to load users';
       }
     });
@@ -601,7 +601,7 @@ export class AdminComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error updating user logos:', err);
+        // console.error('Error updating user logos:', err);
         this.logoError = err.error?.message || 'Failed to update user logos';
       }
     });
@@ -684,7 +684,7 @@ export class AdminComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error uploading logo:', err);
+        // console.error('Error uploading logo:', err);
         this.logoError = err.error?.error || 'Failed to upload logo';
         this.uploadInProgress = false;
       }
@@ -766,7 +766,7 @@ export class AdminComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error deleting result:', err);
+        // console.error('Error deleting result:', err);
         alert('Failed to delete result. Please try again.');
       }
     });
@@ -809,7 +809,7 @@ export class AdminComponent implements OnInit {
         this.filterHeadlines();
       },
       error: (err) => {
-        console.error('Error loading headlines:', err);
+        // console.error('Error loading headlines:', err);
         this.headlineError = 'Failed to load headlines';
       }
     });
@@ -825,7 +825,7 @@ export class AdminComponent implements OnInit {
         }));
       },
       error: (err) => {
-        console.error('Error loading user teams:', err);
+        // console.error('Error loading user teams:', err);
       }
     });
   }
@@ -867,7 +867,7 @@ export class AdminComponent implements OnInit {
         this.filterHeadlines();
       },
       error: (err) => {
-        console.error('Error creating headline:', err);
+        // console.error('Error creating headline:', err);
         this.headlineError = err.error?.message || 'Failed to create headline';
       }
     });
@@ -910,7 +910,7 @@ export class AdminComponent implements OnInit {
         this.filterHeadlines();
       },
       error: (err) => {
-        console.error('Error updating headline:', err);
+        // console.error('Error updating headline:', err);
         this.headlineError = err.error?.message || 'Failed to update headline';
       }
     });
@@ -944,7 +944,7 @@ export class AdminComponent implements OnInit {
         this.filterHeadlines();
       },
       error: (err) => {
-        console.error('Error deleting headline:', err);
+        // console.error('Error deleting headline:', err);
         this.headlineError = err.error?.message || 'Failed to delete headline';
       }
     });
@@ -985,7 +985,7 @@ export class AdminComponent implements OnInit {
         this.deadlineLoading = false;
       },
       error: (err) => {
-        console.error('Error loading deadline:', err);
+        // console.error('Error loading deadline:', err);
         this.deadlineError = 'Failed to load deadline settings';
         this.deadlineLoading = false;
       }
@@ -1017,7 +1017,7 @@ export class AdminComponent implements OnInit {
         this.deadlineLoading = false;
       },
       error: (err) => {
-        console.error('Error updating deadline:', err);
+        // console.error('Error updating deadline:', err);
         this.deadlineError = err.error?.error || 'Failed to update deadline';
         this.deadlineLoading = false;
       }

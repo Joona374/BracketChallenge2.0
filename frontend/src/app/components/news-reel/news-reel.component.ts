@@ -45,24 +45,31 @@ export class NewsReelComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(switchMap(() => this.fetchHeadlines()))
       .subscribe({
         next: (data) => {
-          // If no headlines are returned from API, use fallback headlines
-          if (data.length === 0) {
-            this.useDefaultHeadlines();
-          } else {
-            this.formattedHeadlines = data.map((h: Headline) => ({
-              teamName: h.team_name,
-              content: h.headline,
-              created: h.created
-            }));
-          }
+          this.formattedHeadlines = data.map((h: Headline) => ({
+            teamName: h.team_name,
+            content: h.headline,
+            created: h.created
+          }));
           this.createRepeatedHeadlines();
         },
         error: (err) => {
-          console.error('Failed to fetch headlines:', err);
-          this.useDefaultHeadlines();
+          // console.error('Failed to fetch headlines:', err);
+          this.formattedHeadlines = [];
           this.createRepeatedHeadlines();
         }
       });
+  }
+
+  loadHeadlines(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/headlines`).subscribe({
+      next: (data) => {
+        this.formattedHeadlines = data;
+      },
+      error: (err) => {
+        // console.error('Failed to load headlines', err);
+        this.formattedHeadlines = [];
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -83,17 +90,6 @@ export class NewsReelComponent implements OnInit, OnDestroy, AfterViewInit {
   private fetchHeadlines() {
 
     return this.http.get<Headline[]>(`${environment.apiUrl}/headlines`);
-  }
-
-  private useDefaultHeadlines() {
-    // Fallback headlines in case API fails or returns no data
-    this.formattedHeadlines = [
-      { teamName: "Playoffs", content: "🔥 Bracket Deadline: April 20 at 21:00 EET", created: "2023-04-20T21:00:00Z" },
-      { teamName: "NHL", content: "🧊 Eastern Conference could get wild", created: "2023-04-19T18:00:00Z" },
-      { teamName: "BracketChallenge", content: "🚨 Make your picks before the puck drops!", created: "2023-04-18T12:00:00Z" },
-      { teamName: "Stanley", content: "🏆 Who will hoist the Cup? You decide!", created: "2023-04-17T09:00:00Z" },
-      { teamName: "Hockey", content: "😤 Don't sleep on the underdogs", created: "2023-04-16T15:00:00Z" }
-    ];
   }
 
   private createRepeatedHeadlines() {

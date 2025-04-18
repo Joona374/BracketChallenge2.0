@@ -115,7 +115,7 @@ export class BracketComponent implements OnInit {
         this.computeNextRounds();
       },
       error: (err) => {
-        console.error("Failed to load matchups", err);
+        // console.error("Failed to load matchups", err);
       },
     });
   }
@@ -319,7 +319,7 @@ export class BracketComponent implements OnInit {
               "The bracket submission deadline has passed. Your picks cannot be saved."
             );
           } else {
-            console.error("Failed to save picks:", err);
+            // console.error("Failed to save picks:", err);
             alert("Failed to save picks. Please try again.");
           }
         },
@@ -349,7 +349,7 @@ export class BracketComponent implements OnInit {
           if (err.status === 404) {
             console.log("No previous picks found for this user.");
           } else {
-            console.error("Failed to load picks", err);
+            // console.error("Failed to load picks", err);
           }
         },
       });

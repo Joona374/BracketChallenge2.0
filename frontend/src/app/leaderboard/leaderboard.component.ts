@@ -39,30 +39,25 @@ export class LeaderboardComponent implements OnInit {
     const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
     this.currentUserId = user?.id || 0;
 
-    this.loadLeaderboardData();
+    this.loadLeaderboard();
   }
 
-  loadLeaderboardData(): void {
+  loadLeaderboard(): void {
     this.loading = true;
-    this.error = null;
-
-    this.http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboard`)
-      .subscribe({
-        next: (data) => {
-          this.leaderboardEntries = data;
-          this.sortLeaderboard(); // Sort the leaderboard with current sort settings
-          this.updateRanks();
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Failed to load leaderboard data', err);
-          this.error = 'Failed to load leaderboard data. Using mock data instead.';
-          this.loadMockData(); // Uncomment fallback to mock data
-          this.loading = false;
-          this.sortLeaderboard(); // Sort mock data too
-          this.updateRanks();
-        }
-      });
+    this.http.get<any[]>(`${environment.apiUrl}/leaderboard`).subscribe({
+      next: (data) => {
+        this.leaderboardEntries = data;
+        this.sortLeaderboard();
+        this.updateRanks();
+        this.loading = false;
+      },
+      error: (err) => {
+        // console.error('Failed to load leaderboard', err);
+        // Set empty leaderboard and show zeros if no data
+        this.leaderboardEntries = [];
+        this.loading = false;
+      }
+    });
   }
 
   // New method to ensure leaderboard is always properly sorted
@@ -85,113 +80,6 @@ export class LeaderboardComponent implements OnInit {
       if (a.rank > b.rank) return 1;
       return 0;
     });
-  }
-
-  loadMockData(): void {
-    this.leaderboardEntries = [
-      {
-        id: 1,
-        rank: 1,
-        username: 'IceKing',
-        teamName: 'joonanpojat',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/boston-bruins.svg',
-        totalPoints: 87,
-        bracketPoints: 45,
-        predictionsPoints: 10
-      },
-      {
-        id: 2,
-        rank: 2,
-        username: 'PuckMaster',
-        teamName: 'Toronto Titans',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/toronto-maple-leafs.svg',
-        totalPoints: 76,
-        bracketPoints: 30,
-        predictionsPoints: 10
-      },
-      {
-        id: 3,
-        rank: 3,
-        username: 'HockeyFan99',
-        teamName: 'Boston Bruisers',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/boston-bruins.svg',
-        totalPoints: 70,
-        bracketPoints: 40,
-        predictionsPoints: 10
-      },
-      {
-        id: 4,
-        rank: 4,
-        username: 'StanleyCupDreams',
-        teamName: 'Pittsburgh Power',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/pittsburgh-penguins.svg',
-        totalPoints: 65,
-        bracketPoints: 25,
-        predictionsPoints: 10
-      },
-      {
-        id: 5,
-        rank: 5,
-        username: 'GoalieGuru',
-        teamName: 'Montreal Magic',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/montreal-canadiens.svg',
-        totalPoints: 60,
-        bracketPoints: 25,
-        predictionsPoints: 15
-      },
-      {
-        id: 6,
-        rank: 6,
-        username: 'DefenseFirst',
-        teamName: 'New York Knights',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/new-york-rangers.svg',
-        totalPoints: 55,
-        bracketPoints: 20,
-        predictionsPoints: 10
-      },
-      {
-        id: 7,
-        rank: 7,
-        username: 'LightTheLamp',
-        teamName: 'Tampa Thunderbolts',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/tampa-bay-lightning.svg',
-        totalPoints: 50,
-        bracketPoints: 20,
-        predictionsPoints: 10
-      },
-      {
-        id: 8,
-        rank: 8,
-        username: 'HatTrickHero',
-        teamName: 'Vegas Victors',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/vegas-golden-knights.svg',
-        totalPoints: 45,
-        bracketPoints: 15,
-        predictionsPoints: 10
-      },
-      {
-        id: 9,
-        rank: 9,
-        username: 'BlueLineDefender',
-        teamName: 'Nashville Noise',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/nashville-predators.svg',
-        totalPoints: 40,
-        bracketPoints: 15,
-        predictionsPoints: 10
-      },
-      {
-        id: 10,
-        rank: 10,
-        username: 'TopShelf',
-        teamName: 'Edmonton Express',
-        logoUrl: 'https://cdn.nhl.com/logos/nhl/t.nhl.com/edmonton-oilers.svg',
-        totalPoints: 35,
-        bracketPoints: 10,
-        predictionsPoints: 10
-      }
-    ];
-    this.sortLeaderboard(); // Sort mock data
-    this.updateRanks();
   }
 
   sortBy(key: keyof LeaderboardEntry): void {

@@ -2,11 +2,16 @@
   <div class="news-reel-track" #newsTrack>
     <ng-container *ngFor="let headline of repeatedHeadlines; index as i">
       <span class="headline">
-        <a
-          [routerLink]="['/user', getTeamNameForUrl(headline.teamName)]"
-          class="team-name"
-          >{{ "@" + getDisplayTeamName(headline.teamName) }}</a
-        >
+        <ng-container *ngIf="headline.teamName && headline.teamName !== '' ; else systemMsg">
+          <a
+            [routerLink]="['/user', getTeamNameForUrl(headline.teamName)]"
+            class="team-name"
+            >{{ "&#64;" + getDisplayTeamName(headline.teamName) }}</a
+          >
+        </ng-container>
+        <ng-template #systemMsg>
+          <span class="team-name">&#64;System</span>
+        </ng-template>
         {{ headline.content }}
         <span class="timestamp">{{ formatTimestamp(headline.created) }}</span>
         <span class="spacer"></span>
