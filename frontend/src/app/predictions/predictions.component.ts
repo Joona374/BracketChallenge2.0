@@ -300,8 +300,12 @@ export class PredictionsComponent implements OnInit {
               if (response.predictions[category]?.length) {
                 validPredictions[category as PredictionCategory] = response.predictions[category]
                   .map((savedPlayer: any) => {
-                    // Find the player with matching ID from our loaded players list
-                    return this.players.find(p => p.id === savedPlayer.id) || this.goalies.find(g => g.id === savedPlayer.id) || null;
+                    // Use position to determine if goalie or skater
+                    if (savedPlayer.position === 'G') {
+                      return this.goalies.find(g => g.id === savedPlayer.id) || null;
+                    } else {
+                      return this.players.find(p => p.id === savedPlayer.id) || null;
+                    }
                   })
                   .filter((p: PlayerBase | null): p is PlayerBase => p !== null);
               }

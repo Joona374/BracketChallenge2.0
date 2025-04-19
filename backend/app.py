@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone, timedelta
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import json
 import random
 
@@ -1543,6 +1543,7 @@ def update_user_logos(user_id):
         return jsonify({"error": f"Failed to update user logos: {str(e)}"}), 500
 
 @app.route('/api/users/<int:user_id>/upload-logo', methods=['POST'])
+@cross_origin(origins=["https://bracket-challenge2-0.vercel.app", "http://localhost:4200"])
 def upload_user_logo(user_id):
     """
     Upload a logo image for a user
