@@ -1,20 +1,20 @@
 <div class="logo-selection-modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Select Your Team Logo</h2>
+      <h2>Valitse joukkueesi logo</h2>
       <button class="close-button" (click)="cancel()">×</button>
     </div>
 
     <div class="modal-body">
       <div *ngIf="loading" class="loading-container">
         <div class="loading-spinner"></div>
-        <p>Loading logo options...</p>
+        <p>Ladataan logovaihtoehtoja...</p>
       </div>
 
       <div *ngIf="error" class="error-container">
         <p class="error-message">{{ error }}</p>
         <button class="retry-button" (click)="fetchLogoOptions()">
-          Try Again
+          Yritä uudelleen
         </button>
       </div>
 
@@ -23,8 +23,8 @@
         class="no-logos-container"
       >
         <div class="no-logos-icon">🖼️</div>
-        <h3>No Logos Available Yet</h3>
-        <p>Team logos will be available soon. Please check back later.</p>
+        <h3>Ei vielä logoja saatavilla</h3>
+        <p>Joukkueen logot tulevat saataville pian. Tarkista myöhemmin uudelleen.</p>
       </div>
 
       <div *ngIf="!loading && !error && logoUrls.length > 0" class="logos-grid">
@@ -43,14 +43,14 @@
     </div>
 
     <div class="modal-footer">
-      <button class="cancel-button" (click)="cancel()">Cancel</button>
+      <button class="cancel-button" (click)="cancel()">Peruuta</button>
       <button
         class="save-button"
         [disabled]="!selectedLogo"
         [class.disabled]="!selectedLogo"
         (click)="saveSelection()"
       >
-        Save Selection
+        Tallenna valinta
       </button>
     </div>
   </div>

@@ -42,3 +42,4 @@ Thumbs.db
 coverage/
 pytest_cache/
 
+seed_playoffs.py
