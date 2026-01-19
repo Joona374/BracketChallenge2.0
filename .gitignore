@@ -6,7 +6,6 @@ __pycache__/
 
 #  Images and other media files
 *.bmp
-*.png
 *.jpg
 *.jpeg
 *.gif
