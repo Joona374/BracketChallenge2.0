@@ -1,8 +1,10 @@
-# 🏒 NHL Bracket Challenge 2.0
+# NHL Bracket Challenge 2.0
 
-A full-stack web application for NHL playoff bracket predictions, built for the 2025 Stanley Cup Playoffs. Users compete by predicting playoff matchup winners, building fantasy lineups, and forecasting statistical category leaders.
+A full-stack web application for NHL playoff bracket predictions, built for the 2025 Stanley Cup Playoffs. Users compete by predicting playoff matchup winners and forecasting statistical category leaders.
 
-**[Live Demo](https://bracket-challenge2-0.vercel.app)** | **Demo Code: `PORTFOLIO2025`**
+**[Live Demo](https://bracket-challenge2-0.vercel.app)** | **Demo Registration Code: `PORTFOLIO2026`**
+
+> ⏳ **Note:** This full-stack app runs entirely on free-tier services (Vercel + Render + Neon). The backend may take **30-60 seconds** to wake up on first request due to Render's cold start. After the initial load, everything runs smoothly. I chose Render because it offers the best free tier I could find for hosting Python backends.
 
 ![Angular](https://img.shields.io/badge/Angular-19-dd0031?logo=angular)
 ![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask)
@@ -12,24 +14,49 @@ A full-stack web application for NHL playoff bracket predictions, built for the 
 
 ---
 
-## 📸 Screenshots
+## Table of Contents
 
-> *The app is currently in demo mode - register with code `PORTFOLIO2025` to explore all features*
+- [Screenshots](#screenshots)
+- [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
+- [Development Notes](#development-notes)
+- [Project Structure](#project-structure)
+- [Game Modes](#game-modes)
+- [Local Development](#local-development)
+- [Deployment](#deployment)
+- [Database Schema](#database-schema)
+- [Future Improvements](#future-improvements)
+- [Notes](#notes)
+- [License](#license)
 
 ---
 
-## 🎯 Project Overview
+## Screenshots
+**Homepage**
+![Home](docs/home.png)
+**Bracket View**
+![Bracket](docs/bracket.png)
+**Category Predictions**
+![Players](docs/players.png)
 
-This project was developed as a passion project to replace the spreadsheet-based playoff prediction pools I've participated in for years. The app was used by **~20 players** during the 2025 NHL Playoffs, handling real-time scoring updates and leaderboard tracking throughout the postseason.
+
+> *The app is currently in [demo mode](https://bracket-challenge2-0.vercel.app). Register using code `PORTFOLIO2026` to explore all features*
+
+---
+
+## Project Overview
+
+This project was developed as a passion project to replace the spreadsheet-based playoff prediction pools I've ran for past 5 years. The app was used by **~20 players** during the 2025 NHL Playoffs, handling real-time scoring updates and leaderboard tracking throughout the postseason.
 
 ### Key Features
 
-- **🏆 Bracket Predictions** - Pick winners and series lengths for all 4 rounds of the playoffs
-- **⭐ Top 3 Predictions** - Forecast leaders in 7 statistical categories (goals, penalty minutes, defense points, U23 points, goalie wins, Finnish player points, Conn Smythe winner)
-- **👥 User Dashboards** - Personal stats with comparison to league averages
-- **📊 Leaderboard** - Live standings with point breakdowns
-- **⚙️ Admin Panel** - Manage matchups, enter results, generate registration codes
-- **🔐 Auth System** - Registration codes, secure login, password reset via email
+- **Bracket Predictions** - Pick winners and series lengths for all 4 rounds of the playoffs
+- **Top 3 Predictions** - Forecast leaders in 7 statistical categories (goals, penalty minutes, defense points, U23 points, goalie wins, Finnish player points, Conn Smythe winner)
+- **User Dashboards** - Personal stats with comparison to league averages
+- **Leaderboard** - Live standings with point breakdowns
+- **Prize Share Voting** - Users can vote on how to split the prize pool at the end of the season
+- **Admin Panel** - Manage matchups, enter results, generate registration codes
+- **Auth System** - Registration codes, secure login, team-logo management
 
 ### Technical Highlights
 
@@ -40,7 +67,7 @@ This project was developed as a passion project to replace the spreadsheet-based
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Angular 19** - Standalone components, signals, modern Angular patterns
@@ -65,7 +92,16 @@ This project was developed as a passion project to replace the spreadsheet-based
 
 ---
 
-## 📁 Project Structure
+## Development Notes
+
+This project was intentionally used as an experiment in AI-assisted development. 
+The frontend was largely built with AI pair-programming (GitHub Copilot), while I 
+focused on architectural decisions, integration, debugging, and the backend data layer. 
+This workflow allowed me to ship a production-ready app for ~20 users while learning 
+Angular in the process. The experience reinforced that AI is a powerful productivity 
+multiplier, but still requires strong fundamentals to direct effectively.
+
+## Project Structure
 
 ```
 BracketChallenge2.0/
@@ -97,7 +133,7 @@ BracketChallenge2.0/
 
 ---
 
-## 🎮 Game Modes
+## Game Modes
 
 ### 1. Bracket Challenge
 Predict the winner and number of games for each playoff series. Points are awarded based on:
@@ -119,7 +155,7 @@ Points are calculated at the end of each round based on actual statistical leade
 
 ---
 
-## 🚀 Local Development
+## Local Development
 
 ### Prerequisites
 - Node.js 18+
@@ -156,11 +192,12 @@ The app will be available at `http://localhost:4200`
 
 ---
 
-## 🌐 Deployment
+## Deployment
 
 ### Backend (Render)
+- Root Directory: `backend/`
 - Build Command: `pip install -r requirements.txt`
-- Start Command: `gunicorn --chdir backend app:app`
+- Start Command: `gunicorn app:app`
 - Environment: `DATABASE_URL` pointing to Neon PostgreSQL
 
 ### Frontend (Vercel)
@@ -170,7 +207,7 @@ The app will be available at `http://localhost:4200`
 
 ---
 
-## 📊 Database Schema
+## Database Schema
 
 Key models include:
 - `User` - Authentication and profile data
@@ -183,32 +220,22 @@ Key models include:
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 - [ ] Add lineup game view to dashboard (currently hidden)
 - [ ] Implement real-time WebSocket updates for live scores
-- [ ] Add historical season archives
-- [ ] Mobile app version (React Native or Flutter)
 - [ ] Social features (comments, head-to-head comparisons)
 
 ---
 
-## 📝 Notes
+## Notes
 
 - **Demo Mode**: The app is currently in a demo state simulating the start of the 2025 playoffs
-- **Finnish UI**: Some labels are in Finnish as this was built for a Finnish user group
+- **Finnish UI**: Primary language is Finnish as this was built for a Finnish user group
 - **Production Use**: Successfully used by ~20 players during the actual 2025 NHL Playoffs
 
 ---
 
-## 👤 Author
-
-**Joona** - 2nd year ICT Bachelor's student, Finland
-
-This project is part of my portfolio demonstrating full-stack development skills with modern frameworks and real-world deployment experience.
-
----
-
-## 📄 License
+## License
 
 This project is for portfolio demonstration purposes. NHL team logos and player data are property of the National Hockey League.
