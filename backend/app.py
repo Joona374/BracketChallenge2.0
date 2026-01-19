@@ -86,17 +86,8 @@ load_dotenv()
 app = Flask(__name__)
 migrate = Migrate(app, db)
 
-# Configure CORS with more explicit settings
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "http://localhost:4200",
-            "https://bracket-challenge2-0.vercel.app"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+# Configure CORS - allow all origins for portfolio demo
+CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization"]}})
 
 app.config.from_object(Config)
 
