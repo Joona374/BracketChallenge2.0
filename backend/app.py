@@ -119,6 +119,9 @@ def register():
         return jsonify({"error": "Team name already exists"}), 400
 
     code = RegistrationCode.query.filter_by(code=registration_code, is_used=False).first()
+    # Also check for reusable codes (they stay is_used=False)
+    if not code:
+        code = RegistrationCode.query.filter_by(code=registration_code, is_reusable=True).first()
     if not code:
         return jsonify({"error": "Invalid or already used registration code"}), 400
     
@@ -133,7 +136,9 @@ def register():
     )
 
     db.session.add(new_user)
-    code.is_used = True
+    # Only mark as used if not reusable
+    if not code.is_reusable:
+        code.is_used = True
     db.session.commit()
 
     return jsonify({"message": "User registered successfully"}), 201

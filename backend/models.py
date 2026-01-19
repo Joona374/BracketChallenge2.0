@@ -72,9 +72,10 @@ class RegistrationCode(db.Model):
     code = db.Column(db.String(80), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     is_used = db.Column(db.Boolean, default=False)
+    is_reusable = db.Column(db.Boolean, default=False)  # Reusable codes don't get marked as used
 
     def __repr__(self):
-        return f'<RegistrationCode {self.code} - Used: {self.is_used}>'
+        return f'<RegistrationCode {self.code} - Used: {self.is_used} - Reusable: {self.is_reusable}>'
     
 
 class Matchup(db.Model):
