@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://nhl-bracket-2025.duckdns.org/api'
+    apiUrl: 'https://bracketchallenge2-0.onrender.com/api'
 };
