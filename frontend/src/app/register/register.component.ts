@@ -1,10 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { TooltipComponent } from "../tooltip/tooltip.component";
 import { environment } from "../../environments/environment";
+import { WarmupService } from "../services/warmup.service";
 
 
 @Component({
@@ -14,7 +15,7 @@ import { environment } from "../../environments/environment";
   templateUrl: "./register.component.html",
   styleUrl: "./register.component.css",
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   formData = {
     username: "",
     teamName: "",
@@ -26,7 +27,12 @@ export class RegisterComponent {
   message: string = "";
   error: string = "";
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private warmupService: WarmupService) { }
+
+  ngOnInit(): void {
+    // Warm up the backend (Render cold start mitigation)
+    this.warmupService.warmupBackend();
+  }
 
   onSubmit() {
     this.message = ""; // Clear previous messages

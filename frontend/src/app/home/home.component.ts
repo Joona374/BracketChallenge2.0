@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { RouterModule, Router, NavigationEnd } from "@angular/router";
 import { DatePipe } from "@angular/common";
 import { AuthService, User } from "../../app/services/auth.service";
+import { WarmupService } from "../services/warmup.service";
 import { Subscription } from "rxjs";
 import { ViewportScroller } from '@angular/common';
 
@@ -19,9 +20,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   private userSubscription: Subscription | null = null;
   private logoUpdateListener: any;
 
-  constructor(private authService: AuthService, private router: Router, private viewportScroller: ViewportScroller) { }
+  constructor(private authService: AuthService, private router: Router, private viewportScroller: ViewportScroller, private warmupService: WarmupService) { }
 
   ngOnInit(): void {
+    // Warm up the backend (Render cold start mitigation)
+    this.warmupService.warmupBackend();
+
     // Subscribe to auth changes
     this.userSubscription = this.authService.currentUser$.subscribe((user: User | null) => {
       this.loggedInUser = user ? user.username : null;

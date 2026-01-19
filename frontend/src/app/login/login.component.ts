@@ -1,8 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { RouterModule, Router } from "@angular/router";
 import { AuthService } from "../services/auth.service";
+import { WarmupService } from "../services/warmup.service";
 
 @Component({
   selector: "app-login",
@@ -11,7 +12,7 @@ import { AuthService } from "../services/auth.service";
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   formData = {
     username: "",
     password: "",
@@ -22,8 +23,14 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private warmupService: WarmupService
   ) { }
+
+  ngOnInit(): void {
+    // Warm up the backend (Render cold start mitigation)
+    this.warmupService.warmupBackend();
+  }
 
   onSubmit() {
     this.message = "";
