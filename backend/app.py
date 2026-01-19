@@ -13,9 +13,7 @@ from score_module import calculate_bracket_points
 from stats_module import get_current_standings
 
 import os
-from openai import OpenAI
 import requests
-from threading import Thread
 from dotenv import load_dotenv
 
 # Default deadline (will be used only if not in database)
@@ -83,51 +81,6 @@ def get_time_until_deadline():
         return f"{minutes} minutes, {seconds} seconds"
 
 load_dotenv()
-
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OpenAI API key not found. Please set it in your environment variables.")
-    
-client = OpenAI(api_key=api_key)
-if not client:
-    raise ValueError("OpenAI API key not found. Please set it in your environment variables.")
-
-
-LOGO_DIR = "team_logos"
-os.makedirs(LOGO_DIR, exist_ok=True)
-def generate_team_logos(team_name, user_id):
-    """
-    Generates 4 team logos using OpenAI's DALL·E model and saves them locally.
-    """
-    prompt = (
-        f"Generate an image of logo for imaginary ice hockey team named {team_name}. "
-        "The surroundings of the image logo, meaning the background color of the image, should be black. "
-        "The logo itself can still have a colorful design and colorful background colors. "
-        "The style shouldn't be too serious, but instead lighthearted, ironic, and funny—without being too childish. "
-        "These logos are for a fantasy hockey league where all participants are adults who don't mind even offensive themes, "
-        "as it's all in a joking spirit. Make sure to center the logo inside the image as much as possible."
-    )
-    print(f"Generating logos for team: {team_name}")
-    try:
-        response = client.images.generate(
-            prompt=prompt,
-            n=1,
-            size="1024x1024",  # square aspect ratio
-            model="dall-e-3"  # ensure you have access to this model
-        )
-        # Iterate over the returned image data and save each image
-        for i, data in enumerate(response.data):
-            image_url = data.url
-            if image_url:
-                image_response = requests.get(image_url)
-                if image_response.status_code == 200:
-                    file_path = os.path.join(LOGO_DIR, f"{user_id}_logo_{i}.png")
-                    with open(file_path, "wb") as f:
-                        f.write(image_response.content)
-                else:
-                    print(f"Failed to download image {i} for user {user_id}")
-    except Exception as e:
-        print("Error generating team logos:", e)
 
 
 app = Flask(__name__)
@@ -1504,12 +1457,12 @@ def update_user_logos(user_id):
     Update a user's logo URLs
     """
     data = request.json
-    
+
     try:
         user = User.query.get(user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
-        
+
         # Update logo URLs if provided
         if 'logo1_url' in data:
             user.logo1_url = data['logo1_url']
@@ -1521,9 +1474,9 @@ def update_user_logos(user_id):
             user.logo4_url = data['logo4_url']
         if 'selected_logo_url' in data:
             user.selected_logo_url = data['selected_logo_url']
-        
+
         db.session.commit()
-        
+
         return jsonify({
             "message": "User logos updated successfully",
             "user": {
@@ -1541,50 +1494,6 @@ def update_user_logos(user_id):
         db.session.rollback()
         print(f"Error updating user logos: {e}")
         return jsonify({"error": f"Failed to update user logos: {str(e)}"}), 500
-
-@app.route('/api/users/<int:user_id>/upload-logo', methods=['POST'])
-@cross_origin(origins=["https://bracket-challenge2-0.vercel.app", "http://localhost:4200"])
-def upload_user_logo(user_id):
-    """
-    Upload a logo image for a user
-    """
-    data = request.json
-    
-    if not data or 'image_data' not in data:
-        return jsonify({"error": "Missing image data"}), 400
-    
-    # Get image data and position
-    image_data = data.get('image_data')
-    position = data.get('position')  # Position can be 1-4 for logo1-4, or 0 for selected_logo
-    
-    # Ensure image data is in the correct format
-    if not image_data.startswith('data:image'):
-        return jsonify({"error": "Invalid image format"}), 400
-    
-    # Extract the base64 data
-    try:
-        # Remove the data URL prefix (e.g., 'data:image/png;base64,')
-        image_data = image_data.split(',')[1] if ',' in image_data else image_data
-    except Exception as e:
-        return jsonify({"error": f"Failed to process image: {str(e)}"}), 400
-    
-    try:
-        # Import function from cloudinary_worker
-        from cloudinary_worker import upload_file_for_user
-        
-        # Upload the file
-        result = upload_file_for_user(user_id, image_data, position)
-        
-        if not result["success"]:
-            return jsonify({"error": result["message"]}), 500
-        
-        return jsonify({
-            "message": "Logo uploaded successfully",
-            "url": result["url"]
-        }), 200
-    except Exception as e:
-        print(f"Error uploading logo: {e}")
-        return jsonify({"error": f"Failed to upload logo: {str(e)}"}), 500
 
 @app.route('/api/headlines', methods=['GET'])
 def get_headlines():
@@ -1724,62 +1633,16 @@ def delete_headline(headline_id):
         headline = Headline.query.get(headline_id)
         if not headline:
             return jsonify({"error": "Headline not found"}), 404
-        
+
         db.session.delete(headline)
         db.session.commit()
-        
+
         return jsonify({"message": "Headline deleted successfully"}, 200)
-    
+
     except Exception as e:
         db.session.rollback()
         print(f"Error deleting headline: {e}")
         return jsonify({"error": f"Failed to delete headline: {str(e)}"}), 500
-
-@app.route('/api/generate-headline', methods=['POST'])
-def generate_headline():
-    data = request.json
-    team_name = data.get('teamName')
-    
-    if not team_name:
-        return jsonify({'error': 'Team name is required'}), 400
-    
-    language = data.get('language', 'en')
-    
-    prompt = f"""Write a sarcastic, cocky, and darkly humorous news headlines about a fantasy hockey team called "{team_name}" that just joined an NHL Bracket Challenge.
-    The tone should be trash talk — the kind of humor you'd use to roast your best friends.
-    It should vaguely feel like its been written by a sports writer for tsn  etc.
-    If you can think of a zinger to make fun of their ridiculous team name thats great. Dont just call the name stupid, but try and make a smart joke about it. You can also roast how bad their bracket and player picks are going to be.
-    Use hockey terms and NHL clichés, and lean into the chaos. If you can make fun of the name in any way thats always great!
-    If the name is in finnish, you can try and translate it to english and make fun of it.
-    Do not hold back. No politeness, no filters.
-    Also try and use random funny hashtags related to the headline.
-    Keep it under 200 characters."""
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a witty sports journalist writing humorous NHL headlines."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        
-        headline = response.choices[0].message.content.strip()
-        
-        # Create new headline in database
-        new_headline = Headline(
-            headline=headline,
-            team_name=team_name,
-            is_active=True
-        )
-        db.session.add(new_headline)
-        db.session.commit()
-        
-        return jsonify({'message': 'Headline generated successfully', 'headline': headline}), 200
-        
-    except Exception as e:
-        print("Error generating headline:", str(e))
-        return jsonify({'error': 'Failed to generate headline'}), 500
 
 @app.route('/api/deadline/status', methods=['GET'])
 def get_deadline_status():

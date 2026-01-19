@@ -16,6 +16,7 @@ __pycache__/
 
 # 📦 Python virtual environment
 venv/
+.venv/
 
 # 🛠 Flask / SQLite
 *.db
@@ -41,5 +42,3 @@ Thumbs.db
 coverage/
 pytest_cache/
 
-# Just personal notes
-kehveli.txt
