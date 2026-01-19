@@ -201,6 +201,11 @@ def get_user_logos():
     if not user_id:
         return jsonify({"error": "Missing userId parameter"}), 400
 
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid userId"}), 400
+
     user = User.query.get(user_id)
 
     if not user:
@@ -274,6 +279,11 @@ def get_picks():
 
     if not user_id:
         return jsonify({"error": "Missing user_id"}), 400
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid user_id"}), 400
 
     pick = Pick.query.filter_by(user_id=user_id).first()
 
@@ -401,6 +411,10 @@ def get_lineup():
     if not user_id:
         return jsonify({"error": "Missing user_id"}), 400
     try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid user_id"}), 400
+    try:
         lineup_pick = LineupPick.query.filter_by(user_id=user_id).first()
         if not lineup_pick:
             return jsonify({"error": "No lineup found for this user"}), 404
@@ -464,44 +478,55 @@ def save_predictions():
 @app.route('/api/predictions/get', methods=['GET'])
 def get_predictions():
     user_id = request.args.get('user_id')
-    
+
     if not user_id:
         return jsonify({"error": "User ID is required"}), 400
-    
+
+    # Convert to int - PostgreSQL requires exact type matching
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid user ID"}), 400
+
     prediction = Prediction.query.filter_by(user_id=user_id).first()
-    
+
     if not prediction:
         return jsonify({"message": "No predictions found for this user"}), 404
-    
+
     # Parse the JSON string back into a dictionary
     predictions_data = json.loads(prediction.predictions_json)
-    
+
     return jsonify({"predictions": predictions_data}), 200
 
 @app.route('/api/predictions/summary', methods=['GET'])
 def get_predictions_summary():
     """Get a summary of the user's predictions compared to current standings"""
     from stats_module import get_current_standings
-    
+
     user_id = request.args.get('userId')
     print(f"\nProcessing predictions summary for user {user_id}")
-    
+
     if not user_id:
         return jsonify({"error": "Missing userId parameter"}), 400
-        
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid userId"}), 400
+
     try:
         # Get the user's predictions
         prediction = Prediction.query.filter_by(user_id=user_id).first()
         if not prediction:
             return jsonify({"error": "No predictions found for this user"}), 404
-            
+
         predictions_data = json.loads(prediction.predictions_json)
-        
+
         # Get current standings from stats module
         print("\nFetching current standings...")
         current_standings = get_current_standings()
         print(f"\nGot current standings for categories: {list(current_standings.keys())}")
-        
+
         # Initialize summary structure
         summary = {
             "completed": 0,
@@ -509,7 +534,7 @@ def get_predictions_summary():
             "categories": [],
             "totalCorrect": 0
         }
-        
+
         # Process each category from the current standings
         for category, curr_top3 in current_standings.items():
             print(f"\nProcessing category: {category}")
@@ -518,7 +543,7 @@ def get_predictions_summary():
                 user_picks = predictions_data[category]
                 if isinstance(user_picks, list):
                     user_picks = user_picks[:3]  # Get top 3 picks
-                                    
+
                 # Count correct picks by comparing IDs
                 correct_picks = 0
                 for pick in user_picks:
@@ -530,8 +555,7 @@ def get_predictions_summary():
                         # New format: compare by ID
                         pick_id = pick.get('id')
                         correct_picks += sum(1 for p in curr_top3 if p.id == pick_id)
-                
-                
+
                 # Convert current top 3 players/goalies to dictionaries
                 current_top3_dicts = []
                 for player in curr_top3:
@@ -571,7 +595,7 @@ def get_predictions_summary():
                         }
                         if hasattr(player, 'reg_penalty_minutes'):
                             player_dict['reg_penalty_minutes'] = player.reg_penalty_minutes
-                            
+
                     current_top3_dicts.append(player_dict)
 
                 category_summary = {
@@ -580,16 +604,16 @@ def get_predictions_summary():
                     "currentTop3": current_top3_dicts,
                     "correctPicks": correct_picks
                 }
-                
+
                 summary["categories"].append(category_summary)
                 summary["totalCorrect"] += correct_picks
-                
+
                 # Update completed count if we have actual standings
                 if curr_top3:
                     summary["completed"] += 1
-        
+
         return jsonify(summary), 200
-        
+
     except Exception as e:
         print(f"Error getting predictions summary: {str(e)}")
         import traceback
@@ -604,6 +628,10 @@ def get_bracket_summary():
     user_id = request.args.get('userId')
     if not user_id:
         return jsonify({"error": "Missing userId parameter"}), 400
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid userId"}), 400
     try:
         # Get the user's picks
         pick = Pick.query.filter_by(user_id=user_id).first()
@@ -668,38 +696,38 @@ def get_bracket_summary():
         # Calculate points/corrects using score_module
         calculate_bracket_points(int(user_id))  # updates UserPoints
         user_points = UserPoints.query.filter_by(user_id=int(user_id)).first()
-        
+
         # Get statistics across all users
         all_user_points = UserPoints.query.all()
-        
+
         # Calculate statistics for each round
         round1_correct_values = [up.bracket_round1_correct for up in all_user_points if up.bracket_round1_correct is not None]
         round1_points_values = [up.bracket_round1_points for up in all_user_points if up.bracket_round1_points is not None]
-        
+
         round2_correct_values = [up.bracket_round2_correct for up in all_user_points if up.bracket_round2_correct is not None]
         round2_points_values = [up.bracket_round2_points for up in all_user_points if up.bracket_round2_points is not None]
-        
+
         round3_correct_values = [up.bracket_round3_correct for up in all_user_points if up.bracket_round3_correct is not None]
         round3_points_values = [up.bracket_round3_points for up in all_user_points if up.bracket_round3_points is not None]
-        
+
         final_correct_values = [up.bracket_final_correct for up in all_user_points if up.bracket_final_correct is not None]
         final_points_values = [up.bracket_final_points for up in all_user_points if up.bracket_final_points is not None]
-        
+
         # Calculate totals across all rounds
         total_correct_values = [(up.bracket_round1_correct or 0) + 
                                (up.bracket_round2_correct or 0) + 
                                (up.bracket_round3_correct or 0) + 
                                (up.bracket_final_correct or 0) for up in all_user_points]
-        
+
         total_points_values = [(up.bracket_round1_points or 0) + 
                               (up.bracket_round2_points or 0) + 
                               (up.bracket_round3_points or 0) + 
                               (up.bracket_final_points or 0) for up in all_user_points]
-        
+
         # Helper function to safely calculate average
         def safe_avg(values):
             return sum(values) / len(values) if values else 0
-        
+
         # Build rounds summary for dashboard
         rounds = [
             {
