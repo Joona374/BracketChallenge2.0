@@ -66,7 +66,7 @@ export class VoteComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
 
   // Deadline settings
-  private votingDeadline = new Date('2025-04-23T00:00:00'); // Set to first playoff game
+  private votingDeadline = new Date('2026-02-10T00:00:00'); // Set to first playoff game
   private timerSubscription: Subscription | null = null;
 
   // Step size for distribution adjustment
