@@ -8,6 +8,7 @@
     name="username"
     required
     [(ngModel)]="formData.username"
+    [disabled]="isLoading"
   /><br /><br />
 
   <label for="password">Salasana:</label><br />
@@ -17,10 +18,27 @@
     name="password"
     required
     [(ngModel)]="formData.password"
+    [disabled]="isLoading"
   /><br /><br />
 
-  <button type="submit" [disabled]="!loginForm.form.valid">Kirjaudu</button>
+  <button type="submit" [disabled]="!loginForm.form.valid || isLoading">
+    <span *ngIf="!isLoading">Kirjaudu</span>
+    <span *ngIf="isLoading" class="loading-button-content">
+      <div class="spinner"></div>
+      Kirjaudutaan...
+    </span>
+  </button>
 </form>
+
+<!-- Loading overlay -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="loading-content">
+    <div class="spinner-large"></div>
+    <div class="loading-message" [class.fade-in]="true">
+      {{ loadingMessage }}
+    </div>
+  </div>
+</div>
 
 <div *ngIf="message" style="color: green">{{ message }}</div>
 <div *ngIf="error" style="color: red">{{ error }}</div>
